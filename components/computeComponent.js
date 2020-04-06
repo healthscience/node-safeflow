@@ -9,7 +9,7 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-import ComputeSystem from '../systems/compute/computeSystem.js'
+const ComputeSystem = require('../systems/compute/computeSystem.js')
 const util = require('util')
 const events = require('events')
 
@@ -53,4 +53,4 @@ ComputeComponent.prototype.filterCompute = async function (timeComponent, apiInf
   return computeStatelive
 }
 
-export default ComputeComponent
+module.exports = ComputeComponent

@@ -11,7 +11,7 @@
 */
 
 import { extendMoment } from 'moment-range'
-import TimeUtilities from './timeUtility.js'
+const TimeUtilities =  require('./timeUtility.js')
 const util = require('util')
 const events = require('events')
 const Moment = require('moment')
