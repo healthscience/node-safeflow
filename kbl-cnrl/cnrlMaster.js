@@ -611,7 +611,7 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.resolution = {}
     dataCNRLbundle.namespace = 'safe://cnrl/cnrl-848388553323'
     dataCNRLbundle.index = []
-    dataCNRLbundle.modules = ['cnrl-001234543212', 'cnrl-001234543213', 'cnrl-001234543214', 'cnrl-001234543215', 'cnrl-001234543216', 'cnrl-001234543217', 'cnrl-001234543218', 'cnrl-001234543219']
+    dataCNRLbundle.modules = ['cnrl-001234543212', 'cnrl-33221101', 'cnrl-33227702', 'cnrl-001234543213', 'cnrl-001234543214', 'cnrl-001234543215', 'cnrl-001234543216', 'cnrl-001234543217', 'cnrl-001234543218', 'cnrl-001234543219']
     dataCNRLbundle.kentities = ['PxaTn6JAP8fUowppmNvLniqmFYV9VQMDVVcP5n7BqTm']
   } else if (refIN === 'cnrl-848388553329') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
