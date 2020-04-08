@@ -9,8 +9,8 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-const EntitiesManager = require('./entitiesManager.js')
-const CALE = require('./CALE/cale-utility.js')
+import EntitiesManager from './entitiesManager.js'
+import CALE from './CALE/cale-utility.js'
 
 const util = require('util')
 const events = require('events')
@@ -63,5 +63,4 @@ safeFlow.prototype.entityGetter = async function (shellID) {
   return dataVue
 }
 
-
-module.exports = safeFlow
+export default safeFlow

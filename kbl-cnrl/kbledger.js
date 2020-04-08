@@ -66,6 +66,22 @@ KBLedger.prototype.startKBL = async function () {
 }
 
 /**
+* get modules per NXP cnrl
+* @method modulesCNRL
+*
+*/
+KBLedger.prototype.modulesCNRL = function (mList) {
+  // modules for NXP cnrl contract
+  let moduleList = []
+  // look up module cnrls
+  for (let km of mList) {
+    let cnrlModule = this.liveCNRL.lookupContract(km)
+    moduleList.push(cnrlModule)
+  }
+  return moduleList
+}
+
+/**
 *
 * @method kbIndexQuery
 *
@@ -81,22 +97,6 @@ KBLedger.prototype.kbIndexQuery = async function (cnrl) {
     }
   }
   return KBIDlist
-}
-
-/**
-* get modules per NXP cnrl
-* @method modulesCNRL
-*
-*/
-KBLedger.prototype.modulesCNRL = async function (mList) {
-  // modules for NXP cnrl contract
-  let moduleList = []
-  // look up module cnrls
-  for (let km of mList) {
-    let cnrlModule = this.liveCNRL.lookupContract(km)
-    moduleList.push(cnrlModule)
-  }
-  return moduleList
 }
 
 /**

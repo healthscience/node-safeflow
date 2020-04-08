@@ -1,6 +1,6 @@
 {
   "name": "node-safeflow",
-  "version": "0.5.0",
+  "version": "0.5.2",
   "description": "Node.js wrapper for safeflow protocol",
   "main": "index.js",
   "scripts": {

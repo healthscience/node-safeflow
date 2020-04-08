@@ -69,18 +69,53 @@ EntitiesManager.prototype.deviceFlow = async function (nxpList) {
 */
 EntitiesManager.prototype.peerInput = async function (input) {
   // what type of input  CNRL NXP  Module or KBID entry???
-  console.log('peer input')
+  console.log('input')
   console.log(input)
   let modKbids = {}
   let entityData = {}
-  // now filter for type?
-  let modules = await this.NXPmodules(input.modules)
-  for (let md of modules) {
-    let kbidInfo = await this.CNRLmodKBID(md.prime.cnrl)
-    modKbids[md.prime.cnrl] = kbidInfo
-  }
-  entityData[input.cnrl] = await this.addHSentity(modKbids)
+  entityData[input.cnrl] = await this.addHSentity(input)
   return entityData
+}
+
+/**
+*  create new HS entity
+* @method addHSEntity
+*
+*/
+EntitiesManager.prototype.addHSentity = async function (ecsIN) {
+  console.log('add entity')
+  console.log(ecsIN)
+  let moduleState = false
+  let shellID = this.liveCrypto.entityID(ecsIN)
+  if (this.liveSEntities[shellID]) {
+    console.log('entity' + shellID + 'already exists')
+    this.entityExists()
+  } else {
+    console.log('entity' + shellID + 'is new')
+    // setup entity to hold components per module
+    // extract types of modules from keys
+    // now filter for type?
+    let modules = this.NXPmodules(ecsIN.modules)
+    for (let md of modules) {
+      // need matcher - module type to how its processed.  Only computes have KBIDS
+      if (md.prime.text === 'Compute') {
+        // feed into ECS -KBID processor
+        let kbidInfo = await this.extractModKBID(md.prime.cnrl)
+        moduleState = await this.KBflow(shellID, md, kbidInfo)
+      } else {
+        // plain extract info. from CNRL contract
+      }
+    }
+  }
+  let entityStatus = ''
+  if (moduleState === true) {
+    entityStatus = shellID
+  } else {
+    entityStatus = 'failed'
+  }
+  console.log('setup entity and components per module')
+  console.log(this.liveSEntities)
+  return entityStatus
 }
 
 /**
@@ -88,19 +123,19 @@ EntitiesManager.prototype.peerInput = async function (input) {
 * @method NXPmodules
 *
 */
-EntitiesManager.prototype.NXPmodules = async function (mList) {
+EntitiesManager.prototype.NXPmodules = function (mList) {
   // read peer kbledger
   // let entityModule = {}
-  let nxpList = await this.KBLlive.modulesCNRL(mList)
+  let nxpList = this.KBLlive.modulesCNRL(mList)
   return nxpList
 }
 
 /**
 * knowledge Bundle Index Module CNRL matches
-* @method CNRLmodKBID
+* @method extractModKBID
 *
 */
-EntitiesManager.prototype.CNRLmodKBID = async function (cnrl) {
+EntitiesManager.prototype.extractModKBID = async function (cnrl) {
   // read peer kbledger
   let moduleKBIDdata = {}
   let kbidList = await this.KBLlive.kbIndexQuery(cnrl)
@@ -122,65 +157,25 @@ EntitiesManager.prototype.kbidEntry = async function (kbid) {
 }
 
 /**
-*  create new HS entity
-* @method addHSEntity
+*  deal with each KBID entry
+* @method KBflow
 *
 */
-EntitiesManager.prototype.addHSentity = async function (ecsIN) {
-  console.log('ENTITY maker')
-  console.log(ecsIN)
-  let moduleState = false
-  let shellID = this.liveCrypto.entityID(ecsIN)
-  if (this.liveSEntities[shellID]) {
-    console.log('entity' + shellID + 'already exists')
-    this.entityExists()
-  } else {
-    console.log('entity' + shellID + 'is new')
-    // setup entity to hold components per module
-    // extract types of modules from keys
-    // feed into ECS entity maker
-    let modules = Object.keys(ecsIN)
-    for (let mc of modules) {
-      // temp if null content for module give it some
-      if (mc.length === 0) {
-        moduleState = {'data': 'module content'}
-      } else {
-        moduleState = await this.KBflow(shellID, mc, ecsIN[mc])
-      }
-    }
-  }
-  let entityStatus = ''
-  if (moduleState === true) {
-    entityStatus = shellID
-  } else {
-    entityStatus = 'failed'
-  }
-  console.log('setup entity and components per module')
-  console.log(this.liveSEntities)
-  return entityStatus
-}
-
-/**
-*  examines each module and prepares path through
-* @method moduleFlow
-*
-*/
-EntitiesManager.prototype.KBflow = async function (shellID, mc, mkids) {
-  let kbidData = {}
+EntitiesManager.prototype.KBflow = async function (shellID, mc, kbidsList) {
+  let statusK = false
   // assess type and build components and systems
-  let moduleEntry = Object.keys(mkids)
-  if (moduleEntry.length > 0) {
-    for (let ki of moduleEntry) {
+  if (kbidsList.length > 0) {
+    for (let ki of kbidsList) {
       // start workflow for setting up entity to hold components per module
       let kbComponent = new Entity(this.auth)
       kbComponent[ki] = kbComponent
-      let modComponents = {}
+      let kbidComponent = {}
       modComponents[mc] = kbComponent
-      this.liveSEntities[shellID] = modComponents
-      kbidData[ki] = await this.controlFlow(shellID, mc, ki, mkids[ki])
+      this.liveSEntities[shellID] = kbidComponent
+      statusK = await this.controlFlow(shellID, mc, ki, mkids[ki])
     }
   }
-  return true // kbidData
+  return statusK
 }
 
 /**
@@ -242,8 +237,6 @@ EntitiesManager.prototype.entityDataReturn = async function (shellID) {
   let GroupDataBundle = {}
   let TestDataBundle = {}
   TestDataBundle['cnrl-001234543212'] = {'prime': {'cnrl': 'cnrl-112', 'vistype': 'nxp-plain', 'text': 'Question', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }], 'data': {'form': ['a', 'b', 'c'], 'content': [1, 2, 3]}, 'message': 'compute-complete'}
-  TestDataBundle['cnrl-33221101'] = {'prime': {'cnrl': 'cnrl-33221101', 'vistype': 'nxp-device', 'text': 'Device', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }], 'data': {'form': ['a', 'b', 'c'], 'content': [1, 2, 3]}, 'message': 'device-api'}
-  TestDataBundle['cnrl-33227702'] = {'prime': {'cnrl': 'cnrl-33227702', 'vistype': 'nxp-dapp', 'text': 'Dapp', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }], 'data': {'form': ['a', 'b', 'c'], 'content': [1, 2, 3]}, 'message': 'device-dapp'}
   TestDataBundle['cnrl-001234543214'] = {'prime': {'cnrl': 'cnrl-114', 'vistype': 'nxp-visualise', 'text': 'Results', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': '0', static: false }, { 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': '1', static: false }], 'data': [{'chartOptions': ['1', '2', '3'], 'chartPackage': [1, 2, 3]}, {'chartOptions': ['4', '5', '6'], 'chartPackage': [4, 5, 6]}], 'message': 'compute-complete'}
   TestDataBundle['cnrl-001234543213'] = {'prime': {'cnrl': 'cnrl-113', 'vistype': 'nxp-plain', 'text': 'Controls', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }], 'data': {'form': ['a', 'b', 'c'], 'content': [1, 2, 3]}, 'message': 'compute-complete'}
   TestDataBundle['cnrl-001234543215'] = {'prime': {'cnrl': 'cnrl-115', 'vistype': 'nxp-plain', 'text': 'Errors', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }], 'data': {'form': ['a', 'b', 'c'], 'content': [1, 2, 3]}, 'message': 'compute-complete'}

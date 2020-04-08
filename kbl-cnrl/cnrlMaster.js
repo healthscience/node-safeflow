@@ -603,8 +603,15 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.source = 'cnrl-primary'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-848388553323', 'text': 'EXERCISE - Daily step planning', 'active': false }
     dataCNRLbundle.livingpaper = {'link': 'https://docs.google.com/document/'}
+    dataCNRLbundle.tidy = true
+    dataCNRLbundle.tidyList = []
+    dataCNRLbundle.tableStructure = []
+    dataCNRLbundle.categorycodes.push()
+    dataCNRLbundle.categorycodes.push()
+    dataCNRLbundle.resolution = {}
     dataCNRLbundle.namespace = 'safe://cnrl/cnrl-848388553323'
-    dataCNRLbundle.modules = ['cnrl-001234543212', 'cnrl-33221101', 'cnrl-33227702', 'cnrl-001234543213', 'cnrl-001234543214', 'cnrl-001234543215', 'cnrl-001234543216', 'cnrl-001234543217', 'cnrl-001234543218', 'cnrl-001234543219']
+    dataCNRLbundle.index = []
+    dataCNRLbundle.modules = ['cnrl-001234543212', 'cnrl-001234543303', 'cnrl-001234543304', 'cnrl-001234543213', 'cnrl-001234543214', 'cnrl-001234543215', 'cnrl-001234543216', 'cnrl-001234543217', 'cnrl-001234543218', 'cnrl-001234543219']
     dataCNRLbundle.kentities = ['PxaTn6JAP8fUowppmNvLniqmFYV9VQMDVVcP5n7BqTm']
   } else if (refIN === 'cnrl-848388553329') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
@@ -643,6 +650,22 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-001234543212', 'text': 'Question', 'active': false }
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-001234543212'
+  } else if (refIN === 'cnrl-001234543303') {
+    // CNRL implementation contract e.g. from mobile phone sqlite table structure
+    dataCNRLbundle.type = 'module'
+    dataCNRLbundle.source = 'cnrl-primary'
+    dataCNRLbundle.prime = { 'cnrl': 'cnrl-001234543303', 'text': 'Device', 'active': false }
+    dataCNRLbundle.device = { 'cnrl': 'cnrl-33221101'}
+    dataCNRLbundle.livingpaper = {'link': ''}
+    dataCNRLbundle.namespace = 'safe://cnrl-001234543303'
+  } else if (refIN === 'cnrl-001234543304') {
+    // CNRL implementation contract e.g. from mobile phone sqlite table structure
+    dataCNRLbundle.type = 'module'
+    dataCNRLbundle.source = 'cnrl-primary'
+    dataCNRLbundle.prime = { 'cnrl': 'cnrl-001234543304', 'text': 'Dapp', 'active': false }
+    dataCNRLbundle.device = { 'cnrl': 'cnrl-dappdapp'}
+    dataCNRLbundle.livingpaper = {'link': ''}
+    dataCNRLbundle.namespace = 'safe://cnrl-001234543304'
   } else if (refIN === 'cnrl-001234543213') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'module'
