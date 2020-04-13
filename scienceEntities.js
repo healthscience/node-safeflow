@@ -9,6 +9,7 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
+import DeviceComponent from './components/deviceComponent.js'
 import DataComponent from './components/dataComponent.js'
 import DatatypeComponent from './components/datatypeComponent.js'
 import TimeComponent from './components/timeComponent.js'
@@ -20,6 +21,7 @@ const events = require('events')
 
 var ScienceEntities = function (dAccess) {
   events.EventEmitter.call(this)
+  this.liveDeviceC = new DeviceComponent(dAccess)
   this.liveTimeC = new TimeComponent(dAccess)
   this.liveDatatypeC = new DatatypeComponent(dAccess)
   this.liveDataC = new DataComponent(dAccess)

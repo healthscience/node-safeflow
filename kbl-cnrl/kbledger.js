@@ -66,6 +66,16 @@ KBLedger.prototype.startKBL = async function () {
 }
 
 /**
+* look up CNRL contract
+* @method contractCNRL
+*
+*/
+KBLedger.prototype.contractCNRL = function (cnrl) {
+  let cnrlContract = this.liveCNRL.lookupContract(cnrl)
+  return cnrlContract
+}
+
+/**
 * get modules per NXP cnrl
 * @method modulesCNRL
 *
@@ -116,6 +126,7 @@ KBLedger.prototype.kbidReader = async function (kbid) {
       let dataCNRLrefs = {}
       let dataIndex = Object.keys(kbData[0][ct])
       for (let de of dataIndex) {
+        console.log(de)
         dataCNRLrefs[de] = this.liveCNRL.lookupContract(kbData[0][ct][de])
       }
       expandCNRLrefs[ct] = dataCNRLrefs

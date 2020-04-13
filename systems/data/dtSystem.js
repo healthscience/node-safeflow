@@ -10,15 +10,11 @@
 * @version    $Id$
 */
 
-// import CNRLmaster from '../../kbl-cnrl/cnrlMaster.js'
-import TestStorageAPI from './dataprotocols/teststorage/testStorage.js'
 const util = require('util')
 const events = require('events')
 
 var DTSystem = function (setIN) {
   events.EventEmitter.call(this)
-  // this.liveCNRL = new CNRLmaster(setIN)
-  this.liveTestStorage = new TestStorageAPI(setIN)
 }
 
 /**
@@ -32,13 +28,16 @@ util.inherits(DTSystem, events.EventEmitter)
 * @method DTStartMatch
 *
 */
-DTSystem.prototype.DTStartMatch = function (devicesIN, lDTs, catDTs) {
+DTSystem.prototype.DTStartMatch = function (devicesIN, dataBundle) {
+  console.log('SYSTEM match dts of cnrl with data API')
+  console.log(devicesIN)
+  console.log(dataBundle)
   let datatypePerdevice = {}
   // loop over devices and match to API etc
   for (let dliv of devicesIN) {
-    let packagingDTs = null // this.liveCNRL.lookupContract(dliv.cnrl)
+    let packagingDTs = dataBundle.device // this.liveCNRL.lookupContract(dliv.cnrl)
     // is the data type primary?
-    let sourceDTextract = this.mapSourceDTs(lDTs)
+    let sourceDTextract = this.mapSourceDTs(dataBundle.datatypein)
     let sourceDTmapAPI = this.datatypeCheckAPI(packagingDTs, sourceDTextract)
     let SpackagingDTs = {}
     let TidyDataLogic = []
@@ -115,7 +114,9 @@ DTSystem.prototype.mapCategoryDataTypes = function (catDTs, packagingDTs, lDTs, 
 *
 */
 DTSystem.prototype.datatypeCheckAPI = function (packagingDTs, lDTs) {
+  console.log('check against API')
   console.log(packagingDTs)
+  console.log(lDTs)
   let apiMatch = []
   let apiKeep = {}
   // given datatypes select find match to the query string
@@ -170,6 +171,8 @@ DTSystem.prototype.subStructure = function (tableStructure) {
 *
 */
 DTSystem.prototype.mapSourceDTs = function (lDTs) {
+  console.log('mapSourceDTs')
+  console.log(lDTs)
   let sourceDTextract = []
   for (let iDT of lDTs) {
     // look up datatype contract to see if derived?
@@ -289,31 +292,6 @@ DTSystem.prototype.DTscienceStructure = function (cnrl) {
   sciDTholder.datatypes = sciSourceDTs
   sciDTholder.categories = sciCategoryDTs
   return sciDTholder
-}
-
-/**
-*  // convert datatype API to CNRL contract Text and CNRL ID
-* @method convertAPIdatatypeToCNRL
-*
-*/
-DTSystem.prototype.convertAPIdatatypeToCNRL = function (dtapiList) {
-  let convertDTcnrl = []
-  for (let dta of dtapiList.datatypes) {
-    let conDT = dta.cnrl // this.liveCNRL.lookupContract(dta.cnrl)
-    let convertDT = this.matchConvert(conDT)
-    convertDTcnrl.push(convertDT)
-  }
-  return convertDTcnrl
-}
-
-/**
-*  // convert matcher
-* @method matchConvert
-*
-*/
-DTSystem.prototype.matchConvert = function (dtC) {
-  let matachedDTs = dtC.prime
-  return matachedDTs
 }
 
 export default DTSystem

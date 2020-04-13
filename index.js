@@ -57,9 +57,9 @@ safeFlow.prototype.startFlow = function (apiCNRL, auth) {
 * @method entityGetter
 *
 */
-safeFlow.prototype.entityGetter = async function (shellID) {
+safeFlow.prototype.entityGetter = async function (shellID, modBundle) {
   let dataVue = {}
-  dataVue = this.liveEManager.entityDataReturn(shellID)
+  dataVue = this.liveEManager.entityDataReturn(shellID, modBundle)
   return dataVue
 }
 

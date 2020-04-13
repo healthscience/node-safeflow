@@ -10,15 +10,11 @@
 * @version    $Id$
 */
 
-import CNRLmaster from '../../kbl-cnrl/cnrlMaster.js'
-import TestStorageAPI from './dataprotocols/teststorage/testStorage.js'
 const util = require('util')
 const events = require('events')
 
 var TidyDataSystem = function (setIN) {
   events.EventEmitter.call(this)
-  this.liveCNRL = new CNRLmaster()
-  this.liveTestStorage = new TestStorageAPI(setIN)
 }
 
 /**

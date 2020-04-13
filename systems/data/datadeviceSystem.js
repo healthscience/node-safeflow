@@ -49,7 +49,6 @@ DatadeviceSystem.prototype.getLiveDevices = function (devicesIN) {
 */
 DatadeviceSystem.prototype.storedDevices = async function (dapi) {
   // MAP api to REST library functions for the API
-  console.log('stored devices')
   let currentDevices = []
   let result = await this.liveTestStorage.deviceRESTbuilder(dapi)
   currentDevices = this.sortLiveDevices(result)

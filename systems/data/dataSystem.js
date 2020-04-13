@@ -21,7 +21,6 @@ const moment = require('moment')
 var DataSystem = function (setIN) {
   events.EventEmitter.call(this)
   this.liveTestStorage = new TestStorageAPI(setIN)
-  this.liveSimulatedData = new LiveSimulatedDataSystem(setIN)
   this.liveFilterData = new FilterDataSystem(setIN)
   this.devicePairs = []
   this.dataRaw = []
@@ -109,7 +108,6 @@ DataSystem.prototype.datatypeQueryMapping = async function (systemBundle, time) 
     // first is the data from the PAST or FUTURE ie simulated?
     if (systemBundle.querytime && systemBundle.querytime.startperiod === 'simulateData') {
       // need whole new system for product future data
-      // let futureData = this.liveSimulatedData.assessFuture(this, time)
       // let dayHolder = {}
       // dayHolder.day = futureData
       // rawHolder[devI][dtItem.cnrl] = dayHolder

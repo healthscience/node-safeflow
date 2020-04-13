@@ -44,25 +44,6 @@ EntitiesManager.prototype.peerKBLstart = async function () {
 }
 
 /**
-* extract devices info
-* @method deviceFlow
-*
-*/
-EntitiesManager.prototype.deviceFlow = async function (nxpList) {
-  // what type of input  CNRL NXP  Module or KBID entry???
-  console.log('device flow')
-  console.log(nxpList)
-  let deviceList = []
-  for (let dev of nxpList) {
-    let device = await this.deviceExtract(dev)
-    deviceList.push(device)
-  }
-  console.log('devices returned')
-  console.log(deviceList)
-  return deviceList
-}
-
-/**
 * peer input into ECS
 * @method PeerInput
 *
@@ -83,9 +64,8 @@ EntitiesManager.prototype.peerInput = async function (input) {
 *
 */
 EntitiesManager.prototype.addHSentity = async function (ecsIN) {
-  console.log('add entity')
-  console.log(ecsIN)
   let moduleState = false
+  let modules = {}
   let shellID = this.liveCrypto.entityID(ecsIN)
   if (this.liveSEntities[shellID]) {
     console.log('entity' + shellID + 'already exists')
@@ -93,15 +73,28 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
   } else {
     console.log('entity' + shellID + 'is new')
     // setup entity to hold components per module
+    this.liveSEntities[shellID] = new Entity(this.auth)
     // extract types of modules from keys
     // now filter for type?
-    let modules = this.NXPmodules(ecsIN.modules)
+    modules = this.NXPmodules(ecsIN.modules)
     for (let md of modules) {
-      // need matcher - module type to how its processed.  Only computes have KBIDS
-      if (md.prime.text === 'Compute') {
+      // set modulde information in a components
+      // this.liveSEntities[shellID].liveModuleC.setModInfo(md)
+      // need matcher - module type to how its processed. Only computes have KBIDS
+      if (md.prime.text === 'Device') {
+        // hook up to device
+        let deviceInfo = this.extractDevice(md.device.cnrl)
+        moduleState = await this.deviceflow(shellID, deviceInfo)
+      } else if (md.prime.text === 'Compute') {
         // feed into ECS -KBID processor
         let kbidInfo = await this.extractModKBID(md.prime.cnrl)
-        moduleState = await this.KBflow(shellID, md, kbidInfo)
+        let kbLength = Object.keys(kbidInfo)
+        if (kbLength.length > 0) {
+          for (let ki of kbLength) {
+            // start workflow for setting up entity components to hold data for this module
+            moduleState = await this.controlFlow(shellID, md, kbidInfo[ki])
+          }
+        }
       } else {
         // plain extract info. from CNRL contract
       }
@@ -113,96 +106,69 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
   } else {
     entityStatus = 'failed'
   }
-  console.log('setup entity and components per module')
-  console.log(this.liveSEntities)
-  return entityStatus
+  let entityHolder = {}
+  entityHolder.status = entityStatus
+  entityHolder.modules = modules
+  return entityHolder
 }
 
 /**
-* modules per NXP cnrl
-* @method NXPmodules
+*  add device component daata
+* @method deviceflow
 *
 */
-EntitiesManager.prototype.NXPmodules = function (mList) {
-  // read peer kbledger
-  // let entityModule = {}
-  let nxpList = this.KBLlive.modulesCNRL(mList)
-  return nxpList
+EntitiesManager.prototype.deviceflow = async function (shellID, device) {
+  let statusD = false
+  // set the device in module
+  statusD = await this.liveSEntities[shellID].liveDeviceC.setDevice(device)
+  // proof of evidence
+  // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDeviceC)
+  statusD = true
+  return statusD
 }
-
-/**
-* knowledge Bundle Index Module CNRL matches
-* @method extractModKBID
-*
-*/
-EntitiesManager.prototype.extractModKBID = async function (cnrl) {
-  // read peer kbledger
-  let moduleKBIDdata = {}
-  let kbidList = await this.KBLlive.kbIndexQuery(cnrl)
-  for (let ki of kbidList) {
-    moduleKBIDdata[ki] = await this.kbidEntry(ki)
-  }
-  return moduleKBIDdata
-}
-
-/**
-* knowledge Bundle Ledger Entry Data extraction
-* @method kbidEntry
-*
-*/
-EntitiesManager.prototype.kbidEntry = async function (kbid) {
-  // read peer kbledger
-  let kbidData = await this.KBLlive.kbidReader(kbid)
-  return kbidData
-}
-
-/**
-*  deal with each KBID entry
-* @method KBflow
-*
-*/
-EntitiesManager.prototype.KBflow = async function (shellID, mc, kbidsList) {
-  let statusK = false
-  // assess type and build components and systems
-  if (kbidsList.length > 0) {
-    for (let ki of kbidsList) {
-      // start workflow for setting up entity to hold components per module
-      let kbComponent = new Entity(this.auth)
-      kbComponent[ki] = kbComponent
-      let kbidComponent = {}
-      modComponents[mc] = kbComponent
-      this.liveSEntities[shellID] = kbidComponent
-      statusK = await this.controlFlow(shellID, mc, ki, mkids[ki])
-    }
-  }
-  return statusK
-}
-
 /**
 *  control the adding of data to the entity
 *  KnowledgeSciptingLanguage(forth/stack)to give gurantees)
 * @method controlFlow
 *
 */
-EntitiesManager.prototype.controlFlow = async function (shellid, mid, kid, kbEntryIN) {
+EntitiesManager.prototype.controlFlow = async function (shellID, mod, kbid) {
   console.log('CONTROLFLOW0-----begin')
-  console.log(kbEntryIN)
+  console.log(shellID)
+  console.log(mod)
+  console.log(kbid)
   // set the MASTER TIME CLOCK for entity
-  this.liveSEntities[shellid][mid][kid].liveTimeC.setMasterClock(kbEntryIN.time.startperiod)
-  this.liveSEntities[shellid][mid][kid].liveDatatypeC.dataTypeMapping()
-  /* this.liveSEntities[shellid][mid][kid].liveTimeC.timeProfiling()
-  await this.liveSEntities[shellid][mid][kid].liveDataC.sourceData(this.liveSEntities[shellid].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellid].liveTimeC)
+  this.liveSEntities[shellID].liveTimeC.setMasterClock(kbid.time.startperiod)
+  // proof of evidence
+  // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveTimeC)
+  this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(this.liveSEntities[shellID].liveDeviceC.devices, kbid.data)
+  // proof of evidence
+  // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDatatypeC)
+  /* this.liveSEntities[shellID][mid][kid].liveTimeC.timeProfiling()
+  // proof of evidence
+  // this.liveCrypto.evidenceProof()
+  await this.liveSEntities[shellID][mid][kid].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveTimeC)
+  // proof of evidence
+  // this.liveCrypto.evidenceProof()
   this.emit('computation', 'in-progress')
-  await this.liveSEntities[shellid][mid][kid].liveTimeC.startTimeSystem(this.liveSEntities[shellid].liveDatatypeC, this.liveSEntities[shellid][mid][kid].liveDataC.liveData)
-  this.computeStatus = await this.liveSEntities[shellid][mid][kid].liveComputeC.filterCompute(this.liveSEntities[shellid].liveTimeC, this.liveSEntities[shellid][mid][kid].liveDatatypeC.datatypeInfoLive)
+  await this.liveSEntities[shellID][mid][kid].liveTimeC.startTimeSystem(this.liveSEntities[shellID].liveDatatypeC, this.liveSEntities[shellID][mid][kid].liveDataC.liveData)
+  // proof of evidence
+  // this.liveCrypto.evidenceProof()
+  this.computeStatus = await this.liveSEntities[shellID][mid][kid].liveComputeC.filterCompute(this.liveSEntities[shellID].liveTimeC, this.liveSEntities[shellID][mid][kid].liveDatatypeC.datatypeInfoLive)
+  // proof of evidence
+  // this.liveCrypto.evidenceProof()
   this.emit('computation', 'finished')
   if (this.computeStatus === true) {
   // go direct and get raw data direct
-    await this.liveSEntities[shellid][mid][kid].liveDataC.directSourceUpdated(this.liveSEntities[shellid].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellid].liveTimeC)
+    await this.liveSEntities[shellID][mid][kid].liveDataC.directSourceUpdated(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveTimeC)
+    // proof of evidence
+    // this.liveCrypto.evidenceProof()
   }
-  this.liveSEntities[shellid][mid][kid].liveVisualC.filterVisual(this.liveSEntities[shellid].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellid].liveDataC.liveData, this.liveSEntities[shellid][mid][kid].liveTimeC) */
+  this.liveSEntities[shellID][mid][kid].liveVisualC.filterVisual(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDataC.liveData, this.liveSEntities[shellID][mid][kid].liveTimeC) */
+  // proof of evidence
+  // this.liveCrypto.evidenceProof()
   console.log('CONTROLFLOW9-----FINISHED')
-  console.log(this.liveSEntities[shellid])
+  // console.log(this.liveSEntities[shellID])
   return true
 }
 
@@ -233,20 +199,56 @@ EntitiesManager.prototype.entityExists = function (shellid, dataIn) {
 * @method entityDataReturn
 *
 */
-EntitiesManager.prototype.entityDataReturn = async function (shellID) {
-  let GroupDataBundle = {}
-  let TestDataBundle = {}
-  TestDataBundle['cnrl-001234543212'] = {'prime': {'cnrl': 'cnrl-112', 'vistype': 'nxp-plain', 'text': 'Question', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }], 'data': {'form': ['a', 'b', 'c'], 'content': [1, 2, 3]}, 'message': 'compute-complete'}
-  TestDataBundle['cnrl-001234543214'] = {'prime': {'cnrl': 'cnrl-114', 'vistype': 'nxp-visualise', 'text': 'Results', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': '0', static: false }, { 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': '1', static: false }], 'data': [{'chartOptions': ['1', '2', '3'], 'chartPackage': [1, 2, 3]}, {'chartOptions': ['4', '5', '6'], 'chartPackage': [4, 5, 6]}], 'message': 'compute-complete'}
-  TestDataBundle['cnrl-001234543213'] = {'prime': {'cnrl': 'cnrl-113', 'vistype': 'nxp-plain', 'text': 'Controls', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }], 'data': {'form': ['a', 'b', 'c'], 'content': [1, 2, 3]}, 'message': 'compute-complete'}
-  TestDataBundle['cnrl-001234543215'] = {'prime': {'cnrl': 'cnrl-115', 'vistype': 'nxp-plain', 'text': 'Errors', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }], 'data': {'form': ['a', 'b', 'c'], 'content': [1, 2, 3]}, 'message': 'compute-complete'}
-  TestDataBundle['cnrl-001234543216'] = {'prime': {'cnrl': 'cnrl-116', 'vistype': 'nxp-plain', 'text': 'Lifestyle Medicine', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }], 'data': {'form': ['a', 'b', 'c'], 'content': [1, 2, 3]}, 'message': 'compute-complete'}
-  TestDataBundle['cnrl-001234543217'] = {'prime': {'cnrl': 'cnrl-117', 'vistype': 'nxp-plain', 'text': 'Educate', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }], 'data': {'form': ['a', 'b', 'c'], 'content': [1, 2, 3]}, 'message': 'compute-complete'}
-  TestDataBundle['cnrl-001234543218'] = {'prime': {'cnrl': 'cnrl-1118', 'vistype': 'nxp-plain', 'text': 'Evovle', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }], 'data': {'form': ['a', 'b', 'c'], 'content': [1, 2, 3]}, 'message': 'compute-complete'}
-  TestDataBundle['cnrl-001234543219'] = {'prime': {'cnrl': 'cnrl-119', 'vistype': 'nxp-plain', 'text': 'Communicate', 'active': true}, 'grid': [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }], 'data': {'form': ['a', 'b', 'c'], 'content': [1, 2, 3]}, 'message': 'compute-complete'}
-  this.liveSEntities[shellID] = TestDataBundle
-  GroupDataBundle = this.liveSEntities[shellID]
-  return GroupDataBundle
+EntitiesManager.prototype.entityDataReturn = async function (entityID) {
+  return this.liveSEntities[entityID]
+}
+
+/**
+* modules per NXP cnrl
+* @method NXPmodules
+*
+*/
+EntitiesManager.prototype.NXPmodules = function (mList) {
+  // read peer kbledger
+  // let entityModule = {}
+  let nxpList = this.KBLlive.modulesCNRL(mList)
+  return nxpList
+}
+
+/**
+* Extract the device information
+* @method extractDevice
+*
+*/
+EntitiesManager.prototype.extractDevice = function (cnrl) {
+  console.log('device extract')
+  let deviceBundle = this.KBLlive.contractCNRL(cnrl)
+  return deviceBundle
+}
+/**
+* knowledge Bundle Index Module CNRL matches
+* @method extractModKBID
+*
+*/
+EntitiesManager.prototype.extractModKBID = async function (cnrl) {
+  // read peer kbledger
+  let moduleKBIDdata = {}
+  let kbidList = await this.KBLlive.kbIndexQuery(cnrl)
+  for (let ki of kbidList) {
+    moduleKBIDdata[ki] = await this.kbidEntry(ki)
+  }
+  return moduleKBIDdata
+}
+
+/**
+* knowledge Bundle Ledger Entry Data extraction
+* @method kbidEntry
+*
+*/
+EntitiesManager.prototype.kbidEntry = async function (kbid) {
+  // read peer kbledger
+  let kbidData = await this.KBLlive.kbidReader(kbid)
+  return kbidData
 }
 
 /**

@@ -56,4 +56,14 @@ KBLcryptoUtility.prototype.entityID = function (addressIN) {
   return tempTokenG
 }
 
+/**
+*  hash of proof of work
+* @method evidenceProof
+*
+*/
+KBLcryptoUtility.prototype.evidenceProof = function (dataEvidence) {
+    let kbundleHashPart = hashObject(dataEvidence)
+    // need some sort of holder back in ECS to build up evidence trail
+}
+
 export default KBLcryptoUtility
