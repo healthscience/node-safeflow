@@ -29,54 +29,26 @@ util.inherits(DTSystem, events.EventEmitter)
 *
 */
 DTSystem.prototype.DTStartMatch = function (devicesIN, dataBundle) {
-  console.log('SYSTEM match dts of cnrl with data API')
+  console.log('DTSYSTEM match start----')
   console.log(devicesIN)
   console.log(dataBundle)
   let datatypePerdevice = {}
   // loop over devices and match to API etc
   for (let dliv of devicesIN) {
-    let packagingDTs = dataBundle.device // this.liveCNRL.lookupContract(dliv.cnrl)
-    // is the data type primary?
-    let sourceDTextract = this.mapSourceDTs(dataBundle.datatypein)
-    let sourceDTmapAPI = this.datatypeCheckAPI(packagingDTs, sourceDTextract)
+    console.log(dliv)
+    let packagingDTs = dataBundle.data
+    // use inputs to map to datastore/api/rest etc. table / layout structure
+    let sourceDTmapAPI = this.datatypeTableMapper(dataBundle)
     let SpackagingDTs = {}
     let TidyDataLogic = []
-    // is this a derived source?
-    if (packagingDTs.source !== 'cnrl-primary') {
-      // look up source data packaging
-      SpackagingDTs = null // this.liveCNRL.lookupContract(packagingDTs.source)
-      // tidy data info available?
-      if (packagingDTs.tidy === true) {
-        // investiage the source contract
-        // does the live DT require any tidying?
-        for (let tldt of SpackagingDTs.tidyList) {
-          for (let dtl of sourceDTextract) {
-            if (dtl.cnrl === tldt.cnrl) {
-              TidyDataLogic = SpackagingDTs.tidyList
-            } else {
-              // TidyDataLogic = []
-            }
-          }
-        }
-      }
-    } else {
-      // extract tidy logic info.
-      TidyDataLogic = packagingDTs.tidyList
-    }
     // map DTs to API rest URL
-    let DTmapAPI = this.datatypeCheckAPI(packagingDTs, lDTs)
-    // do the same for categories dts
-    let categoryMapDTs = this.mapCategoryDataTypes(catDTs, packagingDTs, lDTs, SpackagingDTs)
+    let DTmapAPI = this.datatypeTableMapper(dataBundle)
 
     let apiHolder = {}
     apiHolder[dliv.device_mac] = {}
     let apiInfo = {}
     apiInfo.apiquery = DTmapAPI
     apiInfo.sourceapiquery = sourceDTmapAPI
-    apiInfo.sourceDTs = sourceDTextract
-    apiInfo.categorycodes = categoryMapDTs
-    apiInfo.datatypes = lDTs
-    apiInfo.tidyList = TidyDataLogic
     apiHolder[dliv.device_mac] = apiInfo
     datatypePerdevice = apiHolder
   }
@@ -84,59 +56,34 @@ DTSystem.prototype.DTStartMatch = function (devicesIN, dataBundle) {
 }
 
 /**
-*  // map category datatypes
-* @method mapCategoryDataTypes
+*  // map data prime to source data types //
+* @method datatypeTableMapper
 *
 */
-DTSystem.prototype.mapCategoryDataTypes = function (catDTs, packagingDTs, lDTs, SpackagingDTs) {
-  // if null check if category dt, ie derived from two or more dataTypeSensor
-  // let catDTmapAPI = []
-  let checkDTcategory = []
-  let extractCatDT = []
-  if (catDTs.length > 0 && catDTs[0].cnrl !== 'none') {
-    checkDTcategory = this.categoryCheck(catDTs[0], SpackagingDTs)
-    // now check the API query for this dataType
-    // todo extract data type ie loop over category matches, same or all different?
-    // lookup the dataType
-    let catDT = []
-    extractCatDT = null // this.liveCNRL.lookupContract(checkDTcategory[0].column)
-    catDT.push(extractCatDT.prime)
-    // catDTmapAPI = this.datatypeCheckAPI(packagingDTs, catDT)
-  } else {
-    checkDTcategory = []
-  }
-  return checkDTcategory
-}
-
-/**
-*  // map data prime to source data types
-* @method datatypeCheckAPI
-*
-*/
-DTSystem.prototype.datatypeCheckAPI = function (packagingDTs, lDTs) {
-  console.log('check against API')
-  console.log(packagingDTs)
-  console.log(lDTs)
+DTSystem.prototype.datatypeTableMapper = function (dataBundle) {
+  console.log('check against table structure')
+  console.log(dataBundle)
+  // console.log(lDTs)
   let apiMatch = []
   let apiKeep = {}
   // given datatypes select find match to the query string
   let tableCount = 0
   // match to source API query
-  for (let dtt of packagingDTs.tableStructure) {
+  for (let dtt of dataBundle.datatypes.device.tableStructure) {
     // is there table structure embedd in the storageStructure?
     // check to see if table contains sub structure
     let subStructure = this.subStructure(dtt)
     if (subStructure.length > 0) {
       dtt = subStructure
     }
-    for (let idt of lDTs) {
+    for (let idt of dataBundle.datatypes.datatypein) {
       const result = dtt.filter(item => item.cnrl === idt.cnrl)
       if (result.length > 0) {
         let packAPImatch = {}
         packAPImatch.cnrl = result[0].cnrl
         packAPImatch.column = result[0].text
-        packAPImatch.api = packagingDTs.apistructure[tableCount]
-        packAPImatch.namespace = packagingDTs.namespace
+        packAPImatch.api = dataBundle.apistructure[tableCount]
+        packAPImatch.namespace = dataBundle.namespace
         apiMatch.push(packAPImatch)
         if (apiMatch.length === lDTs.length) {
           apiKeep = apiMatch
@@ -151,7 +98,7 @@ DTSystem.prototype.datatypeCheckAPI = function (packagingDTs, lDTs) {
 }
 
 /**
-*  check for sub table structure
+*  check for sub table structure //
 * @method subStructure
 *
 */
@@ -163,135 +110,6 @@ DTSystem.prototype.subStructure = function (tableStructure) {
     }
   }
   return subStructure
-}
-
-/**
-*  map data type to souce DT if they exist
-* @method mapSourceDTs
-*
-*/
-DTSystem.prototype.mapSourceDTs = function (lDTs) {
-  console.log('mapSourceDTs')
-  console.log(lDTs)
-  let sourceDTextract = []
-  for (let iDT of lDTs) {
-    // look up datatype contract to see if derived?
-    let dtSourceContract = {'dtsource': {}} // this.liveCNRL.lookupContract(iDT.cnrl)
-    if (dtSourceContract.source === 'cnrl-derived') {
-      // loop over source DT's
-      for (let sDT of dtSourceContract.dtsource) {
-        // look up datatype contract
-        let dtprime = sDT // this.liveCNRL.lookupContract(sDT)
-        dtprime.prime['primary'] = 'derived'
-        sourceDTextract.push(dtprime.prime)
-      }
-    } else {
-      iDT['primary'] = 'primary'
-      sourceDTextract.push(iDT)
-    }
-  }
-  // need to remove duplicate elements
-  sourceDTextract = sourceDTextract.filter((sourceDTextract, index, self) =>
-    index === self.findIndex((t) => (
-      t.cnrl === sourceDTextract.cnrl
-    ))
-  )
-  return sourceDTextract
-}
-/**
-*  // map data prime to source data types
-* @method categoryCheck
-*
-*/
-DTSystem.prototype.categoryCheck = function (cdt, catSource) {
-  let catMatch = []
-  for (let catS of catSource.categorycodes) {
-    for (let sc of catS.categories) {
-      let scat = sc.cnrl
-      let uicat = cdt.cnrl
-      // any matches to data type in
-      if (scat === uicat) {
-        let codeLogic = sc.code
-        let catHolderLogic = {}
-        catHolderLogic.column = catS.column
-        catHolderLogic.code = codeLogic
-        catMatch.push(catHolderLogic)
-      }
-    }
-  }
-  return catMatch
-}
-
-/**
-* take in two data type arrays and return matching dts
-* @method mapDTs
-*
-*/
-DTSystem.prototype.mapDTs = function (dts1, dts2) {
-  // matching of two arrays
-  let matchArray = []
-  matchArray = dts1.filter(({ cnrl: id1 }) => dts2.some(({ cnrl: id2 }) => id2 === id1))
-  return matchArray
-}
-
-/**
-*  // lookup and assess table structure
-* @method DTtableStructure
-*
-*/
-DTSystem.prototype.DTtableStructure = function (dAPI) {
-  let dtHolder = {}
-  let subSourceAPI = {}
-  let apiDTs = []
-  // given datastore and CNRL science contract map the source API queries to datatypes or source Types
-  let indivDT = {}
-  let APIcnrl = dAPI // this.liveCNRL.lookupContract(dAPI)
-  // loop over table structure and extract out the dataTypes
-  for (let dtt of APIcnrl.tableStructure[0]) {
-    // lookup source DT contracts and build
-    if (dtt.cnrl !== 'datasub') {
-      indivDT = dtt.cnrl // this.liveCNRL.lookupContract(dtt.cnrl)
-      apiDTs.push(indivDT.prime)
-    } else {
-      // drill down a table level to access datatypes
-      for (let stt of dtt.data) {
-        indivDT = stt.cnrl // this.liveCNRL.lookupContract(stt.cnrl)
-        apiDTs.push(indivDT.prime)
-      }
-    }
-  }
-  // does a sub or source structure contract exist?
-  if (APIcnrl.source) {
-    subSourceAPI = APIcnrl.source // this.liveCNRL.lookupContract(APIcnrl.source)
-  }
-  dtHolder.datatypes = apiDTs
-  dtHolder.sourcedts = subSourceAPI
-  return dtHolder
-}
-
-/**
-*  // lookup dts from the science side
-* @method DTscienceStructure
-*
-*/
-DTSystem.prototype.DTscienceStructure = function (cnrl) {
-  let sciDTholder = {}
-  let sciSourceDTs = []
-  let sciCategoryDTs = []
-  let scienceCNRL = cnrl // this.liveCNRL.lookupContract(cnrl)
-  // look up datatypes and check to see if they are derive from other datatypes?
-  for (let iDT of scienceCNRL.datatypes) {
-    let indivDT = iDT.cnrl // this.liveCNRL.lookupContract(iDT.cnrl)
-    sciSourceDTs.push(indivDT.prime)
-  }
-  for (let icDT of scienceCNRL.categories) {
-    let indivcDT = icDT.cnrl // this.liveCNRL.lookupContract(icDT.cnrl)
-    sciCategoryDTs.push(indivcDT.prime)
-  }
-  sciDTholder.contract = scienceCNRL
-  sciDTholder.datatypes = sciSourceDTs
-  sciDTholder.categories = sciCategoryDTs
-  return sciDTholder
 }
 
 export default DTSystem

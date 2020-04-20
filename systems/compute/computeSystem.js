@@ -39,10 +39,10 @@ ComputeSystem.prototype.computationSystem = async function (systemBundle) {
   let computeStatus = {}
   if (systemBundle.cid === 'cnrl-2356388732') {
     computeStatus = await this.liveAverage.averageSystemStart(systemBundle)
-  } else if (systemBundle.cid === 'cnrl-2356388733') {
-    computeStatus = await this.recoverySystem(systemBundle)
   } else if (systemBundle.cid === 'cnrl-2356388737') {
     computeStatus = await this.liveSum.sumSystemStart(systemBundle)
+  } else if (systemBundle.cid === 'cnrl-2356388733') {
+    computeStatus = await this.recoverySystem(systemBundle)
   }
   return computeStatus
 }

@@ -10,17 +10,15 @@
 * @version    $Id$
 */
 import EntitiesManager from './entitiesManager.js'
-import CALE from './CALE/cale-utility.js'
 
 const util = require('util')
 const events = require('events')
 
 var safeFlow = function () {
   events.EventEmitter.call(this)
-  this.defaultStorage = ['http://165.227.244.213:8882'] // know seed peers
+  this.defaultStorage = 'http://165.227.244.213:8882'
   this.settings = {}
   this.liveEManager = {}
-  this.liveCALE = {}
 }
 
 /**
@@ -35,10 +33,9 @@ util.inherits(safeFlow, events.EventEmitter)
 *
 */
 safeFlow.prototype.networkAuthorisation = function (apiCNRL, auth) {
-  auth.namespace = this.defaultStorage[0]
+  auth.namespace = this.defaultStorage
   this.settings = auth
   this.liveEManager = new EntitiesManager(apiCNRL, auth)
-  this.liveCALE = new CALE(this.settings)
   return true
 }
 

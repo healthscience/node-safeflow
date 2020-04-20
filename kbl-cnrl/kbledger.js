@@ -10,6 +10,7 @@
 * @version    $Id$
 */
 import CNRLmaster from './cnrlMaster.js'
+import CNRLUtility from './cnrlUtility.js'
 import KBLstorage from './kblStorage.js'
 
 const util = require('util')
@@ -19,6 +20,7 @@ var KBLedger = function (apiCNRL, setIN) {
   events.EventEmitter.call(this)
   this.liveKBLStorage = new KBLstorage(setIN)
   this.liveCNRL = new CNRLmaster(setIN, this.liveKBLStorage)
+  this.liveCNRLUtility = new CNRLUtility(this.liveCNRL)
   this.liveAPI = apiCNRL
 }
 
@@ -47,7 +49,9 @@ KBLedger.prototype.startKBL = async function () {
   // latest nxp and ledger entries, CNRL contract look ups
   let kbIndex = []
   let NXPlist = []
-  let startLedger = await this.liveKBLStorage.getKBLindex('c')
+  let startLedger = await this.liveKBLStorage.getNXPindex('genesis', 1)
+  console.log('START KBL')
+  console.log(startLedger)
   // loop over and filter out CNRL contract  (TODO expand based on signed and KBID address ie. crytop verification)
   for (let kb of startLedger) {
     let cnrlType = this.liveCNRL.lookupContract(kb.cnrl)
@@ -96,17 +100,11 @@ KBLedger.prototype.modulesCNRL = function (mList) {
 * @method kbIndexQuery
 *
 */
-KBLedger.prototype.kbIndexQuery = async function (cnrl) {
+KBLedger.prototype.kbIndexQuery = async function (cnrl, n) {
   // latest nxp and ledger entries, CNRL contract look ups
-  let KBIDlist = []
-  let indexLedger = await this.liveKBLStorage.getKBLindex(cnrl)
-  // filter for index for CNRL entry
-  for (let ki of indexLedger) {
-    if (ki.cnrl && ki.cnrl === cnrl) {
-      KBIDlist.push(ki.kbid)
-    }
-  }
-  return KBIDlist
+  // let KBIDlist = []
+  let indexKBLedger = await this.liveKBLStorage.getKBLindex(cnrl, n)
+  return indexKBLedger
 }
 
 /**
@@ -126,10 +124,25 @@ KBLedger.prototype.kbidReader = async function (kbid) {
       let dataCNRLrefs = {}
       let dataIndex = Object.keys(kbData[0][ct])
       for (let de of dataIndex) {
-        console.log(de)
-        dataCNRLrefs[de] = this.liveCNRL.lookupContract(kbData[0][ct][de])
+        let dtHolder = []
+        if (de === 'datatypein') {
+          for (let dti of kbData[0][ct][de]) {
+           dtHolder.push(this.liveCNRL.lookupContract(dti))
+          }
+          dataCNRLrefs[de] = dtHolder
+        } else {
+          dataCNRLrefs[de] = this.liveCNRL.lookupContract(kbData[0][ct][de])
+        }
       }
-      expandCNRLrefs[ct] = dataCNRLrefs
+      let startSourceData = this.liveCNRLUtility.traceSource(dataCNRLrefs)
+      // trace back to source, dt, categories, tidy etc.
+      console.log('dt trace source BAXK')
+      console.log(startSourceData)
+      let dataStory = {}
+      dataStory.datatypes = dataCNRLrefs
+      dataStory.trace = startSourceData
+      console.log(dataStory)
+      expandCNRLrefs[ct] = dataStory
     } else if (ct === 'time') {
       let timeCNRLrefs = {}
       for (let ti of kbData[0][ct].timeseg) {
@@ -153,6 +166,8 @@ KBLedger.prototype.kbidReader = async function (kbid) {
       expandCNRLrefs[ct] = visCNRLrefs
     }
   }
+  console.log('expanded')
+  console.log(expandCNRLrefs)
   return expandCNRLrefs
 }
 
@@ -175,17 +190,6 @@ KBLedger.prototype.startSettings = async function (flag, bundle) {
     startStatusData = await this.liveDataSystem.removeStartDash(bundle)
   }
   return startStatusData
-}
-
-/**
-*  list of Experiment Live in Ledger
-* @method liveNetworkExperimentLedger
-*
-*/
-KBLedger.prototype.liveNetworkExperimentLedger = function () {
-  let liveExperList = 0 // ['cnrl-848388553323', 'cnrl-888355992223', 'cnrl-888355992224', 'cnrl-888388992224', 'cnrl-888388232224', 'cnrl-888388233324', 'cnrl-888388443324']
-  // await this.liveDataSystem.getExpKbundles()
-  return liveExperList
 }
 
 /**
@@ -212,26 +216,6 @@ KBLedger.prototype.experimentKbundles = async function (flag, data) {
 KBLedger.prototype.latestKBs = async function () {
   let lastestKBs = await this.liveDataSystem.getExpKbundles()
   return lastestKBs
-}
-
-/**
-*  extract MODLUES from ledger NXP
-* @method extractComputations
-*
-*/
-KBLedger.prototype.extractComputations = function () {
-  let livecomputeList = ['cnrl-2356388731', 'cnrl-2356388737', 'cnrl-2356388732', 'cnrl-2356383848']
-  return livecomputeList
-}
-
-/**
-* call the CNRL on startup to get live science in network
-* @method cnrlLivingKnowledge
-*
-*/
-KBLedger.prototype.cnrlLivingKnowledge = function (refIN) {
-  let startSemantics = this.liveCNRL.livingKnowledge(refIN)
-  return startSemantics
 }
 
 /**

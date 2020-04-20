@@ -24,14 +24,9 @@ var DataComponent = function (setIN) {
   this.liveCategoryData = new CategoryDataSystem(setIN)
   this.liveDataSystem = new DataSystem(setIN)
   this.liveData = []
-  this.livedate = 0
-  this.deviceList = []
-  this.CNRLscience = {}
-  this.datatypeList = []
-  this.categoryList = []
-  this.dataRaw = {}
   this.tidyData = {}
   this.categoryData = {}
+  this.dataRaw = {}
 }
 
 /**
@@ -81,20 +76,20 @@ DataComponent.prototype.setCategories = function (ctIN) {
 * @method RawData
 *
 */
-DataComponent.prototype.sourceData = async function (apiINFO, timeComponent) {
+DataComponent.prototype.sourceData = async function (devicesList, apiINFO, timeComponent) {
   this.apiInfoLive = apiINFO
   let systemBundle = {}
   systemBundle.apiInfo = apiINFO
   systemBundle.computeflow = false
   systemBundle.startperiod = timeComponent.livedate.startperiod
   systemBundle.futureperiod = timeComponent.livedate.futureperiod
-  systemBundle.scienceAsked = this.CNRLscience
-  systemBundle.dtAsked = this.datatypeList
-  systemBundle.devices = this.deviceList
-  systemBundle.devicesFull = this.did.devices
+  systemBundle.scienceAsked = apiINFO.compute
+  systemBundle.dtAsked = apiINFO.datatypein
+  systemBundle.devices = devicesList
+  systemBundle.devicesFull = devicesList
   systemBundle.timeseg = timeComponent.livedate.timeseg
-  systemBundle.querytime = this.did.time
-  systemBundle.categories = this.did.categories
+  systemBundle.querytime = apiINFO.time
+  systemBundle.categories = apiINFO.categories
   // need to check if one day or more or some segment of time is required?
   for (let rt of timeComponent.timerange) {
     let convertTime = moment(rt).valueOf()
@@ -180,7 +175,7 @@ DataComponent.prototype.assessDataStatus = function (time) {
 * @method directSourceUpdated
 *
 */
-DataComponent.prototype.directSourceUpdated = async function (straightBundle, sTime) {
+DataComponent.prototype.directSourceResults = async function (straightBundle, sTime) {
   let systemBundle = {}
   systemBundle.apiInfo = straightBundle
   systemBundle.startperiod = this.livedate

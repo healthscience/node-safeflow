@@ -35,6 +35,7 @@ util.inherits(EntitiesManager, events.EventEmitter)
 *
 */
 EntitiesManager.prototype.peerKBLstart = async function () {
+  console.log('peer setart')
   // read peer kbledger
   // let entityModule = {}
   let nxpList = await this.KBLlive.startKBL()
@@ -52,7 +53,6 @@ EntitiesManager.prototype.peerInput = async function (input) {
   // what type of input  CNRL NXP  Module or KBID entry???
   console.log('input')
   console.log(input)
-  let modKbids = {}
   let entityData = {}
   entityData[input.cnrl] = await this.addHSentity(input)
   return entityData
@@ -78,16 +78,14 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
     // now filter for type?
     modules = this.NXPmodules(ecsIN.modules)
     for (let md of modules) {
-      // set modulde information in a components
-      // this.liveSEntities[shellID].liveModuleC.setModInfo(md)
       // need matcher - module type to how its processed. Only computes have KBIDS
       if (md.prime.text === 'Device') {
         // hook up to device
         let deviceInfo = this.extractDevice(md.device.cnrl)
-        moduleState = await this.deviceflow(shellID, deviceInfo)
+        moduleState = await this.deviceDataflow(shellID, deviceInfo)
       } else if (md.prime.text === 'Compute') {
         // feed into ECS -KBID processor
-        let kbidInfo = await this.extractModKBID(md.prime.cnrl)
+        let kbidInfo = await this.extractKBID(md.prime.cnrl, 1)
         let kbLength = Object.keys(kbidInfo)
         if (kbLength.length > 0) {
           for (let ki of kbLength) {
@@ -114,10 +112,10 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
 
 /**
 *  add device component daata
-* @method deviceflow
+* @method deviceDataflow
 *
 */
-EntitiesManager.prototype.deviceflow = async function (shellID, device) {
+EntitiesManager.prototype.deviceDataflow = async function (shellID, device) {
   let statusD = false
   // set the device in module
   statusD = await this.liveSEntities[shellID].liveDeviceC.setDevice(device)
@@ -134,7 +132,6 @@ EntitiesManager.prototype.deviceflow = async function (shellID, device) {
 */
 EntitiesManager.prototype.controlFlow = async function (shellID, mod, kbid) {
   console.log('CONTROLFLOW0-----begin')
-  console.log(shellID)
   console.log(mod)
   console.log(kbid)
   // set the MASTER TIME CLOCK for entity
@@ -144,27 +141,27 @@ EntitiesManager.prototype.controlFlow = async function (shellID, mod, kbid) {
   this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(this.liveSEntities[shellID].liveDeviceC.devices, kbid.data)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDatatypeC)
-  /* this.liveSEntities[shellID][mid][kid].liveTimeC.timeProfiling()
+  this.liveSEntities[shellID].liveTimeC.timeProfiling(kbid.time)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
-  await this.liveSEntities[shellID][mid][kid].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveTimeC)
+  await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDeviceC.devices, this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveTimeC)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
   this.emit('computation', 'in-progress')
-  await this.liveSEntities[shellID][mid][kid].liveTimeC.startTimeSystem(this.liveSEntities[shellID].liveDatatypeC, this.liveSEntities[shellID][mid][kid].liveDataC.liveData)
+  await this.liveSEntities[shellID].liveTimeC.startTimeSystem(this.liveSEntities[shellID].liveDatatypeC, this.liveSEntities[shellID].liveDataC.liveData)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
-  this.computeStatus = await this.liveSEntities[shellID][mid][kid].liveComputeC.filterCompute(this.liveSEntities[shellID].liveTimeC, this.liveSEntities[shellID][mid][kid].liveDatatypeC.datatypeInfoLive)
+  this.computeStatus = await this.liveSEntities[shellID].liveComputeC.filterCompute(this.liveSEntities[shellID].liveTimeC, this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
   this.emit('computation', 'finished')
   if (this.computeStatus === true) {
   // go direct and get raw data direct
-    await this.liveSEntities[shellID][mid][kid].liveDataC.directSourceUpdated(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveTimeC)
+    await this.liveSEntities[shellID].liveDataC.directSourceResults(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveTimeC)
     // proof of evidence
     // this.liveCrypto.evidenceProof()
   }
-  this.liveSEntities[shellID][mid][kid].liveVisualC.filterVisual(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDataC.liveData, this.liveSEntities[shellID][mid][kid].liveTimeC) */
+  this.liveSEntities[shellID].liveVisualC.filterVisual(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDataC.liveData, this.liveSEntities[shellID].liveTimeC)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
   console.log('CONTROLFLOW9-----FINISHED')
@@ -221,23 +218,26 @@ EntitiesManager.prototype.NXPmodules = function (mList) {
 *
 */
 EntitiesManager.prototype.extractDevice = function (cnrl) {
-  console.log('device extract')
   let deviceBundle = this.KBLlive.contractCNRL(cnrl)
   return deviceBundle
 }
 /**
 * knowledge Bundle Index Module CNRL matches
-* @method extractModKBID
+* @method extractKBID
 *
 */
-EntitiesManager.prototype.extractModKBID = async function (cnrl) {
+EntitiesManager.prototype.extractKBID = async function (cnrl, n) {
   // read peer kbledger
-  let moduleKBIDdata = {}
-  let kbidList = await this.KBLlive.kbIndexQuery(cnrl)
-  for (let ki of kbidList) {
-    moduleKBIDdata[ki] = await this.kbidEntry(ki)
+  let KBIDdata = {}
+  let kbidList = await this.KBLlive.kbIndexQuery(cnrl, n)
+  if (kbidList.length > 0) {
+    for (let ki of kbidList) {
+      KBIDdata[ki.kbid] = await this.kbidEntry(ki.kbid)
+    }
+  } else {
+    KBIDdata = kbidList
   }
-  return moduleKBIDdata
+  return KBIDdata
 }
 
 /**

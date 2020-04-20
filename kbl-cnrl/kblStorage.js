@@ -37,12 +37,13 @@ KBLdatabaseUtility.prototype.peerNXPmodules = async function (contractID) {
 }
 
 /**
-*  KBL entry
-* @method kblEntry
+*  Get NXP index for those peer has joind i.e. genesis index entry
+* @method getNXPindex
 *
 */
-KBLdatabaseUtility.prototype.kblEntry = async function (kbid) {
-  let jsondata = await axios.get(this.baseAPI + '/kblentry/' + this.tempPubkey + '/' + this.tempToken + '/' + kbid)
+KBLdatabaseUtility.prototype.getNXPindex = async function (status, n) {
+  //  nosql query
+  let jsondata = await axios.get(this.baseAPI + '/nxpindex/' + this.tempPubkey + '/' + this.tempToken + '/' + status + '/' + n)
   return jsondata.data
 }
 
@@ -51,9 +52,19 @@ KBLdatabaseUtility.prototype.kblEntry = async function (kbid) {
 * @method getKBLindex
 *
 */
-KBLdatabaseUtility.prototype.getKBLindex = async function (cnrl) {
-  //  nosql query but headng towards a gRPC listener on stream socket
-  let jsondata = await axios.get(this.baseAPI + '/kblindex/' + this.tempPubkey + '/' + this.tempToken + '/' + cnrl)
+KBLdatabaseUtility.prototype.getKBLindex = async function (cnrl, n) {
+  //  nosql query
+  let jsondata = await axios.get(this.baseAPI + '/kblindex/' + this.tempPubkey + '/' + this.tempToken + '/' + cnrl + '/' + n)
+  return jsondata.data
+}
+
+/**
+*  KBL entry
+* @method kblEntry
+*
+*/
+KBLdatabaseUtility.prototype.kblEntry = async function (kbid) {
+  let jsondata = await axios.get(this.baseAPI + '/kblentry/' + this.tempPubkey + '/' + this.tempToken + '/' + kbid)
   return jsondata.data
 }
 

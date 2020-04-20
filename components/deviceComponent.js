@@ -33,7 +33,7 @@ util.inherits(DeviceComponent, events.EventEmitter)
 */
 DeviceComponent.prototype.setDevice = async function (device) {
   let deviceDetail = await this.liveDeviceSystem.storedDevices(device)
-  this.devices.push(deviceDetail)
+  this.devices = deviceDetail
 }
 
 export default DeviceComponent

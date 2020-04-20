@@ -60,16 +60,19 @@ TimeUtilities.prototype.timeConversionUtility = function (timeBundle) {
 *
 */
 TimeUtilities.prototype.computeTimeSegments = function (startTime, tSegs) {
+  console.log('compute time seg UTILITY')
+  console.log(startTime)
+  console.log(tSegs)
   let timeConversion = 0
   // does a standard time types need converting or range or both?
-  for (let ti of tSegs) {
-    if (ti === 'SELECT') {
+  if (tSegs) {
+    if (tSegs === 'SELECT') {
       let rangeMills = this.rangeCovert(ti)
       // console.log(rangeMills)
       timeConversion = rangeMills
     } else {
       let timePeriod = {}
-      timePeriod = this.timeSegBuilder(startTime, ti)
+      timePeriod = this.timeSegBuilder(startTime, tSegs)
       timeConversion = timePeriod
     }
   }
