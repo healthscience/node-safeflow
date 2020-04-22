@@ -49,9 +49,7 @@ KBLedger.prototype.startKBL = async function () {
   // latest nxp and ledger entries, CNRL contract look ups
   let kbIndex = []
   let NXPlist = []
-  let startLedger = await this.liveKBLStorage.getNXPindex('genesis', 1)
-  console.log('START KBL')
-  console.log(startLedger)
+  let startLedger = await this.liveKBLStorage.getNXPindex('genesis', 10)
   // loop over and filter out CNRL contract  (TODO expand based on signed and KBID address ie. crytop verification)
   for (let kb of startLedger) {
     let cnrlType = this.liveCNRL.lookupContract(kb.cnrl)
@@ -67,6 +65,33 @@ KBLedger.prototype.startKBL = async function () {
     }
   }
   return NXPlist
+}
+
+/**
+* get the latest KBL state
+* @method startKBL
+*
+*/
+KBLedger.prototype.startPeerKBL = async function () {
+  // latest nxp and ledger entries, CNRL contract look ups
+  let nxpIndex = []
+  let NXPlist = []
+  let startLedger = await this.liveKBLStorage.getNXPindex('contract', 10)
+  // exclude genesis
+  for (let ki of startLedger) {
+    if (ki.merkle !== 'genesis') {
+      NXPlist.push(ki)
+    }
+  }
+  // loop over and filter out CNRL contract  (TODO expand based on signed and KBID address ie. crytop verification)
+  for (let nxc of NXPlist) {
+    let cnrlType = this.liveCNRL.lookupContract(nxc.cnrl)
+    let kBundle = {}
+    kBundle.index = nxc
+    kBundle.contract = cnrlType
+    nxpIndex.push(kBundle)
+  }
+  return nxpIndex
 }
 
 /**
@@ -117,7 +142,7 @@ KBLedger.prototype.kbidReader = async function (kbid) {
   let kbData = await this.liveKBLStorage.kblEntry(kbid)
   // expandout CNRL references yes
   // go through and extract cnrl contracts
-  let cnrlTypes = Object.keys(kbData[0])
+  /* let cnrlTypes = Object.keys(kbData[0])
   for (let ct of cnrlTypes) {
     // fixed path structure of parsing ledger entry
     if (ct === 'data') {
@@ -167,8 +192,9 @@ KBLedger.prototype.kbidReader = async function (kbid) {
     }
   }
   console.log('expanded')
-  console.log(expandCNRLrefs)
-  return expandCNRLrefs
+  console.log(expandCNRLrefs) */
+  // return expandCNRLrefs
+  return kbData
 }
 
 /**

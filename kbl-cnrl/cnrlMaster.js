@@ -115,6 +115,11 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
   dataCNRLbundle.kentities = []
   dataCNRLbundle.modules = []
   dataCNRLbundle.grid = []
+  dataCNRLbundle.dtcompute = []
+  dataCNRLbundle.category = []
+  dataCNRLbundle.compute = ''
+  dataCNRLbundle.controlpanel = []
+  dataCNRLbundle.automation = false
   if (refIN === 'cnrl-8856388711') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.history = {'proposed': 157118400, 'accepted': 15728400, 'votes': 343}
@@ -686,6 +691,12 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-001234543214'
     dataCNRLbundle.grid = [{ 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': '0', static: false }, { 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': '1', static: false }]
+    dataCNRLbundle.dtcompute = ['cnrl-8856388711', 'cnrl-8856388712']
+    dataCNRLbundle.category = ["none"]
+    dataCNRLbundle.compute = 'cnrl-2356388731'
+    dataCNRLbundle.controlpanel = ['startstop']
+    dataCNRLbundle.automation = true
+    dataCNRLbundle.time = {"realtime" : "1578743694", "timeseg": [ "cnrl-t2" ], "startperiod": "1578700800"}
   } else if (refIN === 'cnrl-001234543215') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'module'
@@ -956,18 +967,6 @@ CNRLmaster.prototype.timeContracts = function (refIN) {
     }]
   }
   return timeIndex
-}
-
-/**
-*  make API call to indexer of the science live on network/plus local history of peers used science
-* @method scienceOnNetwork
-*
-*/
-CNRLmaster.prototype.scienceOnNetwork = function () {
-  let science = [{ active: false, text: 'Observation data', description: 'Display of source data from a devies sensors.', value: 'A', cid: 'cnrl-2356388731', wasm: 'wasm-sc-1', livingpaper: 'http://www.healthscience.network/observation', verified: true }, { active: false, text: 'Sum data', description: 'Add up quantities on a time basis', value: 'F', cid: 'cnrl-2356388737', wasm: 'wasm-sc-6', livingpaper: 'http://www.healthscience.network/sum', verified: true }, { active: false, text: 'Average', description: 'A statisticial average calculated on BMP and steps on a daily basis.', value: 'B', cid: 'cnrl-2356388732', wasm: 'wasm-sc-2', livingpaper: 'http://www.healthscience.network/average', verified: false }, { active: false, text: 'Correlation', description: 'A statisticial way to compare how to variables are connected.', value: 'G', cid: 'cnrl-2356383848', wasm: 'wasm-sc-7', livingpaper: 'http://www.healthscience.network/correlation', verified: false }]
-  return science
-  // , { active: false, text: 'error data', description: 'Data Error numbers and statistics', value: 'D', cid: 'cnrl-2356388734', wasm: 'wasm-sc-4', verified: false }, { active: false, text: 'HealthSpan', description: 'Combines all network machine learning of the scientific computations to build a simulation of a human heart', value: 'E', cid: 'cnrl-2356388736', wasm: 'wasm-sc-5', verified: false }
-  // , { active: false, text: 'Resting HR Recovery', description: 'The use of bayesian statistical methods to show the time it take for the heart to reach resting heart rate value after activity.', value: 'C', cid: 'cnrl-2356388733', wasm: 'wasm-sc-3', livingpaper: 'https://docs.google.com/document/d/11JWcbBrwgLIqPc7V7GpI_WbACuIS_4h630zdT66Re3s/edit', verified: false },
 }
 
 /**

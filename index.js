@@ -50,6 +50,16 @@ safeFlow.prototype.startFlow = function (apiCNRL, auth) {
 }
 
 /**
+* Start FLOW
+* @method startPeerFlow
+*
+*/
+safeFlow.prototype.startPeerFlow = function (apiCNRL, auth) {
+  let startData = this.liveEManager.peerKBLPeerstart()
+  return startData
+}
+
+/**
 * build context for Toolkit
 * @method entityGetter
 *
