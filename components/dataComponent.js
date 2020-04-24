@@ -45,57 +45,12 @@ DataComponent.prototype.setDevicesLive = async function () {
 }
 
 /**
-*  what the CNRL datatype Mapping
-* @method setCNRLsciencemapping
-*
-*/
-DataComponent.prototype.setCNRLsciencemapping = function () {
-  this.CNRLscience = this.did.science
-}
-
-/**
-*  set the datatype asked for
-* @method setDataTypesLive
-*
-*/
-DataComponent.prototype.setDatatypesLive = function (dtIN) {
-  this.datatypeList = dtIN
-}
-
-/**
-*  set the datatype asked for
-* @method setCategories
-*
-*/
-DataComponent.prototype.setCategories = function (ctIN) {
-  this.categoryList = ctIN
-}
-
-/**
 *  source data from device sensor
 * @method RawData
 *
 */
-DataComponent.prototype.sourceData = async function (devicesList, apiINFO, timeComponent) {
-  this.apiInfoLive = apiINFO
-  let systemBundle = {}
-  systemBundle.apiInfo = apiINFO
-  systemBundle.computeflow = false
-  systemBundle.startperiod = timeComponent.livedate.startperiod
-  systemBundle.futureperiod = timeComponent.livedate.futureperiod
-  systemBundle.scienceAsked = apiINFO.compute
-  systemBundle.dtAsked = apiINFO.datatypein
-  systemBundle.devices = devicesList
-  systemBundle.devicesFull = devicesList
-  systemBundle.timeseg = timeComponent.livedate.timeseg
-  systemBundle.querytime = apiINFO.time
-  systemBundle.categories = apiINFO.categories
-  // need to check if one day or more or some segment of time is required?
-  for (let rt of timeComponent.timerange) {
-    let convertTime = moment(rt).valueOf()
-    let timeStructure = convertTime
-    await this.DataControlFlow(systemBundle, timeStructure)
-  }
+DataComponent.prototype.sourceData = async function (apiINFO, timeComponent) {
+  await this.DataControlFlow(apiINFO, timeComponent)
   return true
 }
 
@@ -172,20 +127,12 @@ DataComponent.prototype.assessDataStatus = function (time) {
 
 /**
 *
-* @method directSourceUpdated
+* @method directResults
 *
 */
-DataComponent.prototype.directSourceResults = async function (straightBundle, sTime) {
-  let systemBundle = {}
-  systemBundle.apiInfo = straightBundle
-  systemBundle.startperiod = this.livedate
-  systemBundle.scienceAsked = this.CNRLscience
-  systemBundle.dtAsked = this.datatypeList
-  systemBundle.devices = this.deviceList
-  systemBundle.timeseg = sTime.livedate.timeseg
-  systemBundle.categories = this.did.categories
-  let sourceDirectData = await this.liveDataSystem.datatypeQueryMapping(systemBundle, sTime.livedate.startperiod)
-  this.liveData[sTime.livedate.startperiod] = sourceDirectData
+DataComponent.prototype.directResults = async function (type, api, sourceHash) {
+  let resultData = await this.liveDataSystem.datatypeQueryMapping(type, api, sourceHash)
+  this.liveData[sourceHash] = resultData
 }
 
 export default DataComponent

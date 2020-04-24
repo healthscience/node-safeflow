@@ -29,44 +29,17 @@ util.inherits(VisualComponent, events.EventEmitter)
 
 /**
 *
-* @method setVisLive
-*
-*/
-VisualComponent.prototype.setVisLive = function (updateEID) {
-  this.EIDinfo.time.startperiod = updateEID
-}
-
-/**
-*
 * @method filterVisual
 *
 */
-VisualComponent.prototype.filterVisual = function (visIN, vData, timeComponent) {
+VisualComponent.prototype.filterVisual = function (contract, resultsData) {
   // which of three types of visualisations?
+  console.log('VISULAcomponentIN')
+  console.log(resultsData)
+  console.log(contract)
   let status = false
-  let visBundle = {}
-  visBundle.cid = this.EIDinfo.cid
-  visBundle.devices = this.EIDinfo.devices
-  visBundle.datatypes = this.EIDinfo.datatypes
-  visBundle.visID = this.EIDinfo.visID
-  visBundle.startperiod = timeComponent.livedate.startperiod
-  visBundle.time = timeComponent.livedate
-  visBundle.timerange = timeComponent.timerange
-  for (let vid of this.EIDinfo.visID) {
-    // todo need to check if one or many visualisation types required? ONe for now
-    if (vid === 'vis-sc-1') {
-      this.visualData['vis-sc-1'] = this.liveVisSystem.visSystemChart(visBundle, vData)
-      status = true
-    }
-    if (vid === 'vis-sc-2') {
-      this.visualData['vis-sc-2'] = this.liveVisSystem.tableSystem(visBundle, visIN, vData, timeComponent)
-      // status = true
-    }
-    if (visIN.vid === 'vis-sc-3') {
-      status = true
-      // this.visualData['vis-sc-3'] = this.liveVisSystem.simSystem()
-    }
-  }
+  // pass on vis system to prepare
+  this.visualData = this.liveVisSystem.visualControl(contract, resultsData) 
   return status
 }
 

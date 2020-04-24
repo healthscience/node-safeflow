@@ -35,9 +35,9 @@ util.inherits(TestStorageAPI, events.EventEmitter)
 * @method RESTbuilder
 *
 */
-TestStorageAPI.prototype.RESTbuilder = async function (dapi) {
-  let jsondata = await axios.get(dapi.namespace + dapi.device + this.tempPubkey + '/' + this.tempToken)
-  return jsondata.data
+TestStorageAPI.prototype.RESTbuilder = async function (dapi, queryIN) {
+  let jsondata = await axios.get(dapi.namespace + dapi.path + this.tempPubkey + '/' + this.tempToken + '/' + queryIN)
+  return jsondata.data[0]
 }
 
 /**

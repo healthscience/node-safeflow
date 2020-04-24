@@ -102,7 +102,7 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
         console.log(md)
         let kbidInfo = await this.extractKBID(md.prime.cnrl, 1)
         // now check this KBID HASH against built CNRL inputs
-        moduleState = await this.controlFlow(shellID, md, kbidInfo)
+        moduleState = await this.computeFlow(shellID, md, kbidInfo)
         /* let kbLength = Object.keys(kbidInfo)
         if (kbLength.length > 0) {
           for (let ki of kbLength) {
@@ -110,6 +110,13 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
             moduleState = await this.controlFlow(shellID, md, kbidInfo[ki])
           }
         } */
+      } else if (md.prime.text === 'Visualise') {
+        // feed into ECS -KBID processor
+        console.log('visualise start')
+        console.log(md)
+        // extract visualisation contract information
+        let visInfo = this.KBLlive.contractCNRL(md.visualise)
+        moduleState = await this.visualFlow(shellID, md, visInfo)
       } else {
         // plain extract info. from CNRL contract
       }
@@ -141,26 +148,27 @@ EntitiesManager.prototype.deviceDataflow = async function (shellID, device) {
   statusD = true
   return statusD
 }
+
 /**
 *  control the adding of data to the entity
 *  KnowledgeSciptingLanguage(forth/stack)to give gurantees)
-* @method controlFlow
+* @method computeFlow
 *
 */
-EntitiesManager.prototype.controlFlow = async function (shellID, mod, kbid) {
-  console.log('CONTROLFLOW0-----begin')
+EntitiesManager.prototype.computeFlow = async function (shellID, mod, kbid) {
+  console.log('COMPUTEFLOW0-----begin')
   console.log(mod)
   console.log(kbid)
   let inputKBID = this.liveCrypto.hashKBID(mod, kbid.result)
-  console.log('tow hases')
-  console.log(kbid.kbid)
-  console.log(inputKBID)
   let hashMatcher = this.liveCrypto.compareHashes(kbid.kbid, inputKBID)
   // If the result HASH then just look at Visulisation inputs and send the data back.
   if (hashMatcher === true) {
     console.log('results already prepared')
     // get data from API
-    await this.liveSEntities[shellID].liveDataC.directSourceResults()
+    let mockAPI = {}
+    mockAPI.namespace = 'http://165.227.244.213:8882'
+    mockAPI.path = '/results/'
+    await this.liveSEntities[shellID].liveDataC.directResults('REST', mockAPI, kbid.result)
   } else {
     console.log('new data to process')
     // else go through creating a new KBID
@@ -193,11 +201,23 @@ EntitiesManager.prototype.controlFlow = async function (shellID, mod, kbid) {
       // this.liveCrypto.evidenceProof()
     }
   }
-  this.liveSEntities[shellID].liveVisualC.filterVisual(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDataC.liveData, this.liveSEntities[shellID].liveTimeC)
+  console.log('COMPUTEFLOW9-----FINISHED')
+  // console.log(this.liveSEntities[shellID])
+  return true
+}
+
+/**
+*  visualisation rules to prepare for
+* @method visualFlow
+*
+*/
+EntitiesManager.prototype.visualFlow = async function (shellID, mod, vis) {
+  console.log('VISUALFLOW-----begin')
+  console.log(mod)
+  console.log(vis)
+  this.liveSEntities[shellID].liveVisualC.filterVisual(vis, this.liveSEntities[shellID].liveDataC.liveData)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
-  console.log('CONTROLFLOW9-----FINISHED')
-  // console.log(this.liveSEntities[shellID])
   return true
 }
 

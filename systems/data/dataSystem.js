@@ -37,17 +37,13 @@ util.inherits(DataSystem, events.EventEmitter)
 * @method datatypeQueryMapping
 *
 */
-DataSystem.prototype.datatypeQueryMapping = async function (systemBundle, time) {
-  let rawHolder = {}
-  // loop over the each devices API data source info.
-  for (let devI of systemBundle.devices) {
-    rawHolder[devI] = {}
-    if (devI.device === 'SAFE') {
-
-    } else if (devI.device === 'REST') {
-    // pass on to either safe API builder, REST API builder or IPSF builder etc.
-    // this.rawHolder[devI] = this.liveTestStorage.RESTbuilder(devI.api)
-    }
+DataSystem.prototype.datatypeQueryMapping = async function (type, api, hash) {
+  let rawHolder = []
+  if (type === 'SAFE') {
+    console.log('safeNetwork file GET')
+  } else if (type === 'REST') {
+  // pass on to either safe API builder, REST API builder or IPSF builder etc.
+    rawHolder = await this.liveTestStorage.RESTbuilder(api, hash)
   }
   return rawHolder
 }

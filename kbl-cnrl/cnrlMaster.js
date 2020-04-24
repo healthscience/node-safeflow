@@ -617,7 +617,7 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.resolution = {}
     dataCNRLbundle.namespace = 'safe://cnrl/cnrl-848388553323'
     dataCNRLbundle.index = []
-    dataCNRLbundle.modules = ['cnrl-001234543212', 'cnrl-001234543303', 'cnrl-001234543304', 'cnrl-001234543213', 'cnrl-001234543214', 'cnrl-001234543215', 'cnrl-001234543216', 'cnrl-001234543217', 'cnrl-001234543218', 'cnrl-001234543219']
+    dataCNRLbundle.modules = ['cnrl-001234543212', 'cnrl-001234543303', 'cnrl-001234543304', 'cnrl-001234543213', 'cnrl-001234543214', 'cnrl-001234543215', 'cnrl-001234543458', 'cnrl-001234543216', 'cnrl-001234543217', 'cnrl-001234543218', 'cnrl-001234543219']
     dataCNRLbundle.kentities = ['PxaTn6JAP8fUowppmNvLniqmFYV9VQMDVVcP5n7BqTm']
   } else if (refIN === 'cnrl-848388553329') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
@@ -690,13 +690,22 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-001234543214', 'text': 'Compute', 'active': false }
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-001234543214'
-    dataCNRLbundle.grid = [{ 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': '0', static: false }, { 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': '1', static: false }]
+    dataCNRLbundle.grid = [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '0', static: false }]
     dataCNRLbundle.dtcompute = ['cnrl-8856388711', 'cnrl-8856388712']
     dataCNRLbundle.category = ["none"]
     dataCNRLbundle.compute = 'cnrl-2356388731'
     dataCNRLbundle.controlpanel = ['startstop']
     dataCNRLbundle.automation = true
     dataCNRLbundle.time = {"realtime" : "1578743694", "timeseg": [ "cnrl-t2" ], "startperiod": "1578700800"}
+  } else if (refIN === 'cnrl-001234543458') {
+    // CNRL implementation contract e.g. from mobile phone sqlite table structure
+    dataCNRLbundle.type = 'module'
+    dataCNRLbundle.source = 'cnrl-primary'
+    dataCNRLbundle.prime = { 'cnrl': 'cnrl-001234543458', 'text': 'Visualise', 'active': false }
+    dataCNRLbundle.livingpaper = {'link': ''}
+    dataCNRLbundle.namespace = 'safe://cnrl-001234543458'
+    dataCNRLbundle.grid = [{ 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': '0', static: false }, { 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': '1', static: false }]
+    dataCNRLbundle.visualise = 'cnrl-813033773883'
   } else if (refIN === 'cnrl-001234543215') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'module'
@@ -745,36 +754,33 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-001234543220'
     dataCNRLbundle.grid = []
-  } else if (refIN === 'cnrl-chart') {
-    // CNRL implementation contract e.g. from mobile phone sqlite table structure
+  } else if (refIN === 'cnrl-813033773883') {
     dataCNRLbundle.type = 'visualise'
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.prime = { 'cnrl': 'cnrl-chart', 'text': 'Chart.js', 'active': false }
+    dataCNRLbundle.prime = { 'cnrl': 'cnrl-813033773883', 'text': 'Chart.js', 'active': false }
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-chart'
+    dataCNRLbundle.rules = { 'xaxis': 'cnrl-8856388713', 'yaxis': 'cnrl-8856388711' } // cnrl-8856388712
+    dataCNRLbundle.structure = { 'chartPackage': { 'labels': [], 'datasets': [{ label: '', backgroundColor: 'rgb(255, 99, 132)', borderColor: 'rgb(255, 99, 132)', 'data': [] }] },  'chartOptions': { }, 'message': 'compute-complete' }
   } else if (refIN === 'cnrl-table') {
-    // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'visualise'
     dataCNRLbundle.source = 'cnrl-primary'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-table', 'text': 'vue-grid', 'active': false }
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-table'
   } else if (refIN === 'cnrl-simulation') {
-    // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'visualise'
     dataCNRLbundle.source = 'cnrl-primary'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-simulation', 'text': 'simulation', 'active': false }
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-simulation'
   } else if (refIN === 'cnrl-t0') {
-    // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'time'
     dataCNRLbundle.source = 'cnrl-primary'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-t0', 'text': 'second', 'active': false, 'unit': 1 }
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-t0'
   } else if (refIN === 'cnrl-t1') {
-    // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'time'
     dataCNRLbundle.source = 'cnrl-derived'
     dataCNRLbundle.dtsource = ['cnrl-t0']
@@ -782,7 +788,6 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-t1'
   } else if (refIN === 'cnrl-t2') {
-    // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'time'
     dataCNRLbundle.source = 'cnrl-derive'
     dataCNRLbundle.dtsource = ['cnrl-t1']

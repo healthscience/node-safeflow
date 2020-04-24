@@ -9,15 +9,14 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
+import ChartOptions from './chartOptions.js'
 const util = require('util')
 const events = require('events')
 const moment = require('moment')
 
 var ChartSystem = function () {
   events.EventEmitter.call(this)
-  this.options = {}
-  this.analysisStart = ''
-  this.analysisEnd = ''
+  this.liveChartOptions = new ChartOptions()
 }
 
 /**
@@ -27,78 +26,111 @@ var ChartSystem = function () {
 util.inherits(ChartSystem, events.EventEmitter)
 
 /**
+*  rules and logic need for Chart.js charting data
+* @method chartjsControl
+*
+*/
+ChartSystem.prototype.chartjsControl = function (contract, dataIN) {
+  let chartData = {}
+  chartData.chartPackage = this.structureChartData(contract.rules, dataIN)
+  chartData.chartOptions = this.liveChartOptions.prepareChartOptions()
+  /* if (visBundle.cid === 'cnrl-2356388731') {
+    for (let dtv of visBundle.datatypes) {
+      structureHolder = this.liveChartSystem.structureChartData(dtv, visBundle, dataIN)
+      // prepare the colors for the charts
+      let chartColorsSet = localthis.liveChartSystem.chartColors(dtv)
+      dataTypeBucket.data = structureHolder
+      dataTypeBucket.color = chartColorsSet
+      chartDataH.chart.push(dataTypeBucket)
+      structureHolder = {}
+      dataTypeBucket = {}
+    }
+    // prepare title, y axis text and scaling
+    let titleOut = 'Device ' + visBundle.devices[0].device_name
+    // package all the info. to pass to vue
+    chartData.prepared = this.liveChartSystem.prepareVueChartJS(chartDataH.chart)
+    // prepare chart options
+    let liveChartOptions = this.liveChartOptions.prepareChartOptions(titleOut, visBundle.datatypes, chartData.prepared.scale)
+    // prepared the labels
+    let setTimeTools = chartData.prepared.labels
+    // update for annotation values needing set
+    let chartOptionsSet = this.liveChartOptions.updateChartoptions(setTimeTools, liveChartOptions)
+    chartData.options = chartOptionsSet
+    chartData.liveActive = this.liveChartOptions
+    const chartHolder = {}
+    chartHolder[visIN] = {}
+    chartHolder[visIN][liveTime] = {}
+    chartHolder[visIN][liveTime]['day'] = chartData
+    chartGroupHolder.push(chartHolder)
+    this.visSystemData = chartGroupHolder
+  } else if (visBundle.cid === 'cnrl-2356388732') {
+    let liveChartOptions = this.liveChartOptions.AverageChartOptions()
+    for (let dtv of visBundle.datatypes) {
+      structureHolder = this.liveChartSystem.structureAverageData(dtv, visBundle, dataIN)
+      let chartColorsSet = localthis.liveChartSystem.StatschartColors(dtv)
+      dataTypeBucket.data = structureHolder
+      dataTypeBucket.color = chartColorsSet
+      chartDataH.chart.push(dataTypeBucket)
+      // now prepare data format for chartjs
+      chartData.prepared = this.liveChartSystem.prepareStatsVueChartJS(visBundle.devices, chartDataH)
+      let setTimeTools = chartData.prepared.labels
+      let chartOptionsSet = this.liveChartOptions.updateChartoptions(setTimeTools, liveChartOptions) // this.liveChartSystem.getterChartOptions()
+      chartData.options = chartOptionsSet
+      const chartHolder = {}
+      chartHolder[visIN] = {}
+      chartHolder[visIN][liveTime] = {}
+      chartHolder[visIN][liveTime]['day'] = chartData
+      chartGroupHolder.push(chartHolder)
+      structureHolder = {}
+      dataTypeBucket = {}
+      this.visSystemData = chartGroupHolder
+    }
+  } else if (visBundle.cid === 'cnrl-2356388737') {
+    // summation of datatypes
+    // could be more than one visualisation required,  devices, datatypes, timeseg or computation or event resolutions
+    let liveChartOptions = this.liveChartOptions.SumChartOptions()
+    for (let dtv of visBundle.datatypes) {
+      structureHolder = this.liveChartSystem.structureSumData(dtv, visBundle, dataIN)
+      let chartColorsSet = localthis.liveChartSystem.StatschartColors(dtv)
+      dataTypeBucket.data = structureHolder
+      dataTypeBucket.color = chartColorsSet
+      chartDataH.chart.push(dataTypeBucket)
+      // now prepare data format for chartjs
+      chartData.prepared = this.liveChartSystem.prepareSumVueChartJS(visBundle.devices, chartDataH)
+      let setTimeTools = chartData.prepared.labels
+      let chartOptionsSet = this.liveChartOptions.updateChartoptions(setTimeTools, liveChartOptions) // this.liveChartSystem.getterChartOptions()
+      chartData.options = chartOptionsSet
+      const chartHolder = {}
+      chartHolder[visIN] = {}
+      chartHolder[visIN][liveTime] = {}
+      chartHolder[visIN][liveTime]['day'] = chartData
+      chartGroupHolder.push(chartHolder)
+      structureHolder = {}
+      dataTypeBucket = {}
+      this.visSystemData = chartGroupHolder
+    }
+  } else if (visBundle.cid === 'cnrl-2356388733') {
+    const chartHolder = {}
+    chartHolder[visIN] = {}
+    chartHolder[visIN].status = 'report-component'
+    this.visSystemData = chartHolder
+  } */
+  return chartData
+}
+
+/**
 * return the data structure requested
 * @method structureChartData
 *
 */
-ChartSystem.prototype.structureChartData = function (datatype, cBundle, cData) {
-  let lastDataObject = {}
-  let liveDate = Object.keys(cData)
-  // does the data need merged i.e. spans more than one day?
-  if (cBundle.time.timeseg[0] === 'day') {
-    lastDataObject = cData
-  } else {
-    lastDataObject = this.rangeStructureData(cData)
-  }
-  let datalabel = []
+ChartSystem.prototype.structureChartData = function (rules, cData) {
   let visCHolder = {}
-  let datay = []
-  visCHolder[liveDate] = {}
-  this.chartPrep = {}
+  // let dataPrep = this.prepareVueChartJS(chartDataH.chart)
+  visCHolder = { 'labels': [2, 4], 'datasets': [{ label: 'Wearable', backgroundColor: 'rgb(255, 99, 132)', borderColor: 'rgb(255, 99, 132)', 'data': [1, 2] }] }
   // loop through and build two sperate arrays
-  if (lastDataObject) {
-    for (let devI of cBundle.devices) {
-      visCHolder[liveDate][devI.device_mac] = {}
-      let dataholder = {}
-      for (let tis of cBundle.timerange) {
-        for (let liveData of lastDataObject[tis][devI.device_mac][datatype.cnrl]['day']) {
-          var mDateString = moment(liveData.timestamp * 1000).toDate()
-          datalabel.push(mDateString)
-          if (datatype.cnrl === 'cnrl-8856388711') {
-            datay.push(liveData.heart_rate)
-          } else if (datatype.cnrl === 'cnrl-8856388712') {
-            datay.push(liveData.steps)
-          } else if (datatype.cnrl === 'cnrl-3339949442') {
-            datay.push(liveData.SDS_P2)
-          } else if (datatype.cnrl === 'cnrl-3339949443') {
-            datay.push(liveData.SDS_P1)
-          } else if (datatype.cnrl === 'cnrl-3339949444') {
-            // datay.push(liveData.temperature)
-            if (liveData.temperature === undefined) {
-              datay.push(liveData.BME280_temperature)
-            } else {
-              datay.push(liveData.temperature)
-            }
-          } else if (datatype.cnrl === 'cnrl-3339949445') {
-            if (liveData.humidity === undefined) {
-              datay.push(liveData.BME280_humidity)
-            } else {
-              datay.push(liveData.humidity)
-            }
-          } else if (datatype.cnrl === 'cnrl-3339949446') {
-            datay.push(liveData['BME280_pressure'])
-          }
-        }
-      }
-      dataholder.labels = datalabel
-      dataholder.datasets = datay
-      visCHolder = {}
-      visCHolder = dataholder
-      datalabel = []
-      datay = []
-    }
-  }
   return visCHolder
 }
 
-/**
-*
-* @method rangeStructureData
-*
-*/
-ChartSystem.prototype.rangeStructureData = function (data) {
-  return data
-}
 /**
 *
 * @method yAxisScaleSet
@@ -227,70 +259,7 @@ ChartSystem.prototype.prepareVueChartJS = function (results) {
 *
 */
 ChartSystem.prototype.prepareLabelchart = function (labelIN) {
-  // let preparedLabel = labelIN.reduce((p, c, i, a) => a[p].length > c.length ? p : i, 0)
-  // let preparedLabel = [...labelIN[0], ...labelIN[1]]
-  // return labelIN[preparedLabel]
   return labelIN[0]
-}
-
-/**
-* return the data average structure requested
-* @method structureAverageData
-*
-*/
-ChartSystem.prototype.structureAverageData = function (datatype, cBundle, dataIN) {
-  let liveDate = cBundle.startperiod
-  let visCHolder = {}
-  visCHolder[liveDate] = {}
-  let datalabel = []
-  let dataC = []
-  if (dataIN) {
-    for (let devI of cBundle.devices) {
-      visCHolder[liveDate][devI.device_mac] = {}
-      // let dataholder = {}
-      for (let ts of cBundle.time.timeseg) {
-        for (let liveData of dataIN[liveDate][devI.device_mac][datatype.cnrl][ts]) {
-          let millTimeprepare = liveData.timestamp * 1000
-          let mString = moment(millTimeprepare).toDate() // .format('YYYY-MM-DD hh:mm')
-          datalabel.push(mString)
-          dataC.push(liveData.value)
-        }
-      }
-    }
-  }
-  visCHolder.labels = datalabel
-  visCHolder.datasets = dataC
-  return visCHolder
-}
-
-/**
-* return the data Sum structure requested
-* @method structureumData
-*
-*/
-ChartSystem.prototype.structureSumData = function (datatype, cBundle, dataIN) {
-  let liveDate = cBundle.startperiod
-  let visCHolder = {}
-  visCHolder[liveDate] = {}
-  let datalabel = []
-  let dataC = []
-  if (dataIN) {
-    for (let devI of cBundle.devices) {
-      visCHolder[liveDate][devI.device_mac] = {}
-      // let dataholder = {}
-      for (let ts of cBundle.time.timeseg) {
-        for (let liveDataI of dataIN[liveDate][devI.device_mac][datatype.cnrl][ts]) {
-          let millTimeprepare = liveDataI.timestamp * 1000
-          let mString = moment(millTimeprepare).toDate() // .format('YYYY-MM-DD hh:mm')
-          datalabel.push(mString)
-          dataC.push(liveDataI.value)
-        }
-      }
-    }
-  }
-  visCHolder.labels = datalabel
-  visCHolder.datasets = dataC
-  return visCHolder
 }
 
 /**
@@ -319,247 +288,6 @@ ChartSystem.prototype.StatschartColors = function (datatypeItem) {
     colorHolder.borderColor = '#444b57'
   }
   return colorHolder
-}
-
-/**
-* prepare DataCollection for vuechart.js
-* @method prepareStatsVueChartJS
-*
-*/
-ChartSystem.prototype.prepareStatsVueChartJS = function (deviceList, results) {
-  // need to prepare different visualisations, data return will fit only one select option
-  var localthis = this
-  let datacollection = {}
-  this.labelback = []
-  this.avg = []
-  this.avg2 = []
-  this.colorback = ''
-  this.colorlineback = ''
-  this.colorback2 = ''
-  this.colorlineback2 = ''
-  // how many average dataTypes asked for?
-  if (results.chart.length === 2) {
-    // need to prepare different visualisations, data return will fit only one Chart vis option
-    for (let chD of results.chart) {
-      if (chD.color.datatype === 'cnrl-8856388724') {
-        this.labelback = chD.data.labels
-        this.avg = chD.data.datasets
-        this.colorback = chD.color.backgroundColor
-        this.colorlineback = chD.color.borderColor
-      } else if (chD.color.datatype === 'cnrl-8856388322') {
-        this.labelback = chD.data.labels
-        this.avg2 = chD.data.datasets
-        this.colorback2 = chD.color.backgroundColor
-        this.colorlineback2 = chD.color.borderColor
-      }
-    }
-  } else {
-    if (results.chart[0].color.datatype === 'cnrl-8856388724') {
-      this.avg = []
-      this.labelback = results.chart[0].data.labels
-      this.avg = results.chart[0].data.datasets
-      this.colorback = results.chart[0].color.backgroundColor
-      this.colorlineback = results.chart[0].color.borderColor
-    } else if (results.chart[0].color.datatype === 'cnrl-8856388322') {
-      this.heartback = []
-      this.labelback = results.chart[0].data.labels
-      this.avg = results.chart[0].data.datasets
-      this.colorback = results.chart[0].color.backgroundColor
-      this.colorlineback = results.chart[0].color.borderColor
-    }
-  }
-
-  if (results === 'no data') {
-    // no data to display
-    localthis.chartmessage = 'No data to display'
-    datacollection = {
-      labels: [],
-      datasets: [
-        {
-          type: 'line',
-          label: 'no data',
-          borderColor: '#ed7d7d',
-          backgroundColor: '#ed7d7d',
-          fill: false,
-          data: [],
-          yAxisID: 'bpm'
-        }, {
-          type: 'line',
-          label: 'no data',
-          borderColor: '#ea1212',
-          backgroundColor: '#ea1212',
-          fill: false,
-          data: [],
-          yAxisID: 'steps'
-        }
-      ]
-    }
-  } else {
-    // how many devices average to visualise?
-    if (deviceList.length === 2) {
-      localthis.chartmessage = 'AVG BPM'
-      datacollection = {
-        labels: localthis.labelback,
-        datasets: [
-          {
-            type: 'line',
-            label: 'Device 1',
-            borderColor: this.colorback,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            fill: true,
-            data: localthis.avg,
-            yAxisID: 'bpm'
-          }, {
-            type: 'line',
-            label: 'Device 2',
-            borderColor: this.colorback2,
-            backgroundColor: '#050d2d',
-            fill: false,
-            data: localthis.avg2,
-            yAxisID: 'bpm'
-          }
-        ]
-      }
-    } else if (deviceList.length === 1) {
-      // only one average device data to display
-      localthis.chartmessage = 'BPM'
-      datacollection = {
-        labels: localthis.labelback,
-        datasets: [
-          {
-            type: 'line',
-            label: 'Device 1',
-            borderColor: this.colorback,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            fill: true,
-            data: localthis.avg,
-            yAxisID: 'bpm'
-          }
-        ]
-      }
-    }
-  }
-  return datacollection
-}
-
-/**
-* prepare DataCollection for vuechart.js
-* @method prepareSumVueChartJS
-*
-*/
-ChartSystem.prototype.prepareSumVueChartJS = function (deviceList, results) {
-  // need to prepare different visualisations, data return will fit only one select option
-  var localthis = this
-  let datacollection = {}
-  this.labelback = []
-  this.sum = []
-  this.sum2 = []
-  this.colorback = ''
-  this.colorlineback = ''
-  this.colorback2 = ''
-  this.colorlineback2 = ''
-  // how many average dataTypes asked for?
-  if (results.chart.length === 2) {
-    // need to prepare different visualisations, data return will fit only one Chart vis option
-    for (let chD of results.chart) {
-      if (chD.color.datatype === 'cnrl-8856388924') {
-        this.labelback = chD.data.labels
-        this.sum = chD.data.datasets
-        this.colorback = chD.color.backgroundColor
-        this.colorlineback = chD.color.borderColor
-      } else if (chD.color.datatype === 'cnrl-8856389322') {
-        this.labelback = chD.data.labels
-        this.sum2 = chD.data.datasets
-        this.colorback2 = chD.color.backgroundColor
-        this.colorlineback2 = chD.color.borderColor
-      }
-    }
-  } else {
-    if (results.chart[0].color.datatype === 'cnrl-8856388924') {
-      this.sum = []
-      this.labelback = results.chart[0].data.labels
-      this.sum = results.chart[0].data.datasets
-      this.colorback = results.chart[0].color.backgroundColor
-      this.colorlineback = results.chart[0].color.borderColor
-    } else if (results.chart[0].color.datatype === 'cnrl-8856389322') {
-      this.labelback = results.chart[0].data.labels
-      this.sum = results.chart[0].data.datasets
-      this.colorback = results.chart[0].color.backgroundColor
-      this.colorlineback = results.chart[0].color.borderColor
-    }
-  }
-
-  if (results === 'no data') {
-    // no data to display
-    localthis.chartmessage = 'No data to display'
-    datacollection = {
-      labels: [],
-      datasets: [
-        {
-          type: 'line',
-          label: 'no data',
-          borderColor: '#ed7d7d',
-          backgroundColor: '#ed7d7d',
-          fill: false,
-          data: [],
-          yAxisID: 'bpm'
-        }, {
-          type: 'line',
-          label: 'no data',
-          borderColor: '#ea1212',
-          backgroundColor: '#ea1212',
-          fill: false,
-          data: [],
-          yAxisID: 'steps'
-        }
-      ]
-    }
-  } else {
-    // how many devices average to visualise?
-    if (deviceList.length === 2) {
-      localthis.chartmessage = 'SUM BPM'
-      datacollection = {
-        labels: localthis.labelback,
-        datasets: [
-          {
-            type: 'line',
-            label: 'Device 1',
-            borderColor: this.colorback,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            fill: true,
-            data: localthis.sum,
-            yAxisID: 'bpm'
-          }, {
-            type: 'line',
-            label: 'Device 2',
-            borderColor: this.colorback2,
-            backgroundColor: '#050d2d',
-            fill: false,
-            data: localthis.sum2,
-            yAxisID: 'bpm'
-          }
-        ]
-      }
-    } else if (deviceList.length === 1) {
-      // only one average device data to display
-      localthis.chartmessage = 'SUM-'
-      datacollection = {
-        labels: localthis.labelback,
-        datasets: [
-          {
-            type: 'line',
-            label: 'Device 1',
-            borderColor: this.colorback,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            fill: true,
-            data: localthis.sum,
-            yAxisID: 'bpm'
-          }
-        ]
-      }
-    }
-  }
-  return datacollection
 }
 
 export default ChartSystem
