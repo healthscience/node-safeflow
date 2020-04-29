@@ -696,7 +696,7 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.compute = 'cnrl-2356388731'
     dataCNRLbundle.controlpanel = ['startstop']
     dataCNRLbundle.automation = true
-    dataCNRLbundle.time = {"realtime" : "1578743694", "timeseg": [ "cnrl-t2" ], "startperiod": "1578700800"}
+    dataCNRLbundle.time = {"realtime" : 0, "timeseg": [ "cnrl-t1" ], "startperiod": "1587769200000"}
   } else if (refIN === 'cnrl-001234543458') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'module'
@@ -784,14 +784,14 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.type = 'time'
     dataCNRLbundle.source = 'cnrl-derived'
     dataCNRLbundle.dtsource = ['cnrl-t0']
-    dataCNRLbundle.prime = { 'cnrl': 'cnrl-t1', 'text': 'day', 'active': false, 'unit': 86400 }
+    dataCNRLbundle.prime = { 'cnrl': 'cnrl-t1', 'text': 'day', 'active': false, 'unit': 86400000 }
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-t1'
   } else if (refIN === 'cnrl-t2') {
     dataCNRLbundle.type = 'time'
     dataCNRLbundle.source = 'cnrl-derive'
     dataCNRLbundle.dtsource = ['cnrl-t1']
-    dataCNRLbundle.prime = { 'cnrl': 'cnrl-t2', 'text': 'week', 'active': false, 'unit': 604800 }
+    dataCNRLbundle.prime = { 'cnrl': 'cnrl-t2', 'text': 'week', 'active': false, 'unit': 604800000 }
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-t2'
   }

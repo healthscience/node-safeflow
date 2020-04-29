@@ -28,31 +28,23 @@ util.inherits(DTSystem, events.EventEmitter)
 * @method DTStartMatch
 *
 */
-DTSystem.prototype.DTStartMatch = function (devicesIN, dataBundle) {
+DTSystem.prototype.DTStartMatch = function (sourceAPI, datatype) {
   console.log('DTSYSTEM match start----')
-  console.log(devicesIN)
-  console.log(dataBundle)
+  console.log(sourceAPI)
+  console.log(datatype)
   let datatypePerdevice = {}
-  // loop over devices and match to API etc
-  for (let dliv of devicesIN) {
-    console.log(dliv)
-    let packagingDTs = dataBundle.data
-    // use inputs to map to datastore/api/rest etc. table / layout structure
-    let sourceDTmapAPI = this.datatypeTableMapper(dataBundle)
-    let SpackagingDTs = {}
-    let TidyDataLogic = []
-    // map DTs to API rest URL
-    let DTmapAPI = this.datatypeTableMapper(dataBundle)
+  let packagingDTs = sourceAPI.data
+  // use inputs to map to datastore/api/rest etc. table / layout structure
+  let sourceDTmapAPI = this.datatypeTableMapper(sourceAPI, datatype)
+  let SpackagingDTs = {}
+  let TidyDataLogic = []
+  // map DTs to API rest URL
+  let DTmapAPI = this.datatypeTableMapper(sourceAPI)
 
-    let apiHolder = {}
-    apiHolder[dliv.device_mac] = {}
-    let apiInfo = {}
-    apiInfo.apiquery = DTmapAPI
-    apiInfo.sourceapiquery = sourceDTmapAPI
-    apiHolder[dliv.device_mac] = apiInfo
-    datatypePerdevice = apiHolder
-  }
-  return datatypePerdevice
+  let apiInfo = {}
+  apiInfo.apiquery = DTmapAPI
+  apiInfo.sourceapiquery = sourceDTmapAPI
+  return apiInfo
 }
 
 /**
@@ -60,41 +52,34 @@ DTSystem.prototype.DTStartMatch = function (devicesIN, dataBundle) {
 * @method datatypeTableMapper
 *
 */
-DTSystem.prototype.datatypeTableMapper = function (dataBundle) {
+DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
   console.log('check against table structure')
-  console.log(dataBundle)
+  console.log(sourceAPI)
+  console.log(dt)
   // console.log(lDTs)
-  let apiMatch = []
-  let apiKeep = {}
+  let apiMatch = {}
   // given datatypes select find match to the query string
   let tableCount = 0
   // match to source API query
-  for (let dtt of dataBundle.datatypes.device.tableStructure) {
+  for (let dtt of sourceAPI.tableStructure) {
     // is there table structure embedd in the storageStructure?
     // check to see if table contains sub structure
     let subStructure = this.subStructure(dtt)
     if (subStructure.length > 0) {
       dtt = subStructure
     }
-    for (let idt of dataBundle.datatypes.datatypein) {
-      const result = dtt.filter(item => item.cnrl === idt.cnrl)
-      if (result.length > 0) {
-        let packAPImatch = {}
-        packAPImatch.cnrl = result[0].cnrl
-        packAPImatch.column = result[0].text
-        packAPImatch.api = dataBundle.apistructure[tableCount]
-        packAPImatch.namespace = dataBundle.namespace
-        apiMatch.push(packAPImatch)
-        if (apiMatch.length === lDTs.length) {
-          apiKeep = apiMatch
-          apiMatch = []
-        }
-      }
+    const result = dtt.filter(item => item.cnrl === dt)
+    if (result.length > 0) {
+      let packAPImatch = {}
+      packAPImatch.cnrl = result[0].cnrl
+      packAPImatch.column = result[0].text
+      packAPImatch.api = sourceAPI.apistructure[tableCount]
+      packAPImatch.namespace = sourceAPI.namespace
+      apiMatch = packAPImatch
     }
-    apiMatch = []
-    tableCount++
   }
-  return apiKeep
+  console.log(apiMatch)
+  return apiMatch
 }
 
 /**

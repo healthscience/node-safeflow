@@ -15,7 +15,6 @@ const moment = require('moment')
 
 var ChartOptions = function () {
   events.EventEmitter.call(this)
-  this.options = {}
 }
 
 /**
@@ -29,10 +28,12 @@ util.inherits(ChartOptions, events.EventEmitter)
 * @method prepareChartOptions
 *
 */
-ChartOptions.prototype.prepareChartOptions = function (title, datatypes, scale) {
+ChartOptions.prototype.prepareChartOptions = function (settings, scale) {
   var localthis = this
+  settings = {}
+  settings.title = 'amazfit'
   // let yAxisOptions = this.prepareYoptions(datatypes, scale)
-  /* let options = {
+  let options = {
     responsive: true,
     spanGaps: true,
     tooltips: {
@@ -42,13 +43,13 @@ ChartOptions.prototype.prepareChartOptions = function (title, datatypes, scale) 
     stacked: false,
     title: {
       display: true,
-      text: title
+      text: settings.title
     },
     scales: {
       xAxes: [{
         display: true,
-        barPercentage: 0.1,
-        type: 'time',
+        // barPercentage: 0.1,
+        // type: 'time',
         time: {
           format: 'YYYY-MM-DD hh:mm',
           // round: 'day'
@@ -57,10 +58,10 @@ ChartOptions.prototype.prepareChartOptions = function (title, datatypes, scale) 
         position: 'bottom',
         ticks: {
           maxRotation: 75,
-          reverse: true
+          reverse: false
         }
       }],
-      yAxes: yAxisOptions
+      yAxes: {} // yAxisOptions
     },
     annotation: {
       events: ['click'],
@@ -137,8 +138,8 @@ ChartOptions.prototype.prepareChartOptions = function (title, datatypes, scale) 
         }
       }]
     }
-  } */
-  let options = {}
+  }
+  // options = {}
   return options
 }
 

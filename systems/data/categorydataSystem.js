@@ -113,7 +113,6 @@ CategoryDataSystem.prototype.categoriseWorker = function (systemBundle, rawData,
       for (let dti of systemBundle.apiInfo[dev].sourceapiquery) {
         for (let ts of systemBundle.timeseg) {
           console.log(ts)
-          catData = rawData[dev][dti.cnrl]['day'].filter(n => excludeCodes(n, systemBundle.apiInfo[dev].categorycodes, catColumnQueryName))
           let catTempHold = {}
           catTempHold[ts] = catData
           catHolder[dev][dti.cnrl] = catTempHold

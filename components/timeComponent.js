@@ -109,22 +109,13 @@ TimeComponent.prototype.setTimeVis = function (liveVis) {
 * @method
 *
 */
-TimeComponent.prototype.timeProfiling = function (timeBundle) {
-  console.log('timbBUNDLE')
-  console.log(timeBundle)
-  let startperiod
-  if (this.livedate === 'simulateData') {
-    return true
-  } else if (this.lastactiveStartTime === 0) {
-    startperiod = this.livedate
-  } else {
-    startperiod = this.lastactiveStartTime
-  }
-  let timeseg = timeBundle.timeseg
-  // as time system to assess the range of data days required?
-  let timeSource = this.liveTimeSystem.sourceTimeRange(startperiod, timeseg)
+TimeComponent.prototype.timeProfiling = function (timeContract) {
+  // set the real timeout
+  let realtimeMS = this.liveTimeSystem.setRealtime()
+  // assess automation and build time range(s)
+  let timeSource = this.liveTimeSystem.sourceTimeRange(timeContract.startperiod, realtimeMS, timeContract.timeseg.prime.text)
   this.timerange = timeSource
-  return true
+  return this.timerange
 }
 
 /**

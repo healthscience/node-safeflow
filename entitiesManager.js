@@ -77,6 +77,7 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
   console.log('input to ECS')
   console.log(ecsIN)
   let moduleState = false
+  let deviceInfo = {}
   let modules = {}
   let shellID = this.liveCrypto.entityID(ecsIN)
   if (this.liveSEntities[shellID]) {
@@ -86,37 +87,31 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
     console.log('entity' + shellID + 'is new')
     // setup entity to hold components per module
     this.liveSEntities[shellID] = new Entity(this.auth)
-    // extract types of modules from keys
+    // extract types of modules
     // now filter for type?
     modules = this.NXPmodules(ecsIN.modules)
     for (let md of modules) {
       // need matcher - module type to how its processed. Only computes have KBIDS
       if (md.prime.text === 'Device') {
         // hook up to device
-        let deviceInfo = this.extractDevice(md.device.cnrl)
+        deviceInfo = this.extractDevice(md.device.cnrl)
         moduleState = await this.deviceDataflow(shellID, deviceInfo)
-        console.log('Device MOD comlete')
       } else if (md.prime.text === 'Compute') {
         // feed into ECS -KBID processor
         console.log('compute start')
         console.log(md)
         let kbidInfo = await this.extractKBID(md.prime.cnrl, 1)
         // now check this KBID HASH against built CNRL inputs
-        moduleState = await this.computeFlow(shellID, md, kbidInfo)
-        /* let kbLength = Object.keys(kbidInfo)
-        if (kbLength.length > 0) {
-          for (let ki of kbLength) {
-            // start workflow for setting up entity components to hold data for this module
-            moduleState = await this.controlFlow(shellID, md, kbidInfo[ki])
-          }
-        } */
+        moduleState = await this.computeFlow(shellID, md, deviceInfo, kbidInfo)
+        console.log('after compuet')
+        console.log(moduleState)
       } else if (md.prime.text === 'Visualise') {
         // feed into ECS -KBID processor
         console.log('visualise start')
         console.log(md)
         // extract visualisation contract information
-        let visInfo = this.KBLlive.contractCNRL(md.visualise)
-        moduleState = await this.visualFlow(shellID, md, visInfo)
+        // let visInfo = this.KBLlive.contractCNRL(md.visualise)
+        // moduleState = await this.visualFlow(shellID, md, visInfo)
       } else {
         // plain extract info. from CNRL contract
       }
@@ -139,10 +134,10 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
 * @method deviceDataflow
 *
 */
-EntitiesManager.prototype.deviceDataflow = async function (shellID, device) {
+EntitiesManager.prototype.deviceDataflow = async function (shellID, apiData) {
   let statusD = false
   // set the device in module
-  statusD = await this.liveSEntities[shellID].liveDeviceC.setDevice(device)
+  statusD = await this.liveSEntities[shellID].liveDeviceC.setDevice(apiData)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDeviceC)
   statusD = true
@@ -155,13 +150,22 @@ EntitiesManager.prototype.deviceDataflow = async function (shellID, device) {
 * @method computeFlow
 *
 */
-EntitiesManager.prototype.computeFlow = async function (shellID, mod, kbid) {
+EntitiesManager.prototype.computeFlow = async function (shellID, mod, apiData, kbid) {
   console.log('COMPUTEFLOW0-----begin')
   console.log(mod)
   console.log(kbid)
-  let inputKBID = this.liveCrypto.hashKBID(mod, kbid.result)
-  let hashMatcher = this.liveCrypto.compareHashes(kbid.kbid, inputKBID)
-  // If the result HASH then just look at Visulisation inputs and send the data back.
+  let updateKBID = {}
+  let hashMatcher = false
+  // look at compute controls and see if time need brought up to date?
+  if (mod.automation === true) {
+    // update time in kbid
+    updateKBID = this.automationUpdate(shellID, mod)
+    hashMatcher = this.compareKBIDs(mod, updateKBID)
+  } else {
+    hashMatcher = this.compareKBIDs(mod, kbid)
+  }
+  console.log('hashmatcher')
+  console.log(hashMatcher)
   if (hashMatcher === true) {
     console.log('results already prepared')
     // get data from API
@@ -171,38 +175,54 @@ EntitiesManager.prototype.computeFlow = async function (shellID, mod, kbid) {
     await this.liveSEntities[shellID].liveDataC.directResults('REST', mockAPI, kbid.result)
   } else {
     console.log('new data to process')
-    // else go through creating a new KBID
-    // WHAT INSTRUCTIONS FROM COMPUTE AUTOMATION?
-    // set the MASTER TIME CLOCK for entity
-    this.liveSEntities[shellID].liveTimeC.setMasterClock(kbid.time.startperiod)
-    // proof of evidence
-    // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveTimeC)
-    this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(this.liveSEntities[shellID].liveDeviceC.devices, kbid.data)
-    // proof of evidence
-    // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDatatypeC)
-    this.liveSEntities[shellID].liveTimeC.timeProfiling(kbid.time)
-    // proof of evidence
-    // this.liveCrypto.evidenceProof()
-    await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDeviceC.devices, this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveTimeC)
-    // proof of evidence
-    // this.liveCrypto.evidenceProof()
-    this.emit('computation', 'in-progress')
-    await this.liveSEntities[shellID].liveTimeC.startTimeSystem(this.liveSEntities[shellID].liveDatatypeC, this.liveSEntities[shellID].liveDataC.liveData)
-    // proof of evidence
-    // this.liveCrypto.evidenceProof()
-    this.computeStatus = await this.liveSEntities[shellID].liveComputeC.filterCompute(this.liveSEntities[shellID].liveTimeC, this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive)
-    // proof of evidence
-    // this.liveCrypto.evidenceProof()
-    this.emit('computation', 'finished')
-    if (this.computeStatus === true) {
-    // go direct and get raw data direct
-      await this.liveSEntities[shellID].liveDataC.directSourceResults(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveTimeC)
-      // proof of evidence
-      // this.liveCrypto.evidenceProof()
+    this.liveSEntities[shellID].liveTimeC.timerange = [1588114800000]
+    // else go through creating new KBID entry
+    // range of time, number of devices, number of data types  do all the loop here?
+    for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
+      for (let datatype of mod.dtcompute) {
+        for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
+          let engineReturn = await this.computeEngine(shellID, apiData, updateKBID, device, datatype, time)
+          console.log('engine return')
+          console.log(engineReturn)
+        }
+      }
     }
   }
   console.log('COMPUTEFLOW9-----FINISHED')
   // console.log(this.liveSEntities[shellID])
+  return true
+}
+
+/**
+* compute engine to prepare new KBID entry
+* @method computeEngine
+*
+*/
+EntitiesManager.prototype.computeEngine = async function (shellID, apiData, contract, device, datatype, time) {
+  console.log('comput engine start')
+  this.liveSEntities[shellID].liveTimeC.setMasterClock(contract.time.startperiod)
+  // proof of evidence
+  // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveTimeC)
+  this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(apiData, device, datatype)
+  // proof of evidence
+  // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDatatypeC)
+  await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.sourceapiquery, datatype, time)
+  // proof of evidence
+  // this.liveCrypto.evidenceProof()
+  // this.emit('computation', 'in-progress')
+  // await this.liveSEntities[shellID].liveTimeC.startTimeSystem(this.liveSEntities[shellID].liveDatatypeC, this.liveSEntities[shellID].liveDataC.liveData)
+  // proof of evidence
+  // this.liveCrypto.evidenceProof()
+  // this.computeStatus = await this.liveSEntities[shellID].liveComputeC.filterCompute(this.liveSEntities[shellID].liveTimeC, this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive)
+  // proof of evidence
+  // this.liveCrypto.evidenceProof()
+  // this.emit('computation', 'finished')
+  /* if (this.computeStatus === true) {
+  // go direct and get raw data direct
+    await this.liveSEntities[shellID].liveDataC.directSourceResults(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveTimeC)
+    // proof of evidence
+    // this.liveCrypto.evidenceProof()
+  } */
   return true
 }
 
@@ -213,8 +233,8 @@ EntitiesManager.prototype.computeFlow = async function (shellID, mod, kbid) {
 */
 EntitiesManager.prototype.visualFlow = async function (shellID, mod, vis) {
   console.log('VISUALFLOW-----begin')
-  console.log(mod)
-  console.log(vis)
+  // console.log(mod)
+  // console.log(vis)
   this.liveSEntities[shellID].liveVisualC.filterVisual(vis, this.liveSEntities[shellID].liveDataC.liveData)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
@@ -250,6 +270,33 @@ EntitiesManager.prototype.entityExists = function (shellid, dataIn) {
 */
 EntitiesManager.prototype.entityDataReturn = async function (entityID) {
   return this.liveSEntities[entityID]
+}
+
+/**
+* automated time updates
+* @method automationUpdate
+*
+*/
+EntitiesManager.prototype.automationUpdate = function (shellID, contract) {
+  // look up time seg contract
+  let timeSeg =  this.KBLlive.contractCNRL(contract.time.timeseg[0])
+  contract.time.timeseg = timeSeg
+  let addTimerange = this.liveSEntities[shellID].liveTimeC.timeProfiling(contract.time)
+  // update contract time
+  contract.time.range = addTimerange
+  return contract
+}
+
+/**
+* logic control over kbid need prepared
+* @method compareKBIDs
+*
+*/
+EntitiesManager.prototype.compareKBIDs = function (mod, kbid) {
+  let inputKBID = this.liveCrypto.hashKBID(mod, kbid.result)
+  let hashMatcher = this.liveCrypto.compareHashes(kbid.kbid, inputKBID)
+  // If the result HASH then just look at Visulisation inputs and send the data back.
+  return hashMatcher
 }
 
 /**

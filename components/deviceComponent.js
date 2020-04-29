@@ -17,6 +17,7 @@ const moment = require('moment')
 var DeviceComponent = function (setIN) {
   events.EventEmitter.call(this)
   this.liveDeviceSystem = new DeviceSystem(setIN)
+  this.apiData = {}
   this.devices = []
 }
 
@@ -32,6 +33,7 @@ util.inherits(DeviceComponent, events.EventEmitter)
 *
 */
 DeviceComponent.prototype.setDevice = async function (device) {
+  this.apidata = device
   let deviceDetail = await this.liveDeviceSystem.storedDevices(device)
   this.devices = deviceDetail
 }

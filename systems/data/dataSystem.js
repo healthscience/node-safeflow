@@ -38,6 +38,9 @@ util.inherits(DataSystem, events.EventEmitter)
 *
 */
 DataSystem.prototype.datatypeQueryMapping = async function (type, api, hash) {
+  console.log('datatypeQueryMapping')
+  console.log(type)
+  console.log(api)
   let rawHolder = []
   if (type === 'SAFE') {
     console.log('safeNetwork file GET')

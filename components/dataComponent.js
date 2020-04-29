@@ -49,8 +49,8 @@ DataComponent.prototype.setDevicesLive = async function () {
 * @method RawData
 *
 */
-DataComponent.prototype.sourceData = async function (apiINFO, timeComponent) {
-  await this.DataControlFlow(apiINFO, timeComponent)
+DataComponent.prototype.sourceData = async function (apiINFO, time) {
+  await this.DataControlFlow(apiINFO, time)
   return true
 }
 
@@ -59,8 +59,8 @@ DataComponent.prototype.sourceData = async function (apiINFO, timeComponent) {
 * @method DataControlFlow
 *
 */
-DataComponent.prototype.DataControlFlow = async function (systemBundle, time) {
-  let dataRback = await this.liveDataSystem.datatypeQueryMapping(systemBundle, time)
+DataComponent.prototype.DataControlFlow = async function (apiINFO, time) {
+  let dataRback = await this.liveDataSystem.datatypeQueryMapping('REST', apiINFO, time)
   this.dataRaw[time] = dataRback
   // is there a categories filter to apply?
   this.CategoriseData(systemBundle, time)
@@ -132,7 +132,7 @@ DataComponent.prototype.assessDataStatus = function (time) {
 */
 DataComponent.prototype.directResults = async function (type, api, sourceHash) {
   let resultData = await this.liveDataSystem.datatypeQueryMapping(type, api, sourceHash)
-  this.liveData[sourceHash] = resultData
+  this.liveData = resultData
 }
 
 export default DataComponent

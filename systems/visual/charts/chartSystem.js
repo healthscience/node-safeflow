@@ -32,89 +32,11 @@ util.inherits(ChartSystem, events.EventEmitter)
 */
 ChartSystem.prototype.chartjsControl = function (contract, dataIN) {
   let chartData = {}
-  chartData.chartPackage = this.structureChartData(contract.rules, dataIN)
+  let structureRules = this.structureChartData(contract.rules, dataIN.data['cnrl-t1'])
+  let dataPrep = this.prepareVueChartJS(contract, structureRules)
+  chartData.chartPackage = dataPrep
+  // dataPrep = { 'labels': [2, 4], 'datasets': [{ label: 'Wearable', backgroundColor: 'rgb(255, 99, 132)', borderColor: 'rgb(255, 99, 132)', 'data': [1, 2] }] }
   chartData.chartOptions = this.liveChartOptions.prepareChartOptions()
-  /* if (visBundle.cid === 'cnrl-2356388731') {
-    for (let dtv of visBundle.datatypes) {
-      structureHolder = this.liveChartSystem.structureChartData(dtv, visBundle, dataIN)
-      // prepare the colors for the charts
-      let chartColorsSet = localthis.liveChartSystem.chartColors(dtv)
-      dataTypeBucket.data = structureHolder
-      dataTypeBucket.color = chartColorsSet
-      chartDataH.chart.push(dataTypeBucket)
-      structureHolder = {}
-      dataTypeBucket = {}
-    }
-    // prepare title, y axis text and scaling
-    let titleOut = 'Device ' + visBundle.devices[0].device_name
-    // package all the info. to pass to vue
-    chartData.prepared = this.liveChartSystem.prepareVueChartJS(chartDataH.chart)
-    // prepare chart options
-    let liveChartOptions = this.liveChartOptions.prepareChartOptions(titleOut, visBundle.datatypes, chartData.prepared.scale)
-    // prepared the labels
-    let setTimeTools = chartData.prepared.labels
-    // update for annotation values needing set
-    let chartOptionsSet = this.liveChartOptions.updateChartoptions(setTimeTools, liveChartOptions)
-    chartData.options = chartOptionsSet
-    chartData.liveActive = this.liveChartOptions
-    const chartHolder = {}
-    chartHolder[visIN] = {}
-    chartHolder[visIN][liveTime] = {}
-    chartHolder[visIN][liveTime]['day'] = chartData
-    chartGroupHolder.push(chartHolder)
-    this.visSystemData = chartGroupHolder
-  } else if (visBundle.cid === 'cnrl-2356388732') {
-    let liveChartOptions = this.liveChartOptions.AverageChartOptions()
-    for (let dtv of visBundle.datatypes) {
-      structureHolder = this.liveChartSystem.structureAverageData(dtv, visBundle, dataIN)
-      let chartColorsSet = localthis.liveChartSystem.StatschartColors(dtv)
-      dataTypeBucket.data = structureHolder
-      dataTypeBucket.color = chartColorsSet
-      chartDataH.chart.push(dataTypeBucket)
-      // now prepare data format for chartjs
-      chartData.prepared = this.liveChartSystem.prepareStatsVueChartJS(visBundle.devices, chartDataH)
-      let setTimeTools = chartData.prepared.labels
-      let chartOptionsSet = this.liveChartOptions.updateChartoptions(setTimeTools, liveChartOptions) // this.liveChartSystem.getterChartOptions()
-      chartData.options = chartOptionsSet
-      const chartHolder = {}
-      chartHolder[visIN] = {}
-      chartHolder[visIN][liveTime] = {}
-      chartHolder[visIN][liveTime]['day'] = chartData
-      chartGroupHolder.push(chartHolder)
-      structureHolder = {}
-      dataTypeBucket = {}
-      this.visSystemData = chartGroupHolder
-    }
-  } else if (visBundle.cid === 'cnrl-2356388737') {
-    // summation of datatypes
-    // could be more than one visualisation required,  devices, datatypes, timeseg or computation or event resolutions
-    let liveChartOptions = this.liveChartOptions.SumChartOptions()
-    for (let dtv of visBundle.datatypes) {
-      structureHolder = this.liveChartSystem.structureSumData(dtv, visBundle, dataIN)
-      let chartColorsSet = localthis.liveChartSystem.StatschartColors(dtv)
-      dataTypeBucket.data = structureHolder
-      dataTypeBucket.color = chartColorsSet
-      chartDataH.chart.push(dataTypeBucket)
-      // now prepare data format for chartjs
-      chartData.prepared = this.liveChartSystem.prepareSumVueChartJS(visBundle.devices, chartDataH)
-      let setTimeTools = chartData.prepared.labels
-      let chartOptionsSet = this.liveChartOptions.updateChartoptions(setTimeTools, liveChartOptions) // this.liveChartSystem.getterChartOptions()
-      chartData.options = chartOptionsSet
-      const chartHolder = {}
-      chartHolder[visIN] = {}
-      chartHolder[visIN][liveTime] = {}
-      chartHolder[visIN][liveTime]['day'] = chartData
-      chartGroupHolder.push(chartHolder)
-      structureHolder = {}
-      dataTypeBucket = {}
-      this.visSystemData = chartGroupHolder
-    }
-  } else if (visBundle.cid === 'cnrl-2356388733') {
-    const chartHolder = {}
-    chartHolder[visIN] = {}
-    chartHolder[visIN].status = 'report-component'
-    this.visSystemData = chartHolder
-  } */
   return chartData
 }
 
@@ -124,11 +46,115 @@ ChartSystem.prototype.chartjsControl = function (contract, dataIN) {
 *
 */
 ChartSystem.prototype.structureChartData = function (rules, cData) {
-  let visCHolder = {}
-  // let dataPrep = this.prepareVueChartJS(chartDataH.chart)
-  visCHolder = { 'labels': [2, 4], 'datasets': [{ label: 'Wearable', backgroundColor: 'rgb(255, 99, 132)', borderColor: 'rgb(255, 99, 132)', 'data': [1, 2] }] }
-  // loop through and build two sperate arrays
-  return visCHolder
+  let dataPrep = {}
+  // console.log('chart data strcture rules')
+  // console.log(rules)
+  // console.log(cData)
+  let splitDatax = cData.map(n => n[rules.xaxis])
+  let splitDatay = cData.map(n => n[rules.yaxis])
+  dataPrep.xaxis = splitDatax
+  dataPrep.yaxis = splitDatay
+  return dataPrep
+}
+
+/**
+* prepare DataCollection for vuechart.js
+* @method prepareVueChartJS
+*
+*/
+ChartSystem.prototype.prepareVueChartJS = function (rules, results) {
+  let datacollection = {}
+  // check for no data available
+  if (results.yaxis.length === 0) {
+    // no data to display
+    this.chartmessage = 'No data to display'
+    datacollection = {
+      labels: [],
+      datasets: [
+        {
+          type: 'line',
+          label: 'chart',
+          borderColor: '#ed7d7d',
+          backgroundColor: '#ed7d7d',
+          fill: false,
+          data: results,
+          yAxisID: ''
+        }
+          /* , {
+          type: 'bar',
+          label: 'Activity Steps',
+          borderColor: '#ea1212',
+          borderWidth: 0.5,
+          backgroundColor: '#ea1212',
+          fill: false,
+          data: [],
+          yAxisID: 'steps'
+        } */
+      ]
+    }
+  } else {
+    // prepare the Chart OBJECT FOR CHART.JS  Up to 2 line e.g. BMP or Steps or BPM + Steps
+    let prepareDataset = this.datasetPrep(rules, results)
+    let datasetHolder = []
+    datasetHolder.push(prepareDataset.datasets)
+    datacollection = {
+      labels: prepareDataset.labels,
+      datasets: datasetHolder
+    }
+  }
+  return datacollection
+}
+
+/**
+* prepare the y axis data array
+* @method datasetPrep
+*
+*/
+ChartSystem.prototype.datasetPrep = function (rules, results) {
+  // label ie x axis data for the charts
+  let labelchart = []
+  // if more than one time data source take the longest
+  let labelData = []
+  let datachart = []
+  let chartItem = {}
+  if (rules.prime.text === 'line') {
+    // chartItem.type = rules.prime.text
+    // chartItem.borderColor = rules.color.borderColor
+    // chartItem.backgroundColor = rules.color.backgroundColor
+  } else {
+    chartItem.type = 'bar'
+    chartItem.fillColor = 'rgb(255, 99, 132)' // rules.color.borderColor // 'rgba(220, 220, 220, 2)'
+    chartItem.borderWidth = 2
+    chartItem.borderColor = 'rgb(255, 99, 132)' // rules.color.borderColor
+    chartItem.backgroundColor = 'rgb(255, 99, 132)' //rules.color.backgroundColor
+  }
+  chartItem.label = 'device' // rules.datatype
+  chartItem.fill = true
+  let scaling = 1 // this.yAxisScaleSet(rules.datatype)
+  // chartItem.scale = scaling
+  chartItem.data = results.yaxis
+  // chartItem.yAxisID = 'y-axis-0' // rules.color.datatype
+  labelData = results.xaxis
+  labelchart = this.prepareLabelchart(labelData)
+  let dataHolder = {}
+  dataHolder.labels = labelchart
+  dataHolder.datasets = chartItem
+  return dataHolder
+}
+/**
+* prepare the x axis data array
+* @method prepareLabelchart
+*
+*/
+ChartSystem.prototype.prepareLabelchart = function (labelIN) {
+  let timePrep = []
+  let count = 1
+  for (let li of labelIN) {
+    let timeFormat = moment(li).toDate()  // .format('YYYY-MM-DD hh:mm')
+    let tsimp = moment(timeFormat).format('llll')
+    timePrep.push(tsimp)
+  }
+  return timePrep
 }
 
 /**
@@ -174,92 +200,6 @@ ChartSystem.prototype.chartColors = function (datatypeItem) {
     colorHolder.borderColor = '#ea1212'
   }
   return colorHolder
-}
-
-/**
-* prepare DataCollection for vuechart.js
-* @method prepareVueChartJS
-*
-*/
-ChartSystem.prototype.prepareVueChartJS = function (results) {
-  let datacollection = {}
-  this.colorback = ''
-  this.colorlineback = ''
-  this.colorback2 = ''
-  this.colorlineback2 = ''
-  this.activityback = ''
-  // label ie x axis data for the charts
-  let labelchart = []
-  // if more than one time data source take the longest
-  let labelData = []
-  let datachart = []
-  for (let rItems of results) {
-    let chartItem = {}
-    if (rItems.color.datatype === 'bpm' || rItems.color.datatype === 'temperature') {
-      chartItem.type = 'line'
-      chartItem.borderColor = rItems.color.borderColor
-      chartItem.backgroundColor = rItems.color.backgroundColor
-    } else {
-      chartItem.type = 'bar'
-      chartItem.fillColor = rItems.color.borderColor // 'rgba(220, 220, 220, 2)'
-      chartItem.borderWidth = 1
-      chartItem.borderColor = rItems.color.borderColor
-      chartItem.backgroundColor = rItems.color.backgroundColor
-    }
-    chartItem.label = rItems.color.datatype
-    chartItem.fill = false
-    let scaling = this.yAxisScaleSet(rItems.data.datasets)
-    chartItem.scale = scaling
-    chartItem.data = rItems.data.datasets
-    chartItem.yAxisID = rItems.color.datatype
-    datachart.push(chartItem)
-    labelData.push(rItems.data.labels)
-  }
-  labelchart = this.prepareLabelchart(labelData)
-  // check for no data available
-  if (results.length === 0) {
-    // no data to display
-    this.chartmessage = 'No data to display'
-    datacollection = {
-      labels: [],
-      datasets: [
-        {
-          type: 'line',
-          label: 'Beats per Minute',
-          borderColor: '#ed7d7d',
-          backgroundColor: '#ed7d7d',
-          fill: false,
-          data: [],
-          yAxisID: 'bpm'
-        }, {
-          type: 'bar',
-          label: 'Activity Steps',
-          borderColor: '#ea1212',
-          borderWidth: 0.5,
-          backgroundColor: '#ea1212',
-          fill: false,
-          data: [],
-          yAxisID: 'steps'
-        }
-      ]
-    }
-  } else {
-    // prepare the Chart OBJECT FOR CHART.JS  Up to 2 line e.g. BMP or Steps or BPM + Steps
-    datacollection = {
-      labels: labelchart,
-      datasets: datachart
-    }
-  }
-  return datacollection
-}
-
-/**
-* prepare the x axis data array
-* @method prepareLabelchart
-*
-*/
-ChartSystem.prototype.prepareLabelchart = function (labelIN) {
-  return labelIN[0]
 }
 
 /**

@@ -11,7 +11,6 @@
 */
 
 import { extendMoment } from 'moment-range'
-import TimeUtilities from './timeUtility.js'
 const util = require('util')
 const events = require('events')
 const Moment = require('moment')
@@ -19,7 +18,6 @@ const moment = extendMoment(Moment)
 
 var TimeSystem = function (setIN) {
   events.EventEmitter.call(this)
-  this.liveTimeUtil = new TimeUtilities()
 }
 
 /**
@@ -29,15 +27,131 @@ var TimeSystem = function (setIN) {
 util.inherits(TimeSystem, events.EventEmitter)
 
 /**
+*  what is the real time now
+* @method setRealtime
+*
+*/
+TimeSystem.prototype.setRealtime = function () {
+  let realtimenow = moment().valueOf() // .startOf('day').valueOf()
+  return realtimenow
+}
+
+
+/**
 *  assess what range of data day / range are required?
 * @method sourceTimeRange
 *
 */
-TimeSystem.prototype.sourceTimeRange = function (startTime, TimeSeg) {
-  let beginD = this.assessSourceRange(startTime, TimeSeg)
-  let timeSourceRange = this.momentRangeBuild(beginD, startTime)
+TimeSystem.prototype.sourceTimeRange = function (startTime, nowTime, Tsegment) {
+  let timeSourceRange = this.momentRangeBuild(startTime, nowTime, Tsegment)
   let rangeFormat = this.formatTimeSafeFlow(timeSourceRange)
   return rangeFormat
+}
+
+/**
+* use moment range to build time array
+* @method momentRangeBuild
+*
+*/
+TimeSystem.prototype.momentRangeBuild = function (startTime, endTime, segment) {
+  let startMoment = moment(parseInt(startTime)).format()
+  let endMoment = moment(endTime).format() // .startOf('day')
+  let rangeBuild = moment.range(startMoment, endMoment)
+  let sourceTimes = Array.from(rangeBuild.by(segment))
+  return sourceTimes
+}
+
+/**
+*  select data for UI
+* @method formatTimeSafeFlow
+*
+*/
+TimeSystem.prototype.formatTimeSafeFlow = function (liveDates) {
+  let timeLive = []
+  for (let ld of liveDates) {
+    let tFormat = moment(ld).valueOf()
+    timeLive.push(tFormat)
+  }
+  return timeLive
+}
+
+/**
+* order the array by time and select the last time
+* @method timeOrderLast
+*
+*/
+TimeSystem.prototype.timeOrderLast = function (dataAIN) {
+  let lastTime = ''
+  // order array by time
+  if (dataAIN !== undefined) {
+    lastTime = dataAIN.timestamp
+  } else {
+    lastTime = 0
+  }
+  return lastTime
+}
+
+/**
+* assess the computation required
+* @method assessCompute
+*
+*/
+TimeSystem.prototype.assessCompute = async function (systemBundle, lastTime, liveTime, device, timeseg) {
+  let computeCheck = {}
+  // first time compute? Or not?
+  if (lastTime === 0) {
+    // console.log('logic 1')
+    let updateCompStatus = 'update-required'
+    let startTimeFound = await this.sourceDTstartTime(device)
+    computeCheck.computestatus = updateCompStatus
+    computeCheck.firstdate = startTimeFound
+  } else if (lastTime < liveTime) {
+    computeCheck.computestatus = 'on-going'
+    computeCheck.firstdate = lastTime
+  } else {
+    computeCheck.computestatus = 'uptodate'
+  }
+  return computeCheck
+}
+
+/**
+* assess the computation required
+* @method assessOngoing
+*
+*/
+TimeSystem.prototype.assessOngoing = function (lastComputeIN, liveTime) {
+  let timeArray = {}
+  timeArray = this.updateComputeDateArray(lastComputeIN, liveTime)
+  return timeArray
+}
+
+/**
+* query source datatype for a starting time stamp
+* @method sourceDTstartTime
+*
+*/
+TimeSystem.prototype.sourceDTstartTime = async function (devIN) {
+  // need to map compute asked for to function that calls API for data
+  let timeDevHolder = ''
+  // pass over to data system to match function for API query
+  // need to update query for source DT rather than the prime ie derived
+  let dateDevice = null // await this.liveTestStorage.getFirstData(devIN)
+  timeDevHolder = dateDevice[0].timestamp
+  return timeDevHolder
+}
+
+/**
+* what data needs to be tidied to update computation?
+* @method updateComputeDateArray
+*
+*/
+TimeSystem.prototype.updateComputeDateArray = function (lastCompTime, liveTime) {
+  let computeList = []
+  const liveDate = liveTime * 1000
+  const lastComputeDate = lastCompTime * 1000
+  // use time utiity to form array fo dates require
+  computeList = this.liveTimeUtil.timeDayArrayBuilder(liveDate, lastComputeDate)
+  return computeList
 }
 
 /**
@@ -109,124 +223,6 @@ TimeSystem.prototype.discoverTimeStatus = async function (systemBundle, dataIN) 
     }
   }
   return statusHolder
-}
-
-/**
-*  select data for UI
-* @method formatTimeSafeFlow
-*
-*/
-TimeSystem.prototype.formatTimeSafeFlow = function (liveDates) {
-  let timeLive = []
-  for (let ld of liveDates) {
-    let tFormat = moment(ld).valueOf()
-    let shortFormat = tFormat / 1000
-    timeLive.push(shortFormat)
-  }
-  return timeLive
-}
-
-/**
-* single day or more data required?
-* @method assessSourceRange
-*
-*/
-TimeSystem.prototype.assessSourceRange = function (startT, timeSeg) {
-  let endD = this.liveTimeUtil.computeTimeSegments(startT, timeSeg)
-  return endD
-}
-
-/**
-* order the array by time and select the last time
-* @method timeOrderLast
-*
-*/
-TimeSystem.prototype.timeOrderLast = function (dataAIN) {
-  let lastTime = ''
-  // order array by time
-  if (dataAIN !== undefined) {
-    lastTime = dataAIN.timestamp
-  } else {
-    lastTime = 0
-  }
-  return lastTime
-}
-
-/**
-* assess the computation required
-* @method assessCompute
-*
-*/
-TimeSystem.prototype.assessCompute = async function (systemBundle, lastTime, liveTime, device, timeseg) {
-  let computeCheck = {}
-  // first time compute? Or not?
-  if (lastTime === 0) {
-    // console.log('logic 1')
-    let updateCompStatus = 'update-required'
-    let startTimeFound = await this.sourceDTstartTime(device)
-    computeCheck.computestatus = updateCompStatus
-    computeCheck.firstdate = startTimeFound
-  } else if (lastTime < liveTime) {
-    computeCheck.computestatus = 'on-going'
-    computeCheck.firstdate = lastTime
-  } else {
-    computeCheck.computestatus = 'uptodate'
-  }
-  return computeCheck
-}
-
-/**
-* assess the computation required
-* @method assessOngoing
-*
-*/
-TimeSystem.prototype.assessOngoing = function (lastComputeIN, liveTime) {
-  let timeArray = {}
-  timeArray = this.updateComputeDateArray(lastComputeIN, liveTime)
-  return timeArray
-}
-
-/**
-* query source datatype for a starting time stamp
-* @method sourceDTstartTime
-*
-*/
-TimeSystem.prototype.sourceDTstartTime = async function (devIN) {
-  // need to map compute asked for to function that calls API for data
-  let timeDevHolder = ''
-  // pass over to data system to match function for API query
-  // need to update query for source DT rather than the prime ie derived
-  let dateDevice = null // await this.liveTestStorage.getFirstData(devIN)
-  timeDevHolder = dateDevice[0].timestamp
-  return timeDevHolder
-}
-
-/**
-* use moment range to build time array
-* @method momentRangeBuild
-*
-*/
-TimeSystem.prototype.momentRangeBuild = function (lastCompTime, liveTime) {
-  let startTime = moment((lastCompTime * 1000)).valueOf()
-  let endTime = moment((liveTime * 1000)).valueOf()
-  let rangeBuild = moment.range(startTime, endTime)
-  let sourceTimes = Array.from(rangeBuild.by('day'))
-  // let convertTOSafeTimeMS = this.convertSFtime()
-  return sourceTimes
-}
-
-/**
-* what data needs to be tidied to update computation?
-* @method updateComputeDateArray
-*
-*/
-TimeSystem.prototype.updateComputeDateArray = function (lastCompTime, liveTime) {
-  let computeList = []
-  const liveDate = liveTime * 1000
-  const lastComputeDate = lastCompTime * 1000
-  // use time utiity to form array fo dates require
-  computeList = this.liveTimeUtil.timeDayArrayBuilder(liveDate, lastComputeDate)
-  return computeList
 }
 
 export default TimeSystem

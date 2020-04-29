@@ -30,9 +30,11 @@ util.inherits(DatatypeComponent, events.EventEmitter)
 * @method dataType
 *
 */
-DatatypeComponent.prototype.dataTypeMapping = function (devices, dtBundle) {
+DatatypeComponent.prototype.dataTypeMapping = function (api, device, datatype) {
   // query CNRL for hash and parse out datatype and packaging info.
-  let dataTypeMapped = this.liveDTsystem.DTStartMatch(devices, dtBundle)
+  let dataTypeMapped = this.liveDTsystem.DTStartMatch(api, datatype)
+  console.log('dt mapped COMPLETET')
+  console.log(dataTypeMapped)
   this.datatypeInfoLive = dataTypeMapped
   return true
 }

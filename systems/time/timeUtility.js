@@ -29,32 +29,6 @@ var TimeUtilities = function (setUP) {
 util.inherits(TimeUtilities, events.EventEmitter)
 
 /**
-* convert all the time input to milliseconds
-* @method timeConversionUtility
-*
-*/
-TimeUtilities.prototype.timeConversionUtility = function (timeBundle) {
-  // pass range to get converted from moment format to miillseconds (stnd for safeflow)
-  let timeConversion = {}
-  let liveStarttime = 0
-  if (timeBundle.startperiod === 'relative') {
-    liveStarttime = timeBundle.startperiod
-  } else {
-    liveStarttime = moment(timeBundle.startperiod).valueOf() / 1000
-  }
-  let laststarttime = moment(timeBundle.laststartperiod).startOf('day').valueOf() / 1000
-  this.realtime = timeBundle.realtime
-  let UItimeConvertion = this.updateUItime(timeBundle.timevis, liveStarttime, laststarttime)
-  timeConversion.timeseg = timeBundle.timeseg
-  timeConversion.timevis = timeBundle.timevis
-  let realTimems = moment(timeBundle.realtime).valueOf()
-  timeConversion.realtime = Math.round(realTimems / 1000)
-  let startConvertion = UItimeConvertion.startperiod // moment(UItimeConvertion.timeperiod).valueOf()
-  timeConversion.startperiod = startConvertion // Math.round(startConvertion / 1000)
-  return timeConversion
-}
-
-/**
 * time segmentation for compute
 * @method computeTimeSegments
 *
@@ -63,161 +37,9 @@ TimeUtilities.prototype.computeTimeSegments = function (startTime, tSegs) {
   console.log('compute time seg UTILITY')
   console.log(startTime)
   console.log(tSegs)
-  let timeConversion = 0
-  // does a standard time types need converting or range or both?
-  if (tSegs) {
-    if (tSegs === 'SELECT') {
-      let rangeMills = this.rangeCovert(ti)
-      // console.log(rangeMills)
-      timeConversion = rangeMills
-    } else {
-      let timePeriod = {}
-      timePeriod = this.timeSegBuilder(startTime, tSegs)
-      timeConversion = timePeriod
-    }
-  }
+  //
+  //
   return timeConversion
-}
-
-/**
-* take range object and convert moment times to miillseconds
-* @method updateUItime
-*
-*/
-TimeUtilities.prototype.updateUItime = function (timeUI, time, lastTime) {
-  let timeMills = {}
-  // does a standard time types need converting or range or both?
-  for (let ti of timeUI) {
-    if (ti === 'SELECT') {
-      let rangeMills = this.rangeCovert(ti, time, lastTime)
-      timeMills.range = rangeMills
-    } else {
-      let timePeriod = {}
-      timePeriod = this.timeConvert(ti, time, lastTime)
-      timeMills.startperiod = timePeriod
-    }
-  }
-  return timeMills
-}
-
-/**
-* Date and Time
-* @method timeConvert
-*
-*/
-TimeUtilities.prototype.timeConvert = function (uT, time, lastTime) {
-  let convertLasttime = lastTime
-  let startTime = time
-  let timestamp
-  if (uT === 'day') {
-    // asking for one 24hr display
-    startTime = time
-  } else if (uT === 'week') {
-    startTime = time
-  } else if (uT === 'month') {
-    startTime = time
-  } else if (uT === 'year') {
-    startTime = time
-  } else if (uT === '-day') {
-    // move back one day in time
-    if (startTime === 'relative') {
-      let backstartTime = (convertLasttime - 86400)
-      startTime = backstartTime
-    }
-    // startTime = (startTime - 86400000)
-  } else if (uT === '+day') {
-    // move forward day in time
-    if (startTime === 'relative') {
-      startTime = (convertLasttime + 86400)
-    } else {
-      // startTime = (startTime + 86400)
-      // console.log(this.realtime)
-      let msRealtime = moment(this.realtime).valueOf()
-      if (startTime > msRealtime) {
-        // pass on to simulated data
-        startTime = 'simulateData'
-      }
-    }
-  } else if (uT === '-week') {
-    // return start of year timeout
-    if (startTime === 'relative') {
-      startTime = (convertLasttime - (7 * 86400))
-    }
-    startTime = startTime * 1
-    // startTime = moment().startOf('week')
-  } else if (uT === '+week') {
-    // return start of year head
-    if (startTime === 'relative') {
-      startTime = (convertLasttime + (7 * 86400))
-    }
-    startTime = startTime * 1
-    // startTime = moment().startOf('week') + 1
-  } else if (uT === '-year') {
-    // return start of year timeout
-    startTime = moment().startOf('year')
-  } else if (uT === '+year') {
-    // return start of year head
-    startTime = moment().startOf('year') + 1
-  } else {
-    const startOfMonth = moment.utc().startOf('month')
-    //  reset the day to first of month adjust month for segment required
-    if (uT === '-month') {
-      startTime = startOfMonth
-    } else {
-      let adSeg = startOfMonth - 1
-      startTime = moment(startOfMonth).subtract(adSeg, 'months')
-    }
-  }
-  //  get the micro time for start of time for query
-  if (startTime !== 'simulateData') {
-    if (startTime !== 'relative') {
-      let startQuerytime = moment(startTime).valueOf()
-      timestamp = startQuerytime
-    } else {
-      timestamp = startTime
-    }
-  } else {
-    timestamp = 'simulateData'
-  }
-  return timestamp
-}
-
-/**
-* build time arrays for computations
-* @method timeSegBuilder
-*
-*/
-TimeUtilities.prototype.timeSegBuilder = function (timeStart, sg) {
-  let timeEnd = 0
-  if (sg === 'day') {
-    timeEnd = timeStart
-  } else if (sg === 'week') {
-    // add 7 days of ms time to start time
-    timeEnd = timeStart - (7 * 86400)
-  } else if (sg === 'month') {
-    // add 30 days of ms time to start time
-    timeEnd = timeStart - (30 * 86400)
-  } else if (sg === 'year') {
-    // add 365 days of ms time to start time
-    timeEnd = timeStart - (365 * 86400)
-  }
-  return timeEnd
-}
-
-/**
-* take range object and convert moment times to miillseconds
-* @method rangeCovert
-*
-*/
-TimeUtilities.prototype.rangeCovert = function (rangeIN) {
-  let rangeMS = {}
-  let startMinute = moment(rangeIN.startTime).startOf('minute')
-  let startMS = moment(startMinute).valueOf()
-  let endMinute = moment(rangeIN.endTime).startOf('minute')
-  let endMS = moment(endMinute).valueOf()
-  rangeMS.startTime = startMS / 1000
-  rangeMS.endTime = endMS / 1000
-  return rangeMS
 }
 
 /**
@@ -380,30 +202,6 @@ TimeUtilities.prototype.longDataArray = function (calInfo) {
     }
   }
   return calendarTimeList
-}
-
-/**
-* Build an array of dates between two time points PER WEEK
-* @method timeWeekArrayBuilder
-*
-*/
-TimeUtilities.prototype.timeWeekArrayBuilder = function (liveTime, lastTime) {
-  let timeWArray = []
-  // set first week
-  return timeWArray
-}
-
-/**
-* prepare HTML display string
-* @method timeHTMLBuilder
-*
-*/
-TimeUtilities.prototype.timeHTMLBuilder = function (liveTime) {
-  let stringTime = ''
-  // prepare monent human readable display
-  let buildMilltime = liveTime * 1000
-  stringTime = moment(buildMilltime).format('MMMM Do YYYY')
-  return stringTime
 }
 
 export default TimeUtilities
