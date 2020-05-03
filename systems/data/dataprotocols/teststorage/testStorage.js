@@ -41,6 +41,17 @@ TestStorageAPI.prototype.RESTbuilder = async function (dapi, queryIN) {
 }
 
 /**
+*  COMPUTEbuilder  temp until smart URL builder is created
+* @method COMPUTEbuilder
+*
+*/
+TestStorageAPI.prototype.COMPUTEbuilder = async function (dapi, device, time) {
+  let apitime = time / 1000
+  let jsondata = await axios.get(dapi.namespace + dapi.path + this.tempPubkey + '/' + this.tempToken + '/' + apitime + '/' + device)
+  return jsondata.data
+}
+
+/**
 *  device REST builder
 * @method deviceRESTbuilder
 *
@@ -71,6 +82,17 @@ TestStorageAPI.prototype.getContextType = async function () {
   return jsondata.data
 }
 
+/**
+*  save results data
+* @method saveResults
+*
+*/
+TestStorageAPI.prototype.saveResults = async function (api, data) {
+  await axios.post(api.namespace + api.path + this.tempPubkey + '/' + this.tempToken, data)
+    .then(function (response) {
+      // console.log(response)
+    })
+}
 
 /**
 *  Remove start bundle

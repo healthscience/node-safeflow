@@ -18,6 +18,7 @@ var ComputeComponent = function (setIN) {
   this.computeCNRLlist = []
   this.liveComputeSystem = new ComputeSystem(setIN)
   this.computeStatus = false
+  this.compute = {}
 }
 
 /**
@@ -31,26 +32,16 @@ util.inherits(ComputeComponent, events.EventEmitter)
 * @method filterCompute
 *
 */
-ComputeComponent.prototype.filterCompute = async function (timeComponent, apiInfo) {
-  let computeStatelive = {}
-  // var localthis = this
-  if (this.EIDinfo.science.wasmfile === 'none' && this.computeStatus === false) {
-    // raw data nothing to compute
-    computeStatelive.computeState = 'observation'
-  } else {
-    let systemBundle = {}
-    systemBundle.cid = this.EIDinfo.cid
-    systemBundle.devices = this.EIDinfo.devices
-    systemBundle.time = this.EIDinfo.time
-    systemBundle.timeseg = this.EIDinfo.time.timeseg
-    systemBundle.scienceAsked = this.EIDinfo.science
-    systemBundle.categories = this.EIDinfo.categories
-    systemBundle.timeInfo = timeComponent
-    systemBundle.apiInfo = apiInfo
-    let computeState = await this.liveComputeSystem.computationSystem(systemBundle)
-    computeStatelive = computeState
-  }
-  return computeStatelive
+ComputeComponent.prototype.filterCompute = async function (contract, device, datatype, time, data) {
+  console.log('computeCOMPONENT')
+  console.log(contract)
+  console.log(device)
+  console.log(datatype)
+  console.log(time)
+  console.log(data)
+  let computeState = await this.liveComputeSystem.computationSystem(contract, data)
+  this.compute[contract.compute] = computeState
+  return this.compute
 }
 
 export default ComputeComponent

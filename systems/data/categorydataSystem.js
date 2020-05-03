@@ -30,28 +30,18 @@ util.inherits(CategoryDataSystem, events.EventEmitter)
 * @method categorySorter
 *
 */
-CategoryDataSystem.prototype.categorySorter = function (systemBundle, rawData, time) {
+CategoryDataSystem.prototype.categorySorter = function (systemBundle, device, datatype, time, rawData) {
+  console.log('catcoreter')
+  console.log(systemBundle)
+  console.log(device)
+  console.log(time)
+  console.log(rawData)
   let catHolder = {}
-  if (systemBundle.computeflow === false) {
-    for (let dev of systemBundle.devices) {
-      // is the dt primary or derives
-      let pordState = this.checkDTprimaryderived(systemBundle, dev)
-      if (pordState === true) {
-        catHolder = this.categoriseWorkerDerived(systemBundle, rawData, time)
-      } else {
-        catHolder = this.categoriseWorker(systemBundle, rawData, time)
-      }
-    }
+  let pordState = this.checkDTprimaryderived(systemBundle, device)
+  if (pordState === true) {
+    catHolder = this.categoriseWorkerDerived(systemBundle, rawData, time)
   } else {
-    // is the dt primary or derives
-    for (let dev of systemBundle.devices) {
-      let pordState = this.checkDTprimaryderived(systemBundle, dev)
-      if (pordState === true) {
-        catHolder = this.categoriseWorker(systemBundle, rawData, time)
-      } else {
-        catHolder = this.categoriseWorkerDerived(systemBundle, rawData, time)
-      }
-    }
+    catHolder = this.categoriseWorker(systemBundle, rawData, time)
   }
   return catHolder
 }
@@ -63,14 +53,10 @@ CategoryDataSystem.prototype.categorySorter = function (systemBundle, rawData, t
 */
 CategoryDataSystem.prototype.checkDTprimaryderived = function (systemBundle, device) {
   let dtPorD = false
-  if (systemBundle.apiInfo[device].sourceDTs.length > 0) {
-    for (let dtps of systemBundle.apiInfo[device].datatypes) {
-      if (dtps.primary !== 'primary') {
-        dtPorD = true
-      } else {
-        dtPorD = false
-      }
-    }
+  if (device.primary !== 'primary') {
+    dtPorD = true
+  } else {
+    dtPorD = false
   }
   return dtPorD
 }
@@ -82,7 +68,7 @@ CategoryDataSystem.prototype.checkDTprimaryderived = function (systemBundle, dev
 */
 CategoryDataSystem.prototype.checkDTcategory = function (systemBundle, device) {
   let catState = false
-  if (systemBundle.apiInfo[device].categorycodes.length !== 0) {
+  if (device.categorycodes.length !== 0) {
     catState = true
   }
   return catState

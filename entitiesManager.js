@@ -110,8 +110,8 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
         console.log('visualise start')
         console.log(md)
         // extract visualisation contract information
-        // let visInfo = this.KBLlive.contractCNRL(md.visualise)
-        // moduleState = await this.visualFlow(shellID, md, visInfo)
+        let visInfo = this.KBLlive.contractCNRL(md.visualise)
+        moduleState = await this.visualFlow(shellID, md, visInfo)
       } else {
         // plain extract info. from CNRL contract
       }
@@ -150,19 +150,24 @@ EntitiesManager.prototype.deviceDataflow = async function (shellID, apiData) {
 * @method computeFlow
 *
 */
-EntitiesManager.prototype.computeFlow = async function (shellID, mod, apiData, kbid) {
+EntitiesManager.prototype.computeFlow = async function (shellID, modContract, apiData, kbid) {
   console.log('COMPUTEFLOW0-----begin')
-  console.log(mod)
+  console.log(modContract)
   console.log(kbid)
-  let updateKBID = {}
+  let contractChanges = {}
+  let updateContract = {}
   let hashMatcher = false
   // look at compute controls and see if time need brought up to date?
-  if (mod.automation === true) {
+  if (modContract.automation === true) {
     // update time in kbid
-    updateKBID = this.automationUpdate(shellID, mod)
-    hashMatcher = this.compareKBIDs(mod, updateKBID)
+    contractChanges = this.automationUpdate(shellID, modContract)
+    console.log('contract changes')
+    console.log(contractChanges)
+    // update contract for first time input
+    modContract.time.startperiod = contractChanges.range[0]
+    hashMatcher = this.compareKBIDs(modContract, kbid)
   } else {
-    hashMatcher = this.compareKBIDs(mod, kbid)
+    hashMatcher = this.compareKBIDs(modContract, kbid)
   }
   console.log('hashmatcher')
   console.log(hashMatcher)
@@ -174,16 +179,60 @@ EntitiesManager.prototype.computeFlow = async function (shellID, mod, apiData, k
     mockAPI.path = '/results/'
     await this.liveSEntities[shellID].liveDataC.directResults('REST', mockAPI, kbid.result)
   } else {
-    console.log('new data to process')
+    console.log('new data to process Create KBID entry')
+    console.log(this.liveSEntities[shellID].liveDeviceC.devices.pop())
+    console.log(this.liveSEntities[shellID].liveDeviceC.devices)
     this.liveSEntities[shellID].liveTimeC.timerange = [1588114800000]
+    modContract.dtcompute = ['cnrl-8856388711']
     // else go through creating new KBID entry
     // range of time, number of devices, number of data types  do all the loop here?
     for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
-      for (let datatype of mod.dtcompute) {
+      for (let datatype of modContract.dtcompute) {
         for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
-          let engineReturn = await this.computeEngine(shellID, apiData, updateKBID, device, datatype, time)
-          console.log('engine return')
+          // set the new updated time settings for the new contract
+          console.log(updateContract)
+          console.log(contractChanges)
+          modContract.time.timeseg = contractChanges.timeseg
+          modContract.time.startperiod = time
+          // should this CNRL contract be update and saved for time changes prob. no.
+          let engineReturn = await this.computeEngine(shellID, apiData, modContract, device, datatype, time)
+          console.log('COMPUTEengine return')
           console.log(engineReturn)
+          // SAVE results
+          let mockAPI = {}
+          mockAPI.namespace = 'http://165.227.244.213:8882'
+          mockAPI.path = '/inresults/'
+          // prepare save structure
+          let saveObject = {}
+          saveObject.timestamp = 1
+          saveObject.hash = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData)
+          saveObject.data = this.liveSEntities[shellID].liveDataC.liveData
+          // { "timestamp" : "1578700500000", "hash" : "39493493943949394", "data" : { "cnrl-t1" : [ { "cnrl-8856388711" : 67, "cnrl-8856388713" : 1578700500000 }, { "cnrl-8856388711" : 68, "cnrl-8856388713" : 1578700600000 }, { "cnrl-8856388711" : 69, "cnrl-8856388713" : 1578700700000 } ] }
+          console.log(saveObject)
+          // console.log(saveObject2222)
+          let saveResults = await this.liveSEntities[shellID].liveDataC.directSaveResults('REST', mockAPI, saveObject)
+          // prepare and save KBID entry
+          // {publickey: "e97bd0056edae2a5da49b7868167b6c9d13bc3d5", result: "39493493943949394", token: "000000003", kbid: "e3935e3940e553116c5a6d3a6d38e994a4c9fb8f"}
+          let newKBIDentry = {}
+          //newKBIDentry.previous = kbid.kbid
+          newKBIDentry.result = saveObject.hash
+          // prepare new KBID hash
+          let newKBIDhash = this.liveCrypto.hashKBID(modContract, saveObject.hash)
+          newKBIDentry.kbid = newKBIDhash
+          newKBIDentry.token = ''
+          console.log('new KIBD entry pre save')
+          console.log(newKBIDentry)
+          /* let kbidEntryPass = await this.KBLlive.kbidEntrysave(newKBIDentry)
+          if (kbidEntryPass === true) {
+            {publickey: "e97bd0056edae2a5da49b7868167b6c9d13bc3d5", timestamp: "1578873600000", cnrl: "cnrl-001234543214", kbid: "e3935e3940e553116c5a6d3a6d38e994a4c9fb8f"}
+            let newIndex = {}
+            newIndex.timestamp = 1
+            newIndex.cnrl = mod.prime.cnrl
+            newIndex.kbid = newKBIDhash
+            let indexKBID = await this.KBLlive.kbidINDEXsave(2)
+            console.log('new index ')
+            console.log(newIndex)
+          } */
         }
       }
     }
@@ -206,23 +255,17 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiData, cont
   this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(apiData, device, datatype)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDatatypeC)
-  await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.sourceapiquery, datatype, time)
+  await this.liveSEntities[shellID].liveDataC.sourceData(apiData, contract,  this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.sourceapiquery, '####', device.device_mac, datatype, time)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
   // this.emit('computation', 'in-progress')
   // await this.liveSEntities[shellID].liveTimeC.startTimeSystem(this.liveSEntities[shellID].liveDatatypeC, this.liveSEntities[shellID].liveDataC.liveData)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
-  // this.computeStatus = await this.liveSEntities[shellID].liveComputeC.filterCompute(this.liveSEntities[shellID].liveTimeC, this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive)
+  this.computeStatus = await this.liveSEntities[shellID].liveComputeC.filterCompute(contract, device.device_mac, datatype, time, this.liveSEntities[shellID].liveDataC.liveData)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
   // this.emit('computation', 'finished')
-  /* if (this.computeStatus === true) {
-  // go direct and get raw data direct
-    await this.liveSEntities[shellID].liveDataC.directSourceResults(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveTimeC)
-    // proof of evidence
-    // this.liveCrypto.evidenceProof()
-  } */
   return true
 }
 
@@ -251,14 +294,6 @@ EntitiesManager.prototype.entityExists = function (shellid, dataIn) {
   let checkDataExist = this.checkForVisualData(shellid, dataIn)
   if (checkDataExist === true) {
     console.log('data already ready')
-    this.liveSEntities[shellid].liveTimeC.setStartPeriod(dataIn.startperiod)
-    this.liveSEntities[shellid].liveTimeC.setRealtime(dataIn.realtime)
-    this.liveSEntities[shellid].liveTimeC.setLastTimeperiod(dataIn.laststartperiod)
-    this.liveSEntities[shellid].liveTimeC.setTimeList(dataIn.startperiod)
-    this.liveSEntities[shellid].liveTimeC.setTimeSegments(dataIn.timeseg)
-    this.liveSEntities[shellid].liveTimeC.setTimeVis(dataIn.timevis)
-    this.liveSEntities[shellid].liveDataC.setDatatypesLive(dataIn.datatypes)
-    this.liveSEntities[shellid].liveDataC.setCategories(dataIn.categories)
   }
   return true
 }
@@ -279,12 +314,15 @@ EntitiesManager.prototype.entityDataReturn = async function (entityID) {
 */
 EntitiesManager.prototype.automationUpdate = function (shellID, contract) {
   // look up time seg contract
+  let localContract = contract
+  let extractContract = {}
   let timeSeg =  this.KBLlive.contractCNRL(contract.time.timeseg[0])
-  contract.time.timeseg = timeSeg
-  let addTimerange = this.liveSEntities[shellID].liveTimeC.timeProfiling(contract.time)
+  localContract.time.timeseg = timeSeg
+  extractContract.timeseg = timeSeg
+  let addTimerange = this.liveSEntities[shellID].liveTimeC.timeProfiling(localContract.time)
   // update contract time
-  contract.time.range = addTimerange
-  return contract
+  extractContract.range = addTimerange
+  return extractContract
 }
 
 /**
@@ -293,8 +331,8 @@ EntitiesManager.prototype.automationUpdate = function (shellID, contract) {
 *
 */
 EntitiesManager.prototype.compareKBIDs = function (mod, kbid) {
-  let inputKBID = this.liveCrypto.hashKBID(mod, kbid.result)
-  let hashMatcher = this.liveCrypto.compareHashes(kbid.kbid, inputKBID)
+  let newKBID = this.liveCrypto.hashKBID(mod, kbid.result)
+  let hashMatcher = this.liveCrypto.compareHashes(kbid.kbid, newKBID)
   // If the result HASH then just look at Visulisation inputs and send the data back.
   return hashMatcher
 }
@@ -320,13 +358,16 @@ EntitiesManager.prototype.extractDevice = function (cnrl) {
   let deviceBundle = this.KBLlive.contractCNRL(cnrl)
   return deviceBundle
 }
+
 /**
 * knowledge Bundle Index Module CNRL matches
 * @method extractKBID
 *
 */
 EntitiesManager.prototype.extractKBID = async function (cnrl, n) {
-  // read peer kbledger
+  console.log('extractKIB')
+  console.log(cnrl)
+  console.log(n)
   let KBIDdata = {}
   let kbidList = await this.KBLlive.kbIndexQuery(cnrl, n)
   if (kbidList.length > 0) {

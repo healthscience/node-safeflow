@@ -17,6 +17,7 @@ const events = require('events')
 
 var ComputeSystem = function (setIN) {
   events.EventEmitter.call(this)
+  // ECS loader should plugin these files WIP
   this.liveSum = new SumSystem(setIN)
   this.liveAverage = new AverageSystem(setIN)
   this.liveRecoveryHR = new RecoveryHeartrate(setIN)
@@ -34,15 +35,21 @@ util.inherits(ComputeSystem, events.EventEmitter)
 * @method computationSystem
 *
 */
-ComputeSystem.prototype.computationSystem = async function (systemBundle) {
+ComputeSystem.prototype.computationSystem = async function (contract, data) {
   // match computation to approprate verified compute need LOADER to add what WASM is being used/required
   let computeStatus = {}
-  if (systemBundle.cid === 'cnrl-2356388732') {
-    computeStatus = await this.liveAverage.averageSystemStart(systemBundle)
-  } else if (systemBundle.cid === 'cnrl-2356388737') {
-    computeStatus = await this.liveSum.sumSystemStart(systemBundle)
-  } else if (systemBundle.cid === 'cnrl-2356388733') {
-    computeStatus = await this.recoverySystem(systemBundle)
+  console.log('computesystem')
+  console.log(contract)
+  console.log(data)
+  if (contract.cid === 'none') {
+    computeStatus.state = true
+    computeStatus.data = data
+  } else if (contract.cid === 'cnrl-2356388732') {
+    computeStatus = await this.liveAverage.averageSystemStart(contract, data)
+  } else if (contract.cid === 'cnrl-2356388737') {
+    computeStatus = await this.liveSum.sumSystemStart(contract, data)
+  } else if (contract.cid === 'cnrl-2356388733') {
+    computeStatus = await this.recoverySystem(contract, data)
   }
   return computeStatus
 }

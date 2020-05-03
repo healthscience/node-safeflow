@@ -28,35 +28,34 @@ util.inherits(FilterDataSystem, events.EventEmitter)
 * @method dtFilterController
 *
 */
-FilterDataSystem.prototype.dtFilterController = function (systemBundle, liveData, time) {
+FilterDataSystem.prototype.dtFilterController = function (source, contract, api, device, datatype, time, liveData) {
+  console.log('filter controller start')
+  console.log(source)
+  console.log(contract)
+  console.log(api)
+  console.log(device)
+  console.log(datatype)
+  console.log(time)
+  console.log(liveData)
   let filterHolder = {}
   let filterType = ''
   filterHolder = {}
-  // loop over the each devices API data source info.
-  for (let devI of systemBundle.devices) {
-    filterHolder[devI] = {}
-    // is the filter on derived source(s)?
-    let dtSourceR = []
-    if (systemBundle.computeflow === true) {
-      dtSourceR = systemBundle.apiInfo[devI].sourceapiquery
-      filterType = 'derived'
-    } else {
-      dtSourceR = systemBundle.apiInfo[devI].apiquery
-      filterType = 'primary'
-    }
-    for (let dtItem of dtSourceR) {
-      filterHolder[devI][dtItem.cnrl] = {}
-      for (let ts of systemBundle.timeseg) {
-        console.log(ts)
-        let sourcerawData = liveData[devI][dtItem.cnrl]['day']
-        let filterColumn = this.filterDataType(filterType, dtItem, sourcerawData, time)
-        if (filterType === 'primary') {
-          filterHolder[devI][dtItem.cnrl]['day'] = filterColumn
-        } else {
-          filterHolder = filterColumn
-        }
-      }
-    }
+  // is the filter on derived source(s)?
+  let dtSourceR = []
+  if (source.computeflow === true) {
+    dtSourceR = api.sourceapiquery
+    filterType = 'derived'
+  } else {
+    dtSourceR = source.datatypes
+    filterType = 'primary'
+  }
+  filterHolder[datatype] = {}
+  let sourcerawData = liveData
+  let filterColumn = this.filterDataType(filterType, datatype, sourcerawData, time)
+  if (filterType === 'primary') {
+    filterHolder[datatype] = filterColumn
+  } else {
+    filterHolder = filterColumn
   }
   return filterHolder
 }
@@ -67,6 +66,11 @@ FilterDataSystem.prototype.dtFilterController = function (systemBundle, liveData
 *
 */
 FilterDataSystem.prototype.filterDataType = function (fTypeIN, sourceDT, arrayIN, time) {
+  console.log('filter data type')
+  console.log(fTypeIN)
+  console.log(sourceDT)
+  console.log(arrayIN)
+  console.log(time)
   let singleArray = []
   if (fTypeIN !== 'derived') {
     for (let sing of arrayIN) {

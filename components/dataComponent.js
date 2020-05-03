@@ -49,8 +49,8 @@ DataComponent.prototype.setDevicesLive = async function () {
 * @method RawData
 *
 */
-DataComponent.prototype.sourceData = async function (apiINFO, time) {
-  await this.DataControlFlow(apiINFO, time)
+DataComponent.prototype.sourceData = async function (source, contract, apiINFO, hash, device, datatype, time) {
+  await this.DataControlFlow(source, contract, apiINFO, device, datatype, time)
   return true
 }
 
@@ -59,14 +59,16 @@ DataComponent.prototype.sourceData = async function (apiINFO, time) {
 * @method DataControlFlow
 *
 */
-DataComponent.prototype.DataControlFlow = async function (apiINFO, time) {
-  let dataRback = await this.liveDataSystem.datatypeQueryMapping('REST', apiINFO, time)
+DataComponent.prototype.DataControlFlow = async function (source, contract, apiINFO, device, datatype, time) {
+  let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', apiINFO, '#####', device, time)
+  console.log('data back from source')
+  console.log(dataRback)
   this.dataRaw[time] = dataRback
   // is there a categories filter to apply?
-  this.CategoriseData(systemBundle, time)
+  this.CategoriseData(apiINFO, device, datatype, time, dataRback)
   // is there any data tidying required
-  this.TidyData(systemBundle, time)
-  this.FilterDownDT(systemBundle, time)
+  this.TidyData(source, contract, apiINFO, device, datatype, time)
+  this.FilterDownDT(source, contract, apiINFO, device, datatype, time)
   return true
 }
 
@@ -75,10 +77,10 @@ DataComponent.prototype.DataControlFlow = async function (apiINFO, time) {
 * @method CategoriseData
 *
 */
-DataComponent.prototype.CategoriseData = function (systemBundle, time) {
+DataComponent.prototype.CategoriseData = function (apiINFO, device, datatype, time) {
   let catDataG = {}
   // console.log(systemBundle)
-  catDataG = this.liveCategoryData.categorySorter(systemBundle, this.dataRaw[time], time)
+  catDataG = this.liveCategoryData.categorySorter(apiINFO, device, datatype, time, this.dataRaw[time])
   this.categoryData[time] = catDataG
 }
 
@@ -87,9 +89,9 @@ DataComponent.prototype.CategoriseData = function (systemBundle, time) {
 * @method TidyData
 *
 */
-DataComponent.prototype.TidyData = function (systemBundlea, time) {
+DataComponent.prototype.TidyData = function (source, contract, apiInfo, device, datatype, time) {
   let tidyDataG = {}
-  tidyDataG = this.liveTidyData.tidyRawData(systemBundlea, this.categoryData[time], time)
+  tidyDataG = this.liveTidyData.tidyRawData(source, contract, apiInfo, device, datatype, time, this.categoryData[time])
   this.tidyData[time] = tidyDataG
   // set liveData based on/if category data asked for
   this.assessDataStatus(time)
@@ -101,12 +103,12 @@ DataComponent.prototype.TidyData = function (systemBundlea, time) {
 * @method FilterDownDT
 *
 */
-DataComponent.prototype.FilterDownDT = function (systemBundlea, time) {
+DataComponent.prototype.FilterDownDT = function (source, contract, api, device, datatype, time) {
   // console.log('filteDown')
   let tidyDataG = {}
   // console.log(systemBundle)
   if (this.liveData.primary !== 'prime') {
-    tidyDataG = this.liveFilterData.dtFilterController(systemBundlea, this.liveData[time], time)
+    tidyDataG = this.liveFilterData.dtFilterController(source, contract, api, device, datatype, time, this.liveData[time])
     this.liveData[time] = tidyDataG
   }
   return true
@@ -131,8 +133,18 @@ DataComponent.prototype.assessDataStatus = function (time) {
 *
 */
 DataComponent.prototype.directResults = async function (type, api, sourceHash) {
-  let resultData = await this.liveDataSystem.datatypeQueryMapping(type, api, sourceHash)
+  let resultData = await this.liveDataSystem.datatypeQueryMapping('REST', api, sourceHash)
   this.liveData = resultData
+}
+
+/**
+*
+* @method directSaveResults
+*
+*/
+DataComponent.prototype.directSaveResults = async function (type, api, data) {
+  let resultData = await this.liveDataSystem.saveSystem(api, data)
+  return true
 }
 
 export default DataComponent

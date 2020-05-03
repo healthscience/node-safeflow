@@ -34,9 +34,10 @@ util.inherits(VisualComponent, events.EventEmitter)
 */
 VisualComponent.prototype.filterVisual = function (contract, resultsData) {
   // which of three types of visualisations?
-  // console.log('VISULAcomponentIN')
-  // console.log(contract)
-  // console.log(resultsData)
+  console.log('VISULAcomponentIN')
+  console.log(contract)
+  console.log('results data start')
+  console.log(resultsData)
   let status = false
   // pass on vis system to prepare
   this.visualData = this.liveVisSystem.visualControl(contract, resultsData)

@@ -30,14 +30,15 @@ util.inherits(KBLcryptoUtility, events.EventEmitter)
 * @method hashKBID
 *
 */
-KBLcryptoUtility.prototype.hashKBID = function (Kinputs, resulthash) {
-  console.log(Kinputs)
+KBLcryptoUtility.prototype.hashKBID = function (newContract, resulthash) {
+  console.log(newContract)
   // prepare Contract evidence
   let contractEvidence = {}
-  contractEvidence.datatypes = Kinputs.dtcompute
-  contractEvidence.compute = Kinputs.compute
-  contractEvidence.time = Kinputs.time
-  contractEvidence.time = resulthash
+  contractEvidence.previous = null
+  contractEvidence.datatypes = newContract.dtcompute
+  contractEvidence.compute = newContract.compute
+  contractEvidence.time = newContract.time
+  contractEvidence.results = resulthash
   // let hashKBID = '39493493943949394'
   let hashKBID = this.evidenceProof(contractEvidence)
   console.log(hashKBID)
@@ -84,9 +85,9 @@ KBLcryptoUtility.prototype.entityID = function (addressIN) {
 *
 */
 KBLcryptoUtility.prototype.evidenceProof = function (dataEvidence) {
-    let kbundleHashPart = hashObject(dataEvidence)
-    // need some sort of holder back in ECS to build up evidence trail
-    return kbundleHashPart
+  let kbundleHashPart = hashObject(dataEvidence)
+  // need some sort of holder back in ECS to build up evidence trail
+  return kbundleHashPart
 }
 
 export default KBLcryptoUtility

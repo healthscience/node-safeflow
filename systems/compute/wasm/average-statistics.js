@@ -9,14 +9,12 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-import TimeUtilities from '../../time/timeUtility.js'
 import TestStorageAPI from '../../data/dataprotocols/teststorage/testStorage.js'
 const util = require('util')
 const events = require('events')
 
 var StatisticsSystem = function (setIN) {
   events.EventEmitter.call(this)
-  this.liveTimeUtil = new TimeUtilities()
   this.liveTestStorage = new TestStorageAPI(setIN)
 }
 

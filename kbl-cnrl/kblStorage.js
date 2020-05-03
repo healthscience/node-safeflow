@@ -53,8 +53,9 @@ KBLdatabaseUtility.prototype.getNXPindex = async function (status, n) {
 *
 */
 KBLdatabaseUtility.prototype.getKBLindex = async function (cnrl, n) {
-  //  nosql query
+  console.log('start index quiery')
   let jsondata = await axios.get(this.baseAPI + '/kblindex/' + this.tempPubkey + '/' + this.tempToken + '/' + cnrl + '/' + n)
+  console.log('after post index quiery')
   return jsondata.data
 }
 
@@ -66,6 +67,32 @@ KBLdatabaseUtility.prototype.getKBLindex = async function (cnrl, n) {
 KBLdatabaseUtility.prototype.kblEntry = async function (kbid) {
   let jsondata = await axios.get(this.baseAPI + '/kblentry/' + this.tempPubkey + '/' + this.tempToken + '/' + kbid)
   return jsondata.data
+}
+
+/**
+*  save KBID entry
+* @method saveKBID
+*
+*/
+KBLdatabaseUtility.prototype.saveKBID = async function (kbidData) {
+  let kbidData2 = { 'publickey': this.tempPubkey, 'result': '39493dddddddddddd', 'token': '000000004', 'kbid': 'e3935e3940e553116c5a6d3a6d38e994a4cdddd' }
+  await axios.post(this.baseAPI + '/kblsave/' + this.tempPubkey + '/' + this.tempToken, kbidData2)
+    .then(function (response) {
+      // console.log(response)
+    })
+}
+
+/**
+*  save KBID index
+* @method saveKBIDindex
+*
+*/
+KBLdatabaseUtility.prototype.saveKBIDindex = async function (kbidData) {
+  let kbidData3 = { 'publickey': this.tempPubkey, 'timestamp': '1578873600000', 'cnrl': 'cnrl-001234543214', 'kbid': '3ddfdfd' }
+  await axios.post(this.baseAPI + '/kblindexsave/' + this.tempPubkey + '/' + this.tempToken, kbidData3)
+    .then(function (response) {
+      // console.log(response)
+    })
 }
 
 /**

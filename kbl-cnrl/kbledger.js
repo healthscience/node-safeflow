@@ -127,8 +127,10 @@ KBLedger.prototype.modulesCNRL = function (mList) {
 */
 KBLedger.prototype.kbIndexQuery = async function (cnrl, n) {
   // latest nxp and ledger entries, CNRL contract look ups
-  // let KBIDlist = []
+  console.log('index')
   let indexKBLedger = await this.liveKBLStorage.getKBLindex(cnrl, n)
+  console.log('back')
+  console.log(indexKBLedger)
   return indexKBLedger
 }
 
@@ -138,62 +140,27 @@ KBLedger.prototype.kbIndexQuery = async function (cnrl, n) {
 *
 */
 KBLedger.prototype.kbidReader = async function (kbid) {
-  let expandCNRLrefs = {}
   let kbData = await this.liveKBLStorage.kblEntry(kbid)
-  // expandout CNRL references yes
-  // go through and extract cnrl contracts
-  /* let cnrlTypes = Object.keys(kbData[0])
-  for (let ct of cnrlTypes) {
-    // fixed path structure of parsing ledger entry
-    if (ct === 'data') {
-      let dataCNRLrefs = {}
-      let dataIndex = Object.keys(kbData[0][ct])
-      for (let de of dataIndex) {
-        let dtHolder = []
-        if (de === 'datatypein') {
-          for (let dti of kbData[0][ct][de]) {
-           dtHolder.push(this.liveCNRL.lookupContract(dti))
-          }
-          dataCNRLrefs[de] = dtHolder
-        } else {
-          dataCNRLrefs[de] = this.liveCNRL.lookupContract(kbData[0][ct][de])
-        }
-      }
-      let startSourceData = this.liveCNRLUtility.traceSource(dataCNRLrefs)
-      // trace back to source, dt, categories, tidy etc.
-      console.log('dt trace source BAXK')
-      console.log(startSourceData)
-      let dataStory = {}
-      dataStory.datatypes = dataCNRLrefs
-      dataStory.trace = startSourceData
-      console.log(dataStory)
-      expandCNRLrefs[ct] = dataStory
-    } else if (ct === 'time') {
-      let timeCNRLrefs = {}
-      for (let ti of kbData[0][ct].timeseg) {
-        timeCNRLrefs[ti] = this.liveCNRL.lookupContract(ti)
-      }
-      let timeBundle = {}
-      timeBundle.startperiod = kbData[0][ct].startperiod
-      timeBundle.realtime = kbData[0][ct].realtime
-      timeBundle.timeseg = timeCNRLrefs
-      expandCNRLrefs[ct] = timeBundle
-    } else if (ct === 'compute') {
-      expandCNRLrefs[ct] = this.liveCNRL.lookupContract(kbData[0][ct].cnrl)
-    } else if (ct === 'visualise') {
-      let visCNRLrefs = {}
-      let visIndex = Object.keys(kbData[0][ct])
-      for (let ve of visIndex) {
-        for (let ii of kbData[0][ct][ve]) {
-          visCNRLrefs[ve] = this.liveCNRL.lookupContract(ii)
-        }
-      }
-      expandCNRLrefs[ct] = visCNRLrefs
-    }
-  }
-  console.log('expanded')
-  console.log(expandCNRLrefs) */
-  // return expandCNRLrefs
+  return kbData
+}
+
+/**
+* save KBID entry
+* @method kbidEntrysave
+*
+*/
+KBLedger.prototype.kbidEntrysave = async function (kbidi) {
+  let kbData = await this.liveKBLStorage.saveKBID(kbidi)
+  return kbData
+}
+
+/**
+* save KBID INDEX
+* @method kbidINDEXsave
+*
+*/
+KBLedger.prototype.kbidINDEXsave = async function (kbidi) {
+  let kbData = await this.liveKBLStorage.saveKBIDindex(kbidi)
   return kbData
 }
 

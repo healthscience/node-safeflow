@@ -32,7 +32,7 @@ util.inherits(ChartSystem, events.EventEmitter)
 */
 ChartSystem.prototype.chartjsControl = function (contract, dataIN) {
   let chartData = {}
-  let structureRules = this.structureChartData(contract.rules, dataIN.data['cnrl-t1'])
+  let structureRules = this.structureChartData(contract.rules, dataIN)
   let dataPrep = this.prepareVueChartJS(contract, structureRules)
   chartData.chartPackage = dataPrep
   // dataPrep = { 'labels': [2, 4], 'datasets': [{ label: 'Wearable', backgroundColor: 'rgb(255, 99, 132)', borderColor: 'rgb(255, 99, 132)', 'data': [1, 2] }] }

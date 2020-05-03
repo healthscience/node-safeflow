@@ -28,26 +28,27 @@ util.inherits(TidyDataSystem, events.EventEmitter)
 * @method tidyRawData
 *
 */
-TidyDataSystem.prototype.tidyRawData = function (bundleIN, dataRaw, time) {
+TidyDataSystem.prototype.tidyRawData = function (source, contract, bundleIN, device, datatype, time, dataRaw) {
   // first check if primary data source or derived (if derived dt source will be tidy on compute cycle)
+  console.log('tidyraw start')
+  console.log(source)
   let tidyHolder = {}
   // loop over devices dts and tidy as needed
   tidyHolder = {}
   let tidyBack = []
   let dInfo = []
   if (bundleIN.computeflow !== true) {
-    for (let dev of bundleIN.devices) {
-      tidyHolder[dev] = []
-      if (bundleIN.apiInfo[dev].sourceDTs[0].primary !== 'derived') {
-        dInfo = bundleIN.apiInfo[dev].tidyList
+      tidyHolder[device] = []
+      if (source.primary !== 'derived') {
+        dInfo = source.tidyList
         if (dInfo.length !== 0) {
           // loop over per time segment
-          for (let ts of bundleIN.timeseg) {
+          for (let ts of device.timeseg) {
             console.log(ts)
             let dtTidy = dInfo
             let rawDataarray = dataRaw[dev]
             let dtMatch = []
-            dtMatch = bundleIN.apiInfo[dev].datatypes
+            dtMatch = source.datatypes
             tidyBack = this.tidyFilter(dtTidy, dtMatch, 'day', rawDataarray)
             tidyHolder[dev] = tidyBack
           }
@@ -57,26 +58,23 @@ TidyDataSystem.prototype.tidyRawData = function (bundleIN, dataRaw, time) {
       } else {
         tidyHolder = dataRaw
       }
-    }
   } else {
-    for (let dev of bundleIN.devices) {
-      tidyHolder[dev] = []
-      if (bundleIN.apiInfo[dev].sourceDTs[0].primary === 'derived') {
-        dInfo = bundleIN.apiInfo[dev].tidyList
-        if (dInfo.length !== 0) {
-        // loop over per time segment
-          for (let ts of bundleIN.timeseg) {
-            console.log(ts)
-            let dtTidy = dInfo
-            let dtMatch = []
-            let rawDataarrayc = dataRaw[dev]
-            dtMatch = bundleIN.apiInfo[dev].sourceDTs
-            tidyBack = this.tidyFilterRemove(dtTidy, dtMatch, 'day', rawDataarrayc)
-          }
-          tidyHolder[dev] = tidyBack
-        } else {
-          tidyHolder = dataRaw
+    tidyHolder[dev] = []
+    if (source.primary === 'derived') {
+      dInfo = device.tidyList
+      if (source.length !== 0) {
+      // loop over per time segment
+        for (let ts of source.timeseg) {
+          console.log(ts)
+          let dtTidy = dInfo
+          let dtMatch = []
+          let rawDataarrayc = dataRaw[dev]
+          dtMatch = source.sourceDTs
+          tidyBack = this.tidyFilterRemove(dtTidy, dtMatch, 'day', rawDataarrayc)
         }
+        tidyHolder[dev] = tidyBack
+      } else {
+        tidyHolder = dataRaw
       }
     }
   }
