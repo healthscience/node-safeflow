@@ -34,10 +34,8 @@ KBLcryptoUtility.prototype.hashKBID = function (newContract, resulthash) {
   console.log(newContract)
   // prepare Contract evidence
   let contractEvidence = {}
-  contractEvidence.previous = null
-  contractEvidence.datatypes = newContract.dtcompute
-  contractEvidence.compute = newContract.compute
-  contractEvidence.time = newContract.time
+  // contractEvidence.previous = null
+  contractEvidence.contract = newContract
   contractEvidence.results = resulthash
   // let hashKBID = '39493493943949394'
   let hashKBID = this.evidenceProof(contractEvidence)

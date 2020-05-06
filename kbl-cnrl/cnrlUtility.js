@@ -9,13 +9,16 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
+import Xlibrarystorage from './xlibraryStorage.js'
+import CNRLmaster from './cnrlMaster.js'
 const util = require('util')
 const events = require('events')
 const axios = require('axios')
 
-var CNRLUtility = function (liveCNRL) {
+var CNRLUtility = function (setIN) {
   events.EventEmitter.call(this)
-  this.liveCNRL = liveCNRL
+  this.liveCNRL = new CNRLmaster(setIN)
+  this.liveXlibrary = new Xlibrarystorage(setIN)
 }
 
 /**
@@ -23,6 +26,114 @@ var CNRLUtility = function (liveCNRL) {
 * @method inherits
 */
 util.inherits(CNRLUtility, events.EventEmitter)
+
+/**
+*  default API's hardwired into toolkit setup
+* @method defautNetworkContracts
+*
+*/
+CNRLUtility.prototype.defautNetworkContracts = async function (refIN) {
+  let dataCNRLbundle = {}
+  let defaultCNRLsetup = await this.liveCNRLStore.defautCNRL(refIN)
+  dataCNRLbundle = defaultCNRLsetup[0]
+  return dataCNRLbundle
+}
+
+/**
+* get the latest KBL state
+* @method startKBL
+*
+*/
+CNRLUtility.prototype.startKBL = async function () {
+  // latest nxp and ledger entries, CNRL contract look ups
+  let kbIndex = []
+  let NXPlist = []
+  let startLedger = await this.liveXlibrary.getNXPindex('genesis', 10)
+  console.log('startledgerannon')
+  console.log(startLedger)
+  // loop over and filter out CNRL contract  (TODO expand based on signed and KBID address ie. crytop verification)
+  for (let kb of startLedger) {
+    let cnrlType = this.liveCNRL.lookupContract(kb.cnrl)
+    let kBundle = {}
+    kBundle.kbid = kb
+    kBundle.cnrl = cnrlType
+    kbIndex.push(kBundle)
+  }
+  // filter for NXP and Kbid entry
+  for (let ki of kbIndex) {
+    if (ki.cnrl.type === 'experiment') {
+      NXPlist.push(ki.cnrl)
+    }
+  }
+  return NXPlist
+}
+
+/**
+* get the latest KBL state
+* @method startKBL
+*
+*/
+CNRLUtility.prototype.startPeerKBL = async function () {
+  // latest nxp and ledger entries, CNRL contract look ups
+  let nxpIndex = []
+  let NXPlist = []
+  let startLedger = await this.liveXlibrary.getNXPindex('contract', 10)
+  console.log('startledger')
+  console.log(startLedger)
+  // exclude genesis
+  for (let ki of startLedger) {
+    if (ki.merkle !== 'genesis') {
+      NXPlist.push(ki)
+    }
+  }
+  // loop over and filter out CNRL contract  (TODO expand based on signed and KBID address ie. crytop verification)
+  for (let nxc of NXPlist) {
+    let cnrlType = this.liveCNRL.lookupContract(nxc.cnrl)
+    let kBundle = {}
+    kBundle.index = nxc
+    kBundle.contract = cnrlType
+    nxpIndex.push(kBundle)
+  }
+  return nxpIndex
+}
+
+/**
+* look up CNRL contract
+* @method contractCNRL
+*
+*/
+CNRLUtility.prototype.contractCNRL = function (cnrl) {
+  let cnrlContract = this.liveCNRL.lookupContract(cnrl)
+  return cnrlContract
+}
+
+/**
+* get modules per NXP cnrl
+* @method modulesCNRL
+*
+*/
+CNRLUtility.prototype.modulesCNRL = async function (mList) {
+  // modules for NXP cnrl contract
+  let moduleList = []
+  // look up module cnrls
+  for (let km of mList) {
+    let cnrlModule = await this.liveXlibrary.peerModules(km)
+    // let cnrlModule = this.liveCNRL.lookupContract(km)
+    moduleList.push(cnrlModule)
+  }
+  return moduleList
+}
+
+/**
+* get modules per NXP cnrl
+* @method saveModule
+*
+*/
+CNRLUtility.prototype.saveModule = async function (newVersion) {
+  let cnrlSaveModule = await this.liveXlibrary.newVerionContract(newVersion)
+  console.log(cnrlSaveModule)
+  return true
+}
 
 /**
 *  trace to source contract

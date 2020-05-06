@@ -12,9 +12,8 @@
 const util = require('util')
 const events = require('events')
 
-var CNRLmaster = function (apiSettings, cnrlStore) {
+var CNRLmaster = function (apiSettings) {
   events.EventEmitter.call(this)
-  this.liveCNRLStore = cnrlStore
 }
 
 /**
@@ -22,18 +21,6 @@ var CNRLmaster = function (apiSettings, cnrlStore) {
 * @method inherits
 */
 util.inherits(CNRLmaster, events.EventEmitter)
-
-/**
-*  default API's hardwired into toolkit setup
-* @method defautNetworkContracts
-*
-*/
-CNRLmaster.prototype.defautNetworkContracts = async function (refIN) {
-  let dataCNRLbundle = {}
-  let defaultCNRLsetup = await this.liveCNRLStore.defautCNRL(refIN)
-  dataCNRLbundle = defaultCNRLsetup[0]
-  return dataCNRLbundle
-}
 
 /**
 * Index of datatypes
@@ -699,7 +686,7 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.compute = 'cnrl-2356388731'
     dataCNRLbundle.controlpanel = ['startstop']
     dataCNRLbundle.automation = true
-    dataCNRLbundle.time = {"realtime" : 0, "timeseg": [ "cnrl-t1" ], "startperiod": "1587769200000"}
+    dataCNRLbundle.time = {"realtime" : 0, "timeseg": [ "cnrl-t1" ], "startperiod": ""}
   } else if (refIN === 'cnrl-001234543458') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'module'

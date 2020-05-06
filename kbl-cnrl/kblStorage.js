@@ -75,8 +75,9 @@ KBLdatabaseUtility.prototype.kblEntry = async function (kbid) {
 *
 */
 KBLdatabaseUtility.prototype.saveKBID = async function (kbidData) {
-  let kbidData2 = { 'publickey': this.tempPubkey, 'result': '39493dddddddddddd', 'token': '000000004', 'kbid': 'e3935e3940e553116c5a6d3a6d38e994a4cdddd' }
-  await axios.post(this.baseAPI + '/kblsave/' + this.tempPubkey + '/' + this.tempToken, kbidData2)
+  console.log('start save KBID entry')
+  // let kbidData2 = { 'publickey': this.tempPubkey, 'result': '39493dddddddddddd', 'token': '000000004', 'kbid': 'e3935e3940e553116c5a6d3a6d38e994a4cdddd' }
+  await axios.post(this.baseAPI + '/kblsave/' + this.tempPubkey + '/' + this.tempToken, kbidData)
     .then(function (response) {
       // console.log(response)
     })
@@ -88,8 +89,8 @@ KBLdatabaseUtility.prototype.saveKBID = async function (kbidData) {
 *
 */
 KBLdatabaseUtility.prototype.saveKBIDindex = async function (kbidData) {
-  let kbidData3 = { 'publickey': this.tempPubkey, 'timestamp': '1578873600000', 'cnrl': 'cnrl-001234543214', 'kbid': '3ddfdfd' }
-  await axios.post(this.baseAPI + '/kblindexsave/' + this.tempPubkey + '/' + this.tempToken, kbidData3)
+  // let kbidData3 = { 'publickey': this.tempPubkey, 'timestamp': '1578873600000', 'cnrl': 'cnrl-001234543214', 'kbid': '3ddfdfd' }
+  await axios.post(this.baseAPI + '/kblindexsave/' + this.tempPubkey + '/' + this.tempToken, kbidData)
     .then(function (response) {
       // console.log(response)
     })

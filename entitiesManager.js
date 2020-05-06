@@ -9,6 +9,7 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
+import CNRLUtility from './kbl-cnrl/cnrlUtility.js'
 import KBLedger from './kbl-cnrl/kbledger.js'
 import CryptoUtility from './kbl-cnrl/cryptoUtility.js'
 import Entity from './scienceEntities.js'
@@ -18,6 +19,7 @@ const events = require('events')
 var EntitiesManager = function (apiCNRL, auth) {
   events.EventEmitter.call(this)
   this.auth = auth
+  this.liveCNRLUtility = new CNRLUtility(auth)
   this.KBLlive = new KBLedger(apiCNRL, auth)
   this.liveCrypto = new CryptoUtility()
   this.liveSEntities = {}
@@ -38,7 +40,7 @@ EntitiesManager.prototype.peerKBLstart = async function () {
   console.log('peer setart')
   // read peer kbledger
   // let entityModule = {}
-  let nxpList = await this.KBLlive.startKBL()
+  let nxpList = await this.liveCNRLUtility.startKBL()
   // should return light data to UI or go ahead and prepare entity for this NXP
   // extract device per NXP so
   return nxpList
@@ -50,7 +52,7 @@ EntitiesManager.prototype.peerKBLstart = async function () {
 *
 */
 EntitiesManager.prototype.peerKBLPeerstart = async function () {
-  let nxpList = await this.KBLlive.startPeerKBL()
+  let nxpList = await this.liveCNRLUtility.startPeerKBL()
   // should return light data to UI or go ahead and prepare entity for this NXP
   // extract device per NXP so
   return nxpList
@@ -89,28 +91,30 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
     this.liveSEntities[shellID] = new Entity(this.auth)
     // extract types of modules
     // now filter for type?
-    modules = this.NXPmodules(ecsIN.modules)
+    modules = await this.NXPmodules(ecsIN.modules)
     for (let md of modules) {
       // need matcher - module type to how its processed. Only computes have KBIDS
-      if (md.prime.text === 'Device') {
+      if (md.type === 'Device') {
         // hook up to device
+        console.log('device')
+        console.log(md)
         deviceInfo = this.extractDevice(md.device.cnrl)
         moduleState = await this.deviceDataflow(shellID, deviceInfo)
-      } else if (md.prime.text === 'Compute') {
+      } else if (md.type === 'compute') {
         // feed into ECS -KBID processor
         console.log('compute start')
         console.log(md)
-        let kbidInfo = await this.extractKBID(md.prime.cnrl, 1)
+        let kbidInfo = await this.extractKBID(md.cnrl, 1)
         // now check this KBID HASH against built CNRL inputs
         moduleState = await this.computeFlow(shellID, md, deviceInfo, kbidInfo)
         console.log('after compuet')
         console.log(moduleState)
-      } else if (md.prime.text === 'Visualise') {
+      } else if (md.type === 'Visualise') {
         // feed into ECS -KBID processor
         console.log('visualise start')
         console.log(md)
         // extract visualisation contract information
-        let visInfo = this.KBLlive.contractCNRL(md.visualise)
+        let visInfo = this.liveCNRLUtility.contractCNRL(md.visualise)
         moduleState = await this.visualFlow(shellID, md, visInfo)
       } else {
         // plain extract info. from CNRL contract
@@ -159,18 +163,20 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
   let hashMatcher = false
   // look at compute controls and see if time need brought up to date?
   if (modContract.automation === true) {
-    // update time in kbid
+    // defaults is to bring up to date computations if set tru
     contractChanges = this.automationUpdate(shellID, modContract)
-    console.log('contract changes')
     console.log(contractChanges)
+    // console.log(ddfdiddfd)
     // update contract for first time input
     modContract.time.startperiod = contractChanges.range[0]
     hashMatcher = this.compareKBIDs(modContract, kbid)
   } else {
+    // uses the current KBID entry
     hashMatcher = this.compareKBIDs(modContract, kbid)
   }
   console.log('hashmatcher')
   console.log(hashMatcher)
+  // console.log(ddfdiddfd)
   if (hashMatcher === true) {
     console.log('results already prepared')
     // get data from API
@@ -179,7 +185,7 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
     mockAPI.path = '/results/'
     await this.liveSEntities[shellID].liveDataC.directResults('REST', mockAPI, kbid.result)
   } else {
-    console.log('new data to process Create KBID entry')
+    console.log('new data to process new verison Ref contract and create new KBID entry')
     console.log(this.liveSEntities[shellID].liveDeviceC.devices.pop())
     console.log(this.liveSEntities[shellID].liveDeviceC.devices)
     this.liveSEntities[shellID].liveTimeC.timerange = [1588114800000]
@@ -198,7 +204,9 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
           let engineReturn = await this.computeEngine(shellID, apiData, modContract, device, datatype, time)
           console.log('COMPUTEengine return')
           console.log(engineReturn)
-          // SAVE results
+          // new version of Ref Contract
+          this.liveCNRLUtility.saveModule(modContract)
+          // create new KBID entry
           let mockAPI = {}
           mockAPI.namespace = 'http://165.227.244.213:8882'
           mockAPI.path = '/inresults/'
@@ -220,19 +228,20 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
           let newKBIDhash = this.liveCrypto.hashKBID(modContract, saveObject.hash)
           newKBIDentry.kbid = newKBIDhash
           newKBIDentry.token = ''
+          newKBIDentry.dml = ''
           console.log('new KIBD entry pre save')
           console.log(newKBIDentry)
-          /* let kbidEntryPass = await this.KBLlive.kbidEntrysave(newKBIDentry)
+          let kbidEntryPass = await this.KBLlive.kbidEntrysave(newKBIDentry)
           if (kbidEntryPass === true) {
-            {publickey: "e97bd0056edae2a5da49b7868167b6c9d13bc3d5", timestamp: "1578873600000", cnrl: "cnrl-001234543214", kbid: "e3935e3940e553116c5a6d3a6d38e994a4c9fb8f"}
+            // {publickey: "e97bd0056edae2a5da49b7868167b6c9d13bc3d5", timestamp: "1578873600000", cnrl: "cnrl-001234543214", kbid: "e3935e3940e553116c5a6d3a6d38e994a4c9fb8f"}
             let newIndex = {}
             newIndex.timestamp = 1
-            newIndex.cnrl = mod.prime.cnrl
+            newIndex.cnrl = modContract.cnrl
             newIndex.kbid = newKBIDhash
-            let indexKBID = await this.KBLlive.kbidINDEXsave(2)
+            let indexKBID = await this.KBLlive.kbidINDEXsave(newIndex)
             console.log('new index ')
             console.log(newIndex)
-          } */
+          }
         }
       }
     }
@@ -316,7 +325,7 @@ EntitiesManager.prototype.automationUpdate = function (shellID, contract) {
   // look up time seg contract
   let localContract = contract
   let extractContract = {}
-  let timeSeg =  this.KBLlive.contractCNRL(contract.time.timeseg[0])
+  let timeSeg =  this.liveCNRLUtility.contractCNRL(contract.time.timeseg[0])
   localContract.time.timeseg = timeSeg
   extractContract.timeseg = timeSeg
   let addTimerange = this.liveSEntities[shellID].liveTimeC.timeProfiling(localContract.time)
@@ -331,9 +340,15 @@ EntitiesManager.prototype.automationUpdate = function (shellID, contract) {
 *
 */
 EntitiesManager.prototype.compareKBIDs = function (mod, kbid) {
+  console.log('compate KIBD HASHES')
+  console.log(mod)
+  console.log(kbid)
   let newKBID = this.liveCrypto.hashKBID(mod, kbid.result)
+  console.log('new hash')
+  console.log(newKBID)
   let hashMatcher = this.liveCrypto.compareHashes(kbid.kbid, newKBID)
   // If the result HASH then just look at Visulisation inputs and send the data back.
+  console.log(hashMatcher)
   return hashMatcher
 }
 
@@ -342,10 +357,10 @@ EntitiesManager.prototype.compareKBIDs = function (mod, kbid) {
 * @method NXPmodules
 *
 */
-EntitiesManager.prototype.NXPmodules = function (mList) {
+EntitiesManager.prototype.NXPmodules = async function (mList) {
   // read peer kbledger
   // let entityModule = {}
-  let nxpList = this.KBLlive.modulesCNRL(mList)
+  let nxpList = await this.liveCNRLUtility.modulesCNRL(mList)
   return nxpList
 }
 
@@ -355,7 +370,7 @@ EntitiesManager.prototype.NXPmodules = function (mList) {
 *
 */
 EntitiesManager.prototype.extractDevice = function (cnrl) {
-  let deviceBundle = this.KBLlive.contractCNRL(cnrl)
+  let deviceBundle = this.liveCNRLUtility.contractCNRL(cnrl)
   return deviceBundle
 }
 

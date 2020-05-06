@@ -9,8 +9,6 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-import CNRLmaster from './cnrlMaster.js'
-import CNRLUtility from './cnrlUtility.js'
 import KBLstorage from './kblStorage.js'
 
 const util = require('util')
@@ -19,8 +17,6 @@ const events = require('events')
 var KBLedger = function (apiCNRL, setIN) {
   events.EventEmitter.call(this)
   this.liveKBLStorage = new KBLstorage(setIN)
-  this.liveCNRL = new CNRLmaster(setIN, this.liveKBLStorage)
-  this.liveCNRLUtility = new CNRLUtility(this.liveCNRL)
   this.liveAPI = apiCNRL
 }
 
@@ -38,86 +34,6 @@ util.inherits(KBLedger, events.EventEmitter)
 KBLedger.prototype.genesisKBL = function () {
   let newLedger = 'new'
   return newLedger
-}
-
-/**
-* get the latest KBL state
-* @method startKBL
-*
-*/
-KBLedger.prototype.startKBL = async function () {
-  // latest nxp and ledger entries, CNRL contract look ups
-  let kbIndex = []
-  let NXPlist = []
-  let startLedger = await this.liveKBLStorage.getNXPindex('genesis', 10)
-  // loop over and filter out CNRL contract  (TODO expand based on signed and KBID address ie. crytop verification)
-  for (let kb of startLedger) {
-    let cnrlType = this.liveCNRL.lookupContract(kb.cnrl)
-    let kBundle = {}
-    kBundle.kbid = kb
-    kBundle.cnrl = cnrlType
-    kbIndex.push(kBundle)
-  }
-  // filter for NXP and Kbid entry
-  for (let ki of kbIndex) {
-    if (ki.cnrl.type === 'experiment') {
-      NXPlist.push(ki.cnrl)
-    }
-  }
-  return NXPlist
-}
-
-/**
-* get the latest KBL state
-* @method startKBL
-*
-*/
-KBLedger.prototype.startPeerKBL = async function () {
-  // latest nxp and ledger entries, CNRL contract look ups
-  let nxpIndex = []
-  let NXPlist = []
-  let startLedger = await this.liveKBLStorage.getNXPindex('contract', 10)
-  // exclude genesis
-  for (let ki of startLedger) {
-    if (ki.merkle !== 'genesis') {
-      NXPlist.push(ki)
-    }
-  }
-  // loop over and filter out CNRL contract  (TODO expand based on signed and KBID address ie. crytop verification)
-  for (let nxc of NXPlist) {
-    let cnrlType = this.liveCNRL.lookupContract(nxc.cnrl)
-    let kBundle = {}
-    kBundle.index = nxc
-    kBundle.contract = cnrlType
-    nxpIndex.push(kBundle)
-  }
-  return nxpIndex
-}
-
-/**
-* look up CNRL contract
-* @method contractCNRL
-*
-*/
-KBLedger.prototype.contractCNRL = function (cnrl) {
-  let cnrlContract = this.liveCNRL.lookupContract(cnrl)
-  return cnrlContract
-}
-
-/**
-* get modules per NXP cnrl
-* @method modulesCNRL
-*
-*/
-KBLedger.prototype.modulesCNRL = function (mList) {
-  // modules for NXP cnrl contract
-  let moduleList = []
-  // look up module cnrls
-  for (let km of mList) {
-    let cnrlModule = this.liveCNRL.lookupContract(km)
-    moduleList.push(cnrlModule)
-  }
-  return moduleList
 }
 
 /**
@@ -151,7 +67,7 @@ KBLedger.prototype.kbidReader = async function (kbid) {
 */
 KBLedger.prototype.kbidEntrysave = async function (kbidi) {
   let kbData = await this.liveKBLStorage.saveKBID(kbidi)
-  return kbData
+  return true
 }
 
 /**
