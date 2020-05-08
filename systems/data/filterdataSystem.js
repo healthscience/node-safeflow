@@ -28,36 +28,15 @@ util.inherits(FilterDataSystem, events.EventEmitter)
 * @method dtFilterController
 *
 */
-FilterDataSystem.prototype.dtFilterController = function (source, contract, api, device, datatype, time, liveData) {
+FilterDataSystem.prototype.dtFilterController = function (source, contract, device, datatype, time, tidyData) {
   console.log('filter controller start')
-  console.log(source)
-  console.log(contract)
-  console.log(api)
-  console.log(device)
-  console.log(datatype)
-  console.log(time)
-  console.log(liveData)
-  let filterHolder = {}
-  let filterType = ''
-  filterHolder = {}
-  // is the filter on derived source(s)?
-  let dtSourceR = []
-  if (source.computeflow === true) {
-    dtSourceR = api.sourceapiquery
-    filterType = 'derived'
-  } else {
-    dtSourceR = source.datatypes
-    filterType = 'primary'
-  }
-  filterHolder[datatype] = {}
-  let sourcerawData = liveData
-  let filterColumn = this.filterDataType(filterType, datatype, sourcerawData, time)
-  if (filterType === 'primary') {
-    filterHolder[datatype] = filterColumn
-  } else {
-    filterHolder = filterColumn
-  }
-  return filterHolder
+  // console.log(source)
+  // console.log(contract)
+  // console.log(device)
+  // console.log(datatype)
+  // console.log(tidyData)
+  let filterColumn = this.filterDataType(source, datatype, tidyData)
+  return filterColumn
 }
 
 /**
@@ -65,33 +44,20 @@ FilterDataSystem.prototype.dtFilterController = function (source, contract, api,
 * @method filterDataType
 *
 */
-FilterDataSystem.prototype.filterDataType = function (fTypeIN, sourceDT, arrayIN, time) {
-  console.log('filter data type')
-  console.log(fTypeIN)
-  console.log(sourceDT)
-  console.log(arrayIN)
-  console.log(time)
+FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData) {
   let singleArray = []
-  if (fTypeIN !== 'derived') {
-    for (let sing of arrayIN) {
-      let dataPair = {}
-      let timestamp = sing['timestamp']
-      dataPair.timestamp = timestamp
-      let valueC = 0
-      if (sing[sourceDT.column] === null) {
-        valueC = null
-      } else {
-        valueC = parseFloat(sing[sourceDT.column])
-      }
-      dataPair[sourceDT.column] = valueC
-      singleArray.push(dataPair)
+  for (let di of tidyData) {
+    let dataPair = {}
+    let timestamp = di['timestamp']
+    dataPair['timestamp'] = timestamp
+    let valueC = 0
+    if (di[datatype] === null) {
+      valueC = null
+    } else {
+      valueC = parseFloat(di[source.sourceapiquery.column])
     }
-  } else {
-    // single flat arrays
-    for (let sing of arrayIN) {
-      let valueD = parseInt(sing[sourceDT.column], 10)
-      singleArray.push(valueD)
-    }
+    dataPair[datatype] = valueC
+    singleArray.push(dataPair)
   }
   return singleArray
 }

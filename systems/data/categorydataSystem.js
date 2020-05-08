@@ -30,48 +30,21 @@ util.inherits(CategoryDataSystem, events.EventEmitter)
 * @method categorySorter
 *
 */
-CategoryDataSystem.prototype.categorySorter = function (systemBundle, device, datatype, time, rawData) {
-  console.log('catcoreter')
-  console.log(systemBundle)
-  console.log(device)
-  console.log(time)
-  console.log(rawData)
+CategoryDataSystem.prototype.categorySorter = function (dataQuery, device, datatype, time, rawData) {
+  console.log('categorySORTER')
+  // console.log(dataQuery)
+  // console.log(device)
+  // console.log(time)
+  // console.log(rawData)
   let catHolder = {}
-  let pordState = this.checkDTprimaryderived(systemBundle, device)
-  if (pordState === true) {
-    catHolder = this.categoriseWorkerDerived(systemBundle, rawData, time)
+  if (dataQuery.categorydt.length > 1) {
+    for (let cdt of dataQuery.categorydt) {
+      catHolder = this.categoriseWorker(dataQuery, rawData, time)
+    }
   } else {
-    catHolder = this.categoriseWorker(systemBundle, rawData, time)
+    catHolder = rawData
   }
   return catHolder
-}
-
-/**
-*
-* @method checkDTprimaryderived
-*
-*/
-CategoryDataSystem.prototype.checkDTprimaryderived = function (systemBundle, device) {
-  let dtPorD = false
-  if (device.primary !== 'primary') {
-    dtPorD = true
-  } else {
-    dtPorD = false
-  }
-  return dtPorD
-}
-
-/**
-*
-* @method checkDTprimaryderived
-*
-*/
-CategoryDataSystem.prototype.checkDTcategory = function (systemBundle, device) {
-  let catState = false
-  if (device.categorycodes.length !== 0) {
-    catState = true
-  }
-  return catState
 }
 
 /**
@@ -79,7 +52,7 @@ CategoryDataSystem.prototype.checkDTcategory = function (systemBundle, device) {
 * @method categoriseWorker
 *
 */
-CategoryDataSystem.prototype.categoriseWorker = function (systemBundle, rawData, time) {
+CategoryDataSystem.prototype.categoriseWorker = function (dataQuery, rawData, time) {
   let catHolder = {}
   const excludeCodes = (e, tItem, column) => {
     for (let fCode of tItem) {
@@ -91,13 +64,13 @@ CategoryDataSystem.prototype.categoriseWorker = function (systemBundle, rawData,
     }
   }
   let catData = []
-  for (let dev of systemBundle.devices) {
+  for (let dev of dataQuery.devices) {
     catHolder[dev] = []
-    if (systemBundle.apiInfo[dev].categorycodes.length !== 0) {
-      let catColumnQueryName = this.extractColumnName(systemBundle.apiInfo[dev].categorycodes)
+    if (dataQuery.apiInfo[dev].categorycodes.length !== 0) {
+      let catColumnQueryName = this.extractColumnName(dataQuery.apiInfo[dev].categorycodes)
       // is it for primary or derive data types?
-      for (let dti of systemBundle.apiInfo[dev].sourceapiquery) {
-        for (let ts of systemBundle.timeseg) {
+      for (let dti of dataQuery.apiInfo[dev].sourceapiquery) {
+        for (let ts of dataQuery.timeseg) {
           console.log(ts)
           let catTempHold = {}
           catTempHold[ts] = catData
@@ -108,17 +81,6 @@ CategoryDataSystem.prototype.categoriseWorker = function (systemBundle, rawData,
       catHolder = rawData
     }
   }
-  return catHolder
-}
-
-/**
-*
-* @method categoriseWorkerDerived
-*
-*/
-CategoryDataSystem.prototype.categoriseWorkerDerived = function (systemBundle, rawData, time) {
-  let catHolder = {}
-  catHolder = rawData
   return catHolder
 }
 

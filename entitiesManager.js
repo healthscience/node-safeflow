@@ -52,7 +52,7 @@ EntitiesManager.prototype.peerKBLstart = async function () {
 *
 */
 EntitiesManager.prototype.peerKBLPeerstart = async function () {
-  let nxpList = await this.liveCNRLUtility.startPeerKBL()
+  let nxpList = await this.liveCNRLUtility.startPeerNXP()
   // should return light data to UI or go ahead and prepare entity for this NXP
   // extract device per NXP so
   return nxpList
@@ -141,7 +141,7 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
 EntitiesManager.prototype.deviceDataflow = async function (shellID, apiData) {
   let statusD = false
   // set the device in module
-  statusD = await this.liveSEntities[shellID].liveDeviceC.setDevice(apiData)
+  statusD = await this.liveSEntities[shellID].liveDeviceC.setDevice(apiData.api)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDeviceC)
   statusD = true
@@ -156,8 +156,6 @@ EntitiesManager.prototype.deviceDataflow = async function (shellID, apiData) {
 */
 EntitiesManager.prototype.computeFlow = async function (shellID, modContract, apiData, kbid) {
   console.log('COMPUTEFLOW0-----begin')
-  console.log(modContract)
-  console.log(kbid)
   let contractChanges = {}
   let updateContract = {}
   let hashMatcher = false
@@ -165,8 +163,6 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
   if (modContract.automation === true) {
     // defaults is to bring up to date computations if set tru
     contractChanges = this.automationUpdate(shellID, modContract)
-    console.log(contractChanges)
-    // console.log(ddfdiddfd)
     // update contract for first time input
     modContract.time.startperiod = contractChanges.range[0]
     hashMatcher = this.compareKBIDs(modContract, kbid)
@@ -185,7 +181,7 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
     mockAPI.path = '/results/'
     await this.liveSEntities[shellID].liveDataC.directResults('REST', mockAPI, kbid.result)
   } else {
-    console.log('new data to process new verison Ref contract and create new KBID entry')
+    console.log('new compute-- new verison Refcontract and create new KBID entry')
     console.log(this.liveSEntities[shellID].liveDeviceC.devices.pop())
     console.log(this.liveSEntities[shellID].liveDeviceC.devices)
     this.liveSEntities[shellID].liveTimeC.timerange = [1588114800000]
@@ -196,17 +192,12 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
       for (let datatype of modContract.dtcompute) {
         for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
           // set the new updated time settings for the new contract
-          console.log(updateContract)
-          console.log(contractChanges)
           modContract.time.timeseg = contractChanges.timeseg
           modContract.time.startperiod = time
           // should this CNRL contract be update and saved for time changes prob. no.
           let engineReturn = await this.computeEngine(shellID, apiData, modContract, device, datatype, time)
           console.log('COMPUTEengine return')
-          console.log(engineReturn)
-          // new version of Ref Contract
-          this.liveCNRLUtility.saveModule(modContract)
-          // create new KBID entry
+          // first save results crypto storage
           let mockAPI = {}
           mockAPI.namespace = 'http://165.227.244.213:8882'
           mockAPI.path = '/inresults/'
@@ -215,12 +206,12 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
           saveObject.timestamp = 1
           saveObject.hash = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData)
           saveObject.data = this.liveSEntities[shellID].liveDataC.liveData
-          // { "timestamp" : "1578700500000", "hash" : "39493493943949394", "data" : { "cnrl-t1" : [ { "cnrl-8856388711" : 67, "cnrl-8856388713" : 1578700500000 }, { "cnrl-8856388711" : 68, "cnrl-8856388713" : 1578700600000 }, { "cnrl-8856388711" : 69, "cnrl-8856388713" : 1578700700000 } ] }
           console.log(saveObject)
           // console.log(saveObject2222)
           let saveResults = await this.liveSEntities[shellID].liveDataC.directSaveResults('REST', mockAPI, saveObject)
+          // new version of Ref Contract
+          this.liveCNRLUtility.saveModule(modContract)
           // prepare and save KBID entry
-          // {publickey: "e97bd0056edae2a5da49b7868167b6c9d13bc3d5", result: "39493493943949394", token: "000000003", kbid: "e3935e3940e553116c5a6d3a6d38e994a4c9fb8f"}
           let newKBIDentry = {}
           //newKBIDentry.previous = kbid.kbid
           newKBIDentry.result = saveObject.hash
@@ -229,17 +220,14 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
           newKBIDentry.kbid = newKBIDhash
           newKBIDentry.token = ''
           newKBIDentry.dml = ''
-          console.log('new KIBD entry pre save')
-          console.log(newKBIDentry)
           let kbidEntryPass = await this.KBLlive.kbidEntrysave(newKBIDentry)
           if (kbidEntryPass === true) {
-            // {publickey: "e97bd0056edae2a5da49b7868167b6c9d13bc3d5", timestamp: "1578873600000", cnrl: "cnrl-001234543214", kbid: "e3935e3940e553116c5a6d3a6d38e994a4c9fb8f"}
             let newIndex = {}
             newIndex.timestamp = 1
             newIndex.cnrl = modContract.cnrl
             newIndex.kbid = newKBIDhash
             let indexKBID = await this.KBLlive.kbidINDEXsave(newIndex)
-            console.log('new index ')
+            console.log('new kblinde saved')
             console.log(newIndex)
           }
         }
@@ -261,10 +249,13 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiData, cont
   this.liveSEntities[shellID].liveTimeC.setMasterClock(contract.time.startperiod)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveTimeC)
-  this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(apiData, device, datatype)
+  this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(apiData, contract, device, datatype)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDatatypeC)
-  await this.liveSEntities[shellID].liveDataC.sourceData(apiData, contract,  this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.sourceapiquery, '####', device.device_mac, datatype, time)
+  console.log('time loop')
+  console.log(time)
+  await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, contract, '####', device.device_mac, datatype, time)
+  console.log(dfdfdfdfd)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
   // this.emit('computation', 'in-progress')
@@ -340,15 +331,9 @@ EntitiesManager.prototype.automationUpdate = function (shellID, contract) {
 *
 */
 EntitiesManager.prototype.compareKBIDs = function (mod, kbid) {
-  console.log('compate KIBD HASHES')
-  console.log(mod)
-  console.log(kbid)
   let newKBID = this.liveCrypto.hashKBID(mod, kbid.result)
-  console.log('new hash')
-  console.log(newKBID)
   let hashMatcher = this.liveCrypto.compareHashes(kbid.kbid, newKBID)
   // If the result HASH then just look at Visulisation inputs and send the data back.
-  console.log(hashMatcher)
   return hashMatcher
 }
 
@@ -370,7 +355,15 @@ EntitiesManager.prototype.NXPmodules = async function (mList) {
 *
 */
 EntitiesManager.prototype.extractDevice = function (cnrl) {
-  let deviceBundle = this.liveCNRLUtility.contractCNRL(cnrl)
+  let deviceBundle = {}
+  let deviceAPI = this.liveCNRLUtility.contractCNRL(cnrl)
+  let sourceAPI = {}
+  // check to see if it has a source api e.g  mobile storage first?
+  if(deviceAPI.source !== 'cnrl-primary') {
+    sourceAPI = this.liveCNRLUtility.contractCNRL(deviceAPI.source)
+  }
+  deviceBundle.api = deviceAPI
+  deviceBundle.primary = sourceAPI
   return deviceBundle
 }
 

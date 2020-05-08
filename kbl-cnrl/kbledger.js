@@ -43,10 +43,7 @@ KBLedger.prototype.genesisKBL = function () {
 */
 KBLedger.prototype.kbIndexQuery = async function (cnrl, n) {
   // latest nxp and ledger entries, CNRL contract look ups
-  console.log('index')
   let indexKBLedger = await this.liveKBLStorage.getKBLindex(cnrl, n)
-  console.log('back')
-  console.log(indexKBLedger)
   return indexKBLedger
 }
 

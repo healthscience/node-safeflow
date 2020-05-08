@@ -73,7 +73,7 @@ CNRLUtility.prototype.startKBL = async function () {
 * @method startKBL
 *
 */
-CNRLUtility.prototype.startPeerKBL = async function () {
+CNRLUtility.prototype.startPeerNXP = async function () {
   // latest nxp and ledger entries, CNRL contract look ups
   let nxpIndex = []
   let NXPlist = []
@@ -130,6 +130,8 @@ CNRLUtility.prototype.modulesCNRL = async function (mList) {
 *
 */
 CNRLUtility.prototype.saveModule = async function (newVersion) {
+  // need to bump version one forward
+  newVersion.version++
   let cnrlSaveModule = await this.liveXlibrary.newVerionContract(newVersion)
   console.log(cnrlSaveModule)
   return true

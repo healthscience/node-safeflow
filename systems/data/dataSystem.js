@@ -37,10 +37,10 @@ util.inherits(DataSystem, events.EventEmitter)
 * @method datatypeQueryMapping
 *
 */
-DataSystem.prototype.datatypeQueryMapping = async function (type, api, hash, device, datatype, time) {
+DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceInfo, device, datatype, time) {
   console.log('datatypeQueryMapping')
   console.log(type)
-  console.log(api)
+  console.log(sourceInfo)
   console.log(hash)
   console.log(device)
   console.log(time)
@@ -52,8 +52,8 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, api, hash, dev
     rawHolder = await this.liveTestStorage.RESTbuilder(api, hash)
   } else if (type === 'COMPUTE') {
     console.log('compuate flow for data API')
-    api.path = '/computedata/'
-    rawHolder = await this.liveTestStorage.COMPUTEbuilder(api, device, time)
+    sourceInfo.data.api.path = '/computedata/'
+    rawHolder = await this.liveTestStorage.COMPUTEbuilder(sourceInfo.data.api, device, time)
   }
   return rawHolder
 }

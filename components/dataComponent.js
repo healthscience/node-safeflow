@@ -49,8 +49,8 @@ DataComponent.prototype.setDevicesLive = async function () {
 * @method RawData
 *
 */
-DataComponent.prototype.sourceData = async function (source, contract, apiINFO, hash, device, datatype, time) {
-  await this.DataControlFlow(source, contract, apiINFO, device, datatype, time)
+DataComponent.prototype.sourceData = async function (source, contract, hash, device, datatype, time) {
+  await this.DataControlFlow(source, contract, hash, device, datatype, time)
   return true
 }
 
@@ -59,16 +59,16 @@ DataComponent.prototype.sourceData = async function (source, contract, apiINFO, 
 * @method DataControlFlow
 *
 */
-DataComponent.prototype.DataControlFlow = async function (source, contract, apiINFO, device, datatype, time) {
-  let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', apiINFO, '#####', device, time)
+DataComponent.prototype.DataControlFlow = async function (source, contract, hash,  device, datatype, time) {
+  let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, device, datatype, time)
   console.log('data back from source')
   console.log(dataRback)
   this.dataRaw[time] = dataRback
   // is there a categories filter to apply?
-  this.CategoriseData(apiINFO, device, datatype, time, dataRback)
+  this.CategoriseData(source, device, datatype, time, dataRback)
   // is there any data tidying required
-  this.TidyData(source, contract, apiINFO, device, datatype, time)
-  this.FilterDownDT(source, contract, apiINFO, device, datatype, time)
+  this.TidyData(source, contract, device, datatype, time)
+  this.FilterDownDT(source, contract, device, datatype, time)
   return true
 }
 
@@ -82,6 +82,8 @@ DataComponent.prototype.CategoriseData = function (apiINFO, device, datatype, ti
   // console.log(systemBundle)
   catDataG = this.liveCategoryData.categorySorter(apiINFO, device, datatype, time, this.dataRaw[time])
   this.categoryData[time] = catDataG
+  console.log('categoryDATA set')
+  console.log(this.categoryData)
 }
 
 /**
@@ -89,9 +91,9 @@ DataComponent.prototype.CategoriseData = function (apiINFO, device, datatype, ti
 * @method TidyData
 *
 */
-DataComponent.prototype.TidyData = function (source, contract, apiInfo, device, datatype, time) {
+DataComponent.prototype.TidyData = function (source, contract, device, datatype, time) {
   let tidyDataG = {}
-  tidyDataG = this.liveTidyData.tidyRawData(source, contract, apiInfo, device, datatype, time, this.categoryData[time])
+  tidyDataG = this.liveTidyData.tidyRawData(source, contract, device, datatype, time, this.categoryData[time])
   this.tidyData[time] = tidyDataG
   // set liveData based on/if category data asked for
   this.assessDataStatus(time)
@@ -103,14 +105,16 @@ DataComponent.prototype.TidyData = function (source, contract, apiInfo, device, 
 * @method FilterDownDT
 *
 */
-DataComponent.prototype.FilterDownDT = function (source, contract, api, device, datatype, time) {
+DataComponent.prototype.FilterDownDT = function (source, contract, device, datatype, time) {
   // console.log('filteDown')
   let tidyDataG = {}
   // console.log(systemBundle)
   if (this.liveData.primary !== 'prime') {
-    tidyDataG = this.liveFilterData.dtFilterController(source, contract, api, device, datatype, time, this.liveData[time])
+    tidyDataG = this.liveFilterData.dtFilterController(source, contract, device, datatype, time, this.tidyData[time])
     this.liveData[time] = tidyDataG
   }
+  console.log('filter down to dts asked for')
+  console.log(this.liveData)
   return true
 }
 

@@ -117,263 +117,179 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
   } else if (refIN === 'cnrl-8856388712') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8856388712', 'text': 'steps', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.categories.push()
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'metres', 'active': false }
     dataCNRLbundle.namespace = 'safe://cnrl/cnrl-8856388712'
     dataCNRLbundle.index = ['']
   } else if (refIN === 'cnrl-8856388713') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8856388713', 'text': 'timestamp', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.categories.push()
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': '60 seconds', 'active': false }
     dataCNRLbundle.namespace = 'cnrl-8856388713'
     dataCNRLbundle.index = ['']
   } else if (refIN === 'cnrl-8856388723') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8856388723', 'text': 'average', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.categories.push()
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'statistics', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-8856388727') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8856388727', 'text': 'recovery', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.cate = []
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': '', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-8356388727') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8356388727', 'text': 'sleep', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-derived'
-    dataCNRLbundle.categories.push()
     dataCNRLbundle.dtsource = ['cnrl-3356388722']
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': '', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-8326388727') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8326388727', 'text': 'walking', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-derived'
-    dataCNRLbundle.categories.push()
     dataCNRLbundle.dtsource = ['cnrl-', 'cnrl-']
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': '', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-8326328727') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8326328727', 'text': 'running', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-derived'
-    dataCNRLbundle.categories.push()
     dataCNRLbundle.dtsource = ['cnrl-', 'cnrl-']
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': '', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-3356388722') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-3356388722', 'text': 'raw_kind', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.categories.push()
     dataCNRLbundle.dtsource = []
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': '', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-3356388733') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-3356388733', 'text': 'RAW_INTENSITY', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.categories.push()
     dataCNRLbundle.dtsource = []
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': '', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-8856388724') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8856388724', 'text': 'average-heartrate', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-derived'
-    dataCNRLbundle.categories.push()
     dataCNRLbundle.dtsource = ['cnrl-8856388711']
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'statistics', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-8856388322') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8856388322', 'text': 'average-steps', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-derived'
-    dataCNRLbundle.categories.push()
     dataCNRLbundle.dtsource = ['cnrl-8856388712']
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'statistics', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-8856388924') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8856388924', 'text': 'sum-heartrate', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-derived'
-    dataCNRLbundle.categories.push()
     dataCNRLbundle.dtsource = ['cnrl-8856388711']
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'statistics', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-8856389322') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8856389322', 'text': 'sum-steps', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-derived'
-    dataCNRLbundle.categories.push()
     dataCNRLbundle.dtsource = ['cnrl-8856388712']
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'statistics', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-8856388725') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8856388725', 'text': 'recovery-heartrate', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-derived'
-    dataCNRLbundle.categories.push()
     dataCNRLbundle.dtsource = ['cnrl-8856388711', 'cnrl-8856388725']
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'statistics', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-8856388748') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-8856388748', 'text': 'p-value', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-derived'
-    dataCNRLbundle.categories.push()
     dataCNRLbundle.dtsource = []
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'statistics', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-3993714611') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-3993714611', 'text': 'p10', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.categories.push()
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'parts per million', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-3339949442') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-3339949442', 'text': 'SDS_P2', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.categories.push()
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'parts per million', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-3339949443') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-3339949443', 'text': 'SDS_P1', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.categories.push()
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'parts per million', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-3339949444') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-3339949444', 'text': 'temperature', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.categories.push()
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'celsius', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-3339949445') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-3339949445', 'text': 'humidity', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.categories.push()
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'moisture per ', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-3339949446') {
     dataCNRLbundle.type = 'datatype'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-3339949446', 'text': 'airpressure', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
     dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.categories.push()
-    dataCNRLbundle.categorycodes.push({})
     dataCNRLbundle.resolution = { 'text': 'atmosphere pressing on earth', 'active': false }
     dataCNRLbundle.namespace = ''
     dataCNRLbundle.index = []
@@ -429,6 +345,21 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.apisave = 'results/<publickey>/<token>/<data>'
     dataCNRLbundle.namespace = 'http://165.227.244.213:8882'
     dataCNRLbundle.index = []
+  } else if (refIN === 'cnrl-773355992211') {
+    // CNRL implementation contract e.g. from mobile phone sqlite table structure
+    dataCNRLbundle.type = 'dtpackaging'
+    dataCNRLbundle.source = 'cnrl-primary'
+    dataCNRLbundle.prime = { 'cnrl': 'cnrl-773355992211', 'text': 'Gadgetbridge-SQLite', 'active': false }
+    dataCNRLbundle.tidy = true
+    dataCNRLbundle.tidyList = {'cnrl-8856388711': {'codes': [-1, 0, 255]}}, {'cnrl-8856388712': {'codes': [-1, 0, 255]}}
+    dataCNRLbundle.device = ''
+    dataCNRLbundle.devicetableStructure = []
+    dataCNRLbundle.tableStructure = [{'cnrl': 'cnrl-8856388713', 'text': 'TIMESTAMP', 'active': false}, {'cnrl': 'cnrl', 'text': 'DEVICE_ID', 'active': false}, {'cnrl': 'cnrl', 'text': 'USER_ID', 'active': false}, {'cnrl': 'cnrl-3356388733', 'text': 'RAW_INTENSITY', 'active': false}, {'cnrl': 'cnrl-8856388712', 'text': 'STEPS', 'active': false}, {'cnrl': 'cnrl-3356388722', 'text': 'RAW_KIND', 'active': false}, {'cnrl': 'cnrl-8856388711', 'text': 'HEART_RATE', 'active': false}]
+    dataCNRLbundle.categorycodes.push({'column': 'cnrl-3356388722', 'categories': [{'code': '112', 'cnrl': 'cnrl-8356388727', 'active': false}, {'code': '202', 'cnrl': 'cnrl-8356388727', 'active': false}]})
+    dataCNRLbundle.categorycodes.push({'column': 'cnrl-3356388733', 'categories': [{'code': '312', 'cnrl': 'cnrl-8326388727', 'active': false}, {'code': '302', 'cnrl': 'cnrl-8326328727', 'active': false}]})
+    dataCNRLbundle.resolution = {}
+    dataCNRLbundle.namespace = 'safe://cnrl/cnrl-773355992211'
+    dataCNRLbundle.index = []
   } else if (refIN === '33221102' || refIN === 'cnrl-33221102') {
     // CNRL implementation REST API
     dataCNRLbundle.type = 'dtpackaging'
@@ -471,32 +402,13 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.tableStructure[1] = [{'cnrl': 'cnrl-8856388713', 'text': 'timestamp', 'active': false}]
     dataCNRLbundle.namespace = 'http://archive.luftdaten.info/'
     dataCNRLbundle.index = []
-  } else if (refIN === 'cnrl-773355992211') {
-    // CNRL implementation contract e.g. from mobile phone sqlite table structure
-    dataCNRLbundle.type = 'dtpackaging'
-    dataCNRLbundle.source = 'cnrl-primary'
-    dataCNRLbundle.prime = { 'cnrl': 'cnrl-773355992211', 'text': 'Gadgetbridge-SQLite', 'active': false }
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = [{'cnrl': 'cnrl-8856388711', 'codes': [-1, 0, 255]}]
-    dataCNRLbundle.device = ''
-    dataCNRLbundle.devicetableStructure = []
-    dataCNRLbundle.tableStructure = [{'cnrl': 'cnrl-8856388713', 'text': 'TIMESTAMP', 'active': false}, {'cnrl': 'cnrl', 'text': 'DEVICE_ID', 'active': false}, {'cnrl': 'cnrl', 'text': 'USER_ID', 'active': false}, {'cnrl': 'cnrl-3356388733', 'text': 'RAW_INTENSITY', 'active': false}, {'cnrl': 'cnrl-8856388712', 'text': 'STEPS', 'active': false}, {'cnrl': 'cnrl-3356388722', 'text': 'RAW_KIND', 'active': false}, {'cnrl': 'cnrl-8856388711', 'text': 'HEART_RATE', 'active': false}]
-    dataCNRLbundle.categorycodes.push({'column': 'cnrl-3356388722', 'categories': [{'code': '112', 'cnrl': 'cnrl-8356388727', 'active': false}, {'code': '202', 'cnrl': 'cnrl-8356388727', 'active': false}]})
-    dataCNRLbundle.categorycodes.push({'column': 'cnrl-3356388733', 'categories': [{'code': '312', 'cnrl': 'cnrl-8326388727', 'active': false}, {'code': '302', 'cnrl': 'cnrl-8326328727', 'active': false}]})
-    dataCNRLbundle.resolution = {}
-    dataCNRLbundle.namespace = 'safe://cnrl/cnrl-773355992211'
-    dataCNRLbundle.index = []
   } else if (refIN === 'cnrl-888355992223') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'experiment'
     dataCNRLbundle.source = 'cnrl-primary'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-888355992223', 'text': 'SLEEP - When do I sleep the best?', 'active': false }
     dataCNRLbundle.livingpaper = {'link': 'https://docs.google.com/document'}
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
-    dataCNRLbundle.categorycodes.push()
-    dataCNRLbundle.categorycodes.push()
     dataCNRLbundle.resolution = {}
     dataCNRLbundle.namespace = 'safe://cnrl/cnrl-888355992223'
     dataCNRLbundle.index = []
@@ -508,11 +420,7 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.source = 'cnrl-primary'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-88735d99d228', 'text': 'STRESS - Mental Health', 'active': false }
     dataCNRLbundle.livingpaper = {'link': 'https://docs.google.com/document'}
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
-    dataCNRLbundle.categorycodes.push()
-    dataCNRLbundle.categorycodes.push()
     dataCNRLbundle.resolution = {}
     dataCNRLbundle.namespace = 'safe://cnrl/cnrl-88735d99d228'
     dataCNRLbundle.index = []
@@ -523,11 +431,7 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.source = 'cnrl-primary'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-888355992224', 'text': 'CALE I am an evolutionary algorithm learning all the time', 'active': false }
     dataCNRLbundle.livingpaper = {'link': 'https://docs.google.com/document/'}
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
-    dataCNRLbundle.categorycodes.push()
-    dataCNRLbundle.categorycodes.push()
     dataCNRLbundle.resolution = {}
     dataCNRLbundle.namespace = 'safe://cnrl/cnrl-888355992223'
     dataCNRLbundle.index = []
@@ -538,11 +442,7 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.source = 'cnrl-primary'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-888388992224', 'text': 'EXERCISE - Resting HR Recovery', 'active': false }
     dataCNRLbundle.livingpaper = {'link': 'https://docs.google.com/document/d/11JWcbBrwgLIqPc7V7GpI_WbACuIS_4h630zdT66Re3s/edit'}
-    dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
     dataCNRLbundle.tableStructure = []
-    dataCNRLbundle.categorycodes.push()
-    dataCNRLbundle.categorycodes.push()
     dataCNRLbundle.resolution = {}
     dataCNRLbundle.namespace = 'safe://cnrl/cnrl-888388992224'
     dataCNRLbundle.index = []
