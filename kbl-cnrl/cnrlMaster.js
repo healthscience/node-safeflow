@@ -351,7 +351,11 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.source = 'cnrl-primary'
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-773355992211', 'text': 'Gadgetbridge-SQLite', 'active': false }
     dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = {'cnrl-8856388711': {'codes': [-1, 0, 255]}}, {'cnrl-8856388712': {'codes': [-1, 0, 255]}}
+    let tidyBuild = {}
+    tidyBuild['cnrl-8856388711'] = {'codes': [-1, 0, 255]}
+    tidyBuild['cnrl-8856388712'] = {'codes': [-1, 0, 255]}
+    dataCNRLbundle.tidyList = tidyBuild
+    // dataCNRLbundle.tidyList = {{'cnrl-8856388711': {'codes': [-1, 0, 255]}}, {'cnrl-8856388712': {'codes': [-1, 0, 255]}}
     dataCNRLbundle.device = ''
     dataCNRLbundle.devicetableStructure = []
     dataCNRLbundle.tableStructure = [{'cnrl': 'cnrl-8856388713', 'text': 'TIMESTAMP', 'active': false}, {'cnrl': 'cnrl', 'text': 'DEVICE_ID', 'active': false}, {'cnrl': 'cnrl', 'text': 'USER_ID', 'active': false}, {'cnrl': 'cnrl-3356388733', 'text': 'RAW_INTENSITY', 'active': false}, {'cnrl': 'cnrl-8856388712', 'text': 'STEPS', 'active': false}, {'cnrl': 'cnrl-3356388722', 'text': 'RAW_KIND', 'active': false}, {'cnrl': 'cnrl-8856388711', 'text': 'HEART_RATE', 'active': false}]
@@ -594,7 +598,8 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-001234543458', 'text': 'Visualise', 'active': false }
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-001234543458'
-    dataCNRLbundle.grid = [{ 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': '0', static: false }, { 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': '1', static: false }]
+    dataCNRLbundle.grid = [{ 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': 'cnrl-8856388711', static: false }, { 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': 'cnrl-8856388712', static: false }]
+    dataCNRLbundle.rules = [{ 'xaxis': 'cnrl-8856388713', 'yaxis': 'cnrl-8856388711' }, { 'xaxis': 'cnrl-8856388713', 'yaxis': 'cnrl-8856388712' }] // cnrl-8856388712
     dataCNRLbundle.visualise = 'cnrl-813033773883'
   } else if (refIN === 'cnrl-001234543215') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
@@ -650,7 +655,6 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.prime = { 'cnrl': 'cnrl-813033773883', 'text': 'Chart.js', 'active': false }
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-chart'
-    dataCNRLbundle.rules = { 'xaxis': 'cnrl-8856388713', 'yaxis': 'cnrl-8856388711' } // cnrl-8856388712
     dataCNRLbundle.structure = { 'chartPackage': { 'labels': [], 'datasets': [{ label: '', backgroundColor: 'rgb(255, 99, 132)', borderColor: 'rgb(255, 99, 132)', 'data': [] }] },  'chartOptions': { }, 'message': 'compute-complete' }
   } else if (refIN === 'cnrl-table') {
     dataCNRLbundle.type = 'visualise'

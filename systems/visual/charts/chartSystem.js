@@ -30,9 +30,12 @@ util.inherits(ChartSystem, events.EventEmitter)
 * @method chartjsControl
 *
 */
-ChartSystem.prototype.chartjsControl = function (contract, dataIN) {
+ChartSystem.prototype.chartjsControl = function (contract, rule, dataIN) {
+  console.log('chartjscontrl start')
+  console.log(contract)
+  console.log(dataIN)
   let chartData = {}
-  let structureRules = this.structureChartData(contract.rules, dataIN)
+  let structureRules = this.structureChartData(rule, dataIN)
   let dataPrep = this.prepareVueChartJS(contract, structureRules)
   chartData.chartPackage = dataPrep
   // dataPrep = { 'labels': [2, 4], 'datasets': [{ label: 'Wearable', backgroundColor: 'rgb(255, 99, 132)', borderColor: 'rgb(255, 99, 132)', 'data': [1, 2] }] }
@@ -45,15 +48,17 @@ ChartSystem.prototype.chartjsControl = function (contract, dataIN) {
 * @method structureChartData
 *
 */
-ChartSystem.prototype.structureChartData = function (rules, cData) {
+ChartSystem.prototype.structureChartData = function (rule, cData) {
   let dataPrep = {}
-  // console.log('chart data strcture rules')
-  // console.log(rules)
-  // console.log(cData)
-  let splitDatax = cData.map(n => n[rules.xaxis])
-  let splitDatay = cData.map(n => n[rules.yaxis])
-  dataPrep.xaxis = splitDatax
-  dataPrep.yaxis = splitDatay
+  console.log('chart data strcture rules')
+  console.log(cData)
+  console.log(rule)
+    let splitDatax = cData.map(n => n[rule.xaxis])
+    let splitDatay = cData.map(n => n[rule.yaxis])
+    dataPrep.xaxis = splitDatax
+    dataPrep.yaxis = splitDatay
+  console.log('chart data pre over')
+  console.log(dataPrep)
   return dataPrep
 }
 
@@ -122,14 +127,14 @@ ChartSystem.prototype.datasetPrep = function (rules, results) {
     // chartItem.borderColor = rules.color.borderColor
     // chartItem.backgroundColor = rules.color.backgroundColor
   } else {
-    chartItem.type = 'bar'
+    chartItem.type = 'line'
     chartItem.fillColor = 'rgb(255, 99, 132)' // rules.color.borderColor // 'rgba(220, 220, 220, 2)'
-    chartItem.borderWidth = 2
+    chartItem.borderWidth = 0
     chartItem.borderColor = 'rgb(255, 99, 132)' // rules.color.borderColor
-    chartItem.backgroundColor = 'rgb(255, 99, 132)' //rules.color.backgroundColor
+    chartItem.backgroundColor = '' // 'rgb(255, 99, 132)' //rules.color.backgroundColor
   }
   chartItem.label = 'device' // rules.datatype
-  chartItem.fill = true
+  chartItem.fill = false
   let scaling = 1 // this.yAxisScaleSet(rules.datatype)
   // chartItem.scale = scaling
   chartItem.data = results.yaxis

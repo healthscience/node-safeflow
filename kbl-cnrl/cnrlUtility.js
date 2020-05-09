@@ -103,7 +103,10 @@ CNRLUtility.prototype.startPeerNXP = async function () {
 *
 */
 CNRLUtility.prototype.contractCNRL = function (cnrl) {
+  console.log(cnrl)
   let cnrlContract = this.liveCNRL.lookupContract(cnrl)
+  console.log('ack fae CNRL data source')
+  console.log(cnrlContract)
   return cnrlContract
 }
 

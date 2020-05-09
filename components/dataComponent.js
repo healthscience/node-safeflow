@@ -23,7 +23,7 @@ var DataComponent = function (setIN) {
   this.liveFilterData = new FilterDataSystem(setIN)
   this.liveCategoryData = new CategoryDataSystem(setIN)
   this.liveDataSystem = new DataSystem(setIN)
-  this.liveData = []
+  this.liveData = {}
   this.tidyData = {}
   this.categoryData = {}
   this.dataRaw = {}
@@ -61,14 +61,14 @@ DataComponent.prototype.sourceData = async function (source, contract, hash, dev
 */
 DataComponent.prototype.DataControlFlow = async function (source, contract, hash,  device, datatype, time) {
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, device, datatype, time)
-  console.log('data back from source')
-  console.log(dataRback)
+  //console.log('data back from source')
+  // console.log(dataRback)
   this.dataRaw[time] = dataRback
   // is there a categories filter to apply?
   this.CategoriseData(source, device, datatype, time, dataRback)
   // is there any data tidying required
   this.TidyData(source, contract, device, datatype, time)
-  this.FilterDownDT(source, contract, device, datatype, time)
+  this.liveData[datatype] = this.FilterDownDT(source, contract, device, datatype, time)
   return true
 }
 
@@ -111,11 +111,10 @@ DataComponent.prototype.FilterDownDT = function (source, contract, device, datat
   // console.log(systemBundle)
   if (this.liveData.primary !== 'prime') {
     tidyDataG = this.liveFilterData.dtFilterController(source, contract, device, datatype, time, this.tidyData[time])
-    this.liveData[time] = tidyDataG
   }
   console.log('filter down to dts asked for')
   console.log(this.liveData)
-  return true
+  return tidyDataG
 }
 
 /**

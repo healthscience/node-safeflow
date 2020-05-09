@@ -97,13 +97,11 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
       if (md.type === 'Device') {
         // hook up to device
         console.log('device')
-        console.log(md)
         deviceInfo = this.extractDevice(md.device.cnrl)
         moduleState = await this.deviceDataflow(shellID, deviceInfo)
       } else if (md.type === 'compute') {
         // feed into ECS -KBID processor
         console.log('compute start')
-        console.log(md)
         let kbidInfo = await this.extractKBID(md.cnrl, 1)
         // now check this KBID HASH against built CNRL inputs
         moduleState = await this.computeFlow(shellID, md, deviceInfo, kbidInfo)
@@ -114,8 +112,7 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
         console.log('visualise start')
         console.log(md)
         // extract visualisation contract information
-        let visInfo = this.liveCNRLUtility.contractCNRL(md.visualise)
-        moduleState = await this.visualFlow(shellID, md, visInfo)
+        moduleState = await this.visualFlow(shellID, md)
       } else {
         // plain extract info. from CNRL contract
       }
@@ -185,7 +182,7 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
     console.log(this.liveSEntities[shellID].liveDeviceC.devices.pop())
     console.log(this.liveSEntities[shellID].liveDeviceC.devices)
     this.liveSEntities[shellID].liveTimeC.timerange = [1588114800000]
-    modContract.dtcompute = ['cnrl-8856388711']
+    // modContract.dtcompute = ['cnrl-8856388711']
     // else go through creating new KBID entry
     // range of time, number of devices, number of data types  do all the loop here?
     for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
@@ -255,13 +252,9 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiData, cont
   console.log('time loop')
   console.log(time)
   await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, contract, '####', device.device_mac, datatype, time)
-  console.log(dfdfdfdfd)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
   // this.emit('computation', 'in-progress')
-  // await this.liveSEntities[shellID].liveTimeC.startTimeSystem(this.liveSEntities[shellID].liveDatatypeC, this.liveSEntities[shellID].liveDataC.liveData)
-  // proof of evidence
-  // this.liveCrypto.evidenceProof()
   this.computeStatus = await this.liveSEntities[shellID].liveComputeC.filterCompute(contract, device.device_mac, datatype, time, this.liveSEntities[shellID].liveDataC.liveData)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
@@ -274,13 +267,19 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiData, cont
 * @method visualFlow
 *
 */
-EntitiesManager.prototype.visualFlow = async function (shellID, mod, vis) {
+EntitiesManager.prototype.visualFlow = async function (shellID, visModule) {
   console.log('VISUALFLOW-----begin')
-  // console.log(mod)
-  // console.log(vis)
-  this.liveSEntities[shellID].liveVisualC.filterVisual(vis, this.liveSEntities[shellID].liveDataC.liveData)
-  // proof of evidence
-  // this.liveCrypto.evidenceProof()
+  console.log(visModule)
+  console.log(this.liveSEntities[shellID].liveDataC.liveData)
+  let visContract = this.liveCNRLUtility.contractCNRL(visModule.visualise)
+  // what has been ask for check rules
+  for (let rule of visModule.rules) {
+    console.log('ppppup dada')
+    console.log(this.liveSEntities[shellID].liveDataC.liveData[rule.yaxis])
+    this.liveSEntities[shellID].liveVisualC.filterVisual(visContract, rule, this.liveSEntities[shellID].liveDataC.liveData[rule.yaxis])
+    // proof of evidence
+    // this.liveCrypto.evidenceProof()
+  }
   return true
 }
 
@@ -364,6 +363,8 @@ EntitiesManager.prototype.extractDevice = function (cnrl) {
   }
   deviceBundle.api = deviceAPI
   deviceBundle.primary = sourceAPI
+  console.log('extract device')
+  console.log(deviceBundle)
   return deviceBundle
 }
 

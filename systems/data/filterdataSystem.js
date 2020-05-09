@@ -49,7 +49,7 @@ FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData
   for (let di of tidyData) {
     let dataPair = {}
     let timestamp = di['timestamp']
-    dataPair['timestamp'] = timestamp
+    dataPair['cnrl-8856388713'] = timestamp
     let valueC = 0
     if (di[datatype] === null) {
       valueC = null
