@@ -29,7 +29,6 @@ util.inherits(TidyDataSystem, events.EventEmitter)
 *
 */
 TidyDataSystem.prototype.tidyRawData = function (source, contract, device, datatype, time, dataRaw) {
-  console.log(source)
   // first check if primary data source or derived (if derived dt source will be tidy on compute cycle)
   let tidyBack = []
   tidyBack = this.tidyFilterRemove(source.tidydt[datatype], datatype, source.sourceapiquery, dataRaw)
@@ -42,7 +41,6 @@ TidyDataSystem.prototype.tidyRawData = function (source, contract, device, datat
 *
 */
 TidyDataSystem.prototype.tidyFilterRemove = function (tidyRules, datatype, apiDTinfo, dataRaw) {
-  console.log(tidyRules)
   let tidyHolderF = {}
   const manFilter = (e, datatype, rule) => {
     let filterMat = null

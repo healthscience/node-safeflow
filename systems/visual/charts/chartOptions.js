@@ -34,6 +34,7 @@ ChartOptions.prototype.prepareChartOptions = function (settings, scale) {
   settings.title = 'amazfit'
   // let yAxisOptions = this.prepareYoptions(datatypes, scale)
   let options = {
+    maintainAspectRatio: false,
     responsive: true,
     spanGaps: true,
     tooltips: {

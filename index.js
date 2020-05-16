@@ -36,6 +36,8 @@ safeFlow.prototype.networkAuthorisation = function (apiCNRL, auth) {
   auth.namespace = this.defaultStorage
   this.settings = auth
   this.liveEManager = new EntitiesManager(apiCNRL, auth)
+  this.flowListen()
+  this.entityGetter()
   return true
 }
 
@@ -64,10 +66,24 @@ safeFlow.prototype.startPeerFlow = function (apiCNRL, auth) {
 * @method entityGetter
 *
 */
-safeFlow.prototype.entityGetter = async function (shellID, modBundle) {
+safeFlow.prototype.entityGetter = function (shellID) {
   let dataVue = {}
-  dataVue = this.liveEManager.entityDataReturn(shellID, modBundle)
-  return dataVue
+  // dataVue = this.liveEManager.entityDataReturn(shellID)
+  console.log('safeflow LISTEN START')
+  this.liveEManager.on('visualUpdate', (data) => {
+    this.emit('displayUpdate', data)
+  })
+}
+
+/**
+* start the ECS flow with a new input
+* @method flowListen
+*
+*/
+safeFlow.prototype.flowListen = function () {
+  this.liveEManager.on('startflow', (data, data2) => {
+    this.liveEManager.entityFlow(data, data2)
+  })
 }
 
 export default safeFlow

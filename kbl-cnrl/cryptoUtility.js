@@ -31,7 +31,6 @@ util.inherits(KBLcryptoUtility, events.EventEmitter)
 *
 */
 KBLcryptoUtility.prototype.hashKBID = function (newContract, resulthash) {
-  console.log(newContract)
   // prepare Contract evidence
   let contractEvidence = {}
   // contractEvidence.previous = null
@@ -39,7 +38,6 @@ KBLcryptoUtility.prototype.hashKBID = function (newContract, resulthash) {
   contractEvidence.results = resulthash
   // let hashKBID = '39493493943949394'
   let hashKBID = this.evidenceProof(contractEvidence)
-  console.log(hashKBID)
   return hashKBID
 }
 
@@ -63,8 +61,9 @@ KBLcryptoUtility.prototype.compareHashes = function (inA, inB) {
 */
 KBLcryptoUtility.prototype.entityID = function (addressIN) {
   // hash Object
-  let kbundleHash = hashObject(addressIN)
   let tempTokenG = ''
+  let kbundleHash = ''
+  kbundleHash = hashObject(addressIN)
   let salt = crypto.randomBytes(16).toString('base64')
   // let hashs = crypto.createHmac('sha256',salt).update(password).digest('base64')
   let hash = crypto.createHmac('sha256', salt).update(kbundleHash).digest()

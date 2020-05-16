@@ -29,7 +29,7 @@ util.inherits(FilterDataSystem, events.EventEmitter)
 *
 */
 FilterDataSystem.prototype.dtFilterController = function (source, contract, device, datatype, time, tidyData) {
-  console.log('filter controller start')
+  // console.log('filter controller start')
   // console.log(source)
   // console.log(contract)
   // console.log(device)

@@ -38,20 +38,20 @@ util.inherits(DataSystem, events.EventEmitter)
 *
 */
 DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceInfo, device, datatype, time) {
-  console.log('datatypeQueryMapping')
-  console.log(type)
-  console.log(sourceInfo)
-  console.log(hash)
-  console.log(device)
-  console.log(time)
+  // console.log('datatypeQueryMapping')
+  // console.log(type)
+  // console.log(sourceInfo)
+  // console.log(hash)
+  // console.log(device)
+  // console.log(time)
   let rawHolder = []
   if (type === 'SAFE') {
-    console.log('safeNetwork file GET')
+    // console.log('safeNetwork file GET')
   } else if (type === 'REST') {
   // pass on to either safe API builder, REST API builder or IPSF builder etc.
     rawHolder = await this.liveTestStorage.RESTbuilder(api, hash)
   } else if (type === 'COMPUTE') {
-    console.log('compuate flow for data API')
+    // console.log('compuate flow for data API')
     sourceInfo.data.api.path = '/computedata/'
     rawHolder = await this.liveTestStorage.COMPUTEbuilder(sourceInfo.data.api, device, time)
   }

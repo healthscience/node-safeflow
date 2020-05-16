@@ -31,9 +31,9 @@ util.inherits(ChartSystem, events.EventEmitter)
 *
 */
 ChartSystem.prototype.chartjsControl = function (contract, rule, dataIN) {
-  console.log('chartjscontrl start')
-  console.log(contract)
-  console.log(dataIN)
+  // console.log('chartjscontrl start')
+  // console.log(contract)
+  // console.log(dataIN)
   let chartData = {}
   let structureRules = this.structureChartData(rule, dataIN)
   let dataPrep = this.prepareVueChartJS(contract, structureRules)
@@ -50,15 +50,12 @@ ChartSystem.prototype.chartjsControl = function (contract, rule, dataIN) {
 */
 ChartSystem.prototype.structureChartData = function (rule, cData) {
   let dataPrep = {}
-  console.log('chart data strcture rules')
-  console.log(cData)
-  console.log(rule)
-    let splitDatax = cData.map(n => n[rule.xaxis])
-    let splitDatay = cData.map(n => n[rule.yaxis])
+    let splitDatax = cData.map(n => n['cnrl-8856388713'])
+    let splitDatay = cData.map(n => n[rule])
     dataPrep.xaxis = splitDatax
     dataPrep.yaxis = splitDatay
-  console.log('chart data pre over')
-  console.log(dataPrep)
+  // console.log('chart data pre over')
+  // console.log(dataPrep)
   return dataPrep
 }
 

@@ -38,9 +38,9 @@ util.inherits(ComputeSystem, events.EventEmitter)
 ComputeSystem.prototype.computationSystem = async function (contract, data) {
   // match computation to approprate verified compute need LOADER to add what WASM is being used/required
   let computeStatus = {}
-  console.log('computesystem')
-  console.log(contract)
-  console.log(data)
+  // console.log('computesystem')
+  // console.log(contract)
+  // console.log(data)
   if (contract.cid === 'none') {
     computeStatus.state = true
     computeStatus.data = data

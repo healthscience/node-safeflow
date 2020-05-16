@@ -78,8 +78,6 @@ CNRLUtility.prototype.startPeerNXP = async function () {
   let nxpIndex = []
   let NXPlist = []
   let startLedger = await this.liveXlibrary.getNXPindex('contract', 10)
-  console.log('startledger')
-  console.log(startLedger)
   // exclude genesis
   for (let ki of startLedger) {
     if (ki.merkle !== 'genesis') {
@@ -103,10 +101,7 @@ CNRLUtility.prototype.startPeerNXP = async function () {
 *
 */
 CNRLUtility.prototype.contractCNRL = function (cnrl) {
-  console.log(cnrl)
   let cnrlContract = this.liveCNRL.lookupContract(cnrl)
-  console.log('ack fae CNRL data source')
-  console.log(cnrlContract)
   return cnrlContract
 }
 

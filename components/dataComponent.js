@@ -16,6 +16,7 @@ import CategoryDataSystem from '../systems/data/categorydataSystem.js'
 const util = require('util')
 const events = require('events')
 const moment = require('moment')
+const hashObject = require('object-hash')
 
 var DataComponent = function (setIN) {
   events.EventEmitter.call(this)
@@ -68,7 +69,7 @@ DataComponent.prototype.DataControlFlow = async function (source, contract, hash
   this.CategoriseData(source, device, datatype, time, dataRback)
   // is there any data tidying required
   this.TidyData(source, contract, device, datatype, time)
-  this.liveData[datatype] = this.FilterDownDT(source, contract, device, datatype, time)
+  let dataMatch = this.FilterDownDT(source, contract, device, datatype, time)
   return true
 }
 
@@ -82,8 +83,6 @@ DataComponent.prototype.CategoriseData = function (apiINFO, device, datatype, ti
   // console.log(systemBundle)
   catDataG = this.liveCategoryData.categorySorter(apiINFO, device, datatype, time, this.dataRaw[time])
   this.categoryData[time] = catDataG
-  console.log('categoryDATA set')
-  console.log(this.categoryData)
 }
 
 /**
@@ -96,7 +95,7 @@ DataComponent.prototype.TidyData = function (source, contract, device, datatype,
   tidyDataG = this.liveTidyData.tidyRawData(source, contract, device, datatype, time, this.categoryData[time])
   this.tidyData[time] = tidyDataG
   // set liveData based on/if category data asked for
-  this.assessDataStatus(time)
+  // this.assessDataStatus(time)
   return true
 }
 
@@ -108,13 +107,15 @@ DataComponent.prototype.TidyData = function (source, contract, device, datatype,
 DataComponent.prototype.FilterDownDT = function (source, contract, device, datatype, time) {
   // console.log('filteDown')
   let tidyDataG = {}
-  // console.log(systemBundle)
-  if (this.liveData.primary !== 'prime') {
-    tidyDataG = this.liveFilterData.dtFilterController(source, contract, device, datatype, time, this.tidyData[time])
-  }
-  console.log('filter down to dts asked for')
-  console.log(this.liveData)
-  return tidyDataG
+  tidyDataG = this.liveFilterData.dtFilterController(source, contract, device, datatype, time, this.tidyData[time])
+  // hash the context device, datatype and time
+  let dataID = {}
+  dataID.device = device
+  dataID.datatype = datatype
+  dataID.time = time
+  let datauuid = hashObject(dataID)
+  this.liveData[datauuid] = tidyDataG
+  return true
 }
 
 /**

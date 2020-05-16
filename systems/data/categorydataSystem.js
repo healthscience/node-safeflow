@@ -31,7 +31,7 @@ util.inherits(CategoryDataSystem, events.EventEmitter)
 *
 */
 CategoryDataSystem.prototype.categorySorter = function (dataQuery, device, datatype, time, rawData) {
-  console.log('categorySORTER')
+  // console.log('categorySORTER')
   // console.log(dataQuery)
   // console.log(device)
   // console.log(time)

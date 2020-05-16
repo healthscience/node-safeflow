@@ -115,6 +115,7 @@ TimeComponent.prototype.timeProfiling = function (timeContract) {
   // assess automation and build time range(s)
   let timeSource = this.liveTimeSystem.sourceTimeRange(timeContract.startperiod, realtimeMS, timeContract.timeseg.prime.text)
   this.timerange = timeSource
+  console.log(this.timerange)
   return this.timerange
 }
 
