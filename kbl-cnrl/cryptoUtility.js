@@ -26,7 +26,7 @@ var KBLcryptoUtility = function () {
 util.inherits(KBLcryptoUtility, events.EventEmitter)
 
 /**
-*  make KBID hash
+*  make KBID hash this is compute Ref. compute contract hash with results
 * @method hashKBID
 *
 */

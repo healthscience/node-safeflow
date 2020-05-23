@@ -114,6 +114,9 @@ DataComponent.prototype.FilterDownDT = function (source, contract, device, datat
   dataID.datatype = datatype
   dataID.time = time
   let datauuid = hashObject(dataID)
+  // console.log(dataID)
+  // console.log('UUID data')
+  // console.log(datauuid)
   this.liveData[datauuid] = tidyDataG
   return true
 }

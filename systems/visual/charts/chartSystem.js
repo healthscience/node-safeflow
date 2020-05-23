@@ -30,13 +30,13 @@ util.inherits(ChartSystem, events.EventEmitter)
 * @method chartjsControl
 *
 */
-ChartSystem.prototype.chartjsControl = function (contract, rule, dataIN) {
-  // console.log('chartjscontrl start')
-  // console.log(contract)
+ChartSystem.prototype.chartjsControl = function (visModule, contract, device, rule, dataIN) {
+  console.log('chartjscontrl start')
+  console.log(contract)
   // console.log(dataIN)
   let chartData = {}
   let structureRules = this.structureChartData(rule, dataIN)
-  let dataPrep = this.prepareVueChartJS(contract, structureRules)
+  let dataPrep = this.prepareVueChartJS(contract, device, structureRules)
   chartData.chartPackage = dataPrep
   // dataPrep = { 'labels': [2, 4], 'datasets': [{ label: 'Wearable', backgroundColor: 'rgb(255, 99, 132)', borderColor: 'rgb(255, 99, 132)', 'data': [1, 2] }] }
   chartData.chartOptions = this.liveChartOptions.prepareChartOptions()
@@ -50,13 +50,58 @@ ChartSystem.prototype.chartjsControl = function (contract, rule, dataIN) {
 */
 ChartSystem.prototype.structureChartData = function (rule, cData) {
   let dataPrep = {}
-    let splitDatax = cData.map(n => n['cnrl-8856388713'])
+    let splitDatax = cData.map(n => (n['cnrl-8856388713'] * 1000))
     let splitDatay = cData.map(n => n[rule])
     dataPrep.xaxis = splitDatax
     dataPrep.yaxis = splitDatay
-  // console.log('chart data pre over')
+  // console.log('chart data prep over')
   // console.log(dataPrep)
   return dataPrep
+}
+
+/**
+* return data to display on one chart
+* @method structureMulitChartData
+*
+*/
+ChartSystem.prototype.structureMulitChartData = function (multiList) {
+  console.log('strucure mulit data for one chart')
+  console.log(multiList)
+  let singleMulti = {}
+  let aggDatasets = []
+  let aggLabels = []
+  for (let ci of multiList) {
+    console.log(ci)
+    aggDatasets.push(ci.chartPackage.datasets[0])
+    aggLabels.push(ci.chartPackage.datasets)
+  }
+  console.log('data labels normalise')
+  console.log(aggLabels)
+  let normaliseLabels = this.normaliseLabels(aggLabels)
+  // console.log('chart data prep over')
+  // console.log(dataPrep)
+  singleMulti.chartOptions =  multiList[0].chartOptions
+  singleMulti.chartPackage = multiList[0].chartPackage
+  singleMulti.chartPackage.datasets = aggDatasets
+  console.log('mulitchart single')
+  console.log(singleMulti)
+  return singleMulti
+}
+
+/**
+*  prepar x axis multi chart same units
+* @method normaliseLabels
+*
+*/
+ChartSystem.prototype.normaliseLabels = function (labelList) {
+  console.log('take each label and normalise')
+  console.log(labelList)
+  let normaliseList = []
+  for (let ll of labelList) {
+    console.log(ll)
+  }
+  console.log(normaliseList)
+  return normaliseList
 }
 
 /**
@@ -64,7 +109,7 @@ ChartSystem.prototype.structureChartData = function (rule, cData) {
 * @method prepareVueChartJS
 *
 */
-ChartSystem.prototype.prepareVueChartJS = function (rules, results) {
+ChartSystem.prototype.prepareVueChartJS = function (rules, device, results) {
   let datacollection = {}
   // check for no data available
   if (results.yaxis.length === 0) {
@@ -96,7 +141,7 @@ ChartSystem.prototype.prepareVueChartJS = function (rules, results) {
     }
   } else {
     // prepare the Chart OBJECT FOR CHART.JS  Up to 2 line e.g. BMP or Steps or BPM + Steps
-    let prepareDataset = this.datasetPrep(rules, results)
+    let prepareDataset = this.datasetPrep(rules, device, results)
     let datasetHolder = []
     datasetHolder.push(prepareDataset.datasets)
     datacollection = {
@@ -112,7 +157,7 @@ ChartSystem.prototype.prepareVueChartJS = function (rules, results) {
 * @method datasetPrep
 *
 */
-ChartSystem.prototype.datasetPrep = function (rules, results) {
+ChartSystem.prototype.datasetPrep = function (rules, device, results) {
   // label ie x axis data for the charts
   let labelchart = []
   // if more than one time data source take the longest
@@ -130,7 +175,7 @@ ChartSystem.prototype.datasetPrep = function (rules, results) {
     chartItem.borderColor = 'rgb(255, 99, 132)' // rules.color.borderColor
     chartItem.backgroundColor = '' // 'rgb(255, 99, 132)' //rules.color.backgroundColor
   }
-  chartItem.label = 'device' // rules.datatype
+  chartItem.label = device // rules.datatype
   chartItem.fill = false
   let scaling = 1 // this.yAxisScaleSet(rules.datatype)
   // chartItem.scale = scaling

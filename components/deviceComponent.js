@@ -32,9 +32,9 @@ util.inherits(DeviceComponent, events.EventEmitter)
 * @method setDevicesLive
 *
 */
-DeviceComponent.prototype.setDevice = async function (device) {
-  this.apidata = device
-  let deviceDetail = await this.liveDeviceSystem.storedDevices(device)
+DeviceComponent.prototype.setDevice = async function (apiD) {
+  this.apiData = apiD
+  let deviceDetail = await this.liveDeviceSystem.storedDevices(apiD.api)
   this.devices = deviceDetail
 }
 

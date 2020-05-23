@@ -33,14 +33,24 @@ util.inherits(VisSystem, events.EventEmitter)
 * @method chartSystem
 *
 */
-VisSystem.prototype.visualControl = function (contract, rule, dataIN) {
-  console.log('vis control')
+VisSystem.prototype.visualControl = function (visModule, contract, device, rule, dataIN) {
+  // console.log('vis control')
   let visBundlePrepared = {}
   if (contract.prime.text === 'Chart.js') {
-    visBundlePrepared = this.liveChartSystem.chartjsControl(contract, rule, dataIN)
+    visBundlePrepared = this.liveChartSystem.chartjsControl(visModule, contract, device, rule, dataIN)
   } else if (contract.prime.text === 'Table') {
   }
   return visBundlePrepared
+}
+
+/**
+*
+* @method singlemultiControl
+*
+*/
+VisSystem.prototype.singlemultiControl = function (multiList) {
+  let restructureDone = this.liveChartSystem.structureMulitChartData(multiList)
+  return restructureDone
 }
 
 /**

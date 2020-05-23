@@ -69,7 +69,7 @@ DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
       packAPImatch.cnrl = result[0].cnrl
       packAPImatch.column = result[0].text
       packAPImatch.api = sourceAPI.api.apistructure[tableCount]
-      packAPImatch.namespace = sourceAPI.api.namespace
+      packAPImatch.namespace = sourceAPI.namespace
       apiMatch = packAPImatch
     }
   }
