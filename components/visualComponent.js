@@ -37,6 +37,7 @@ util.inherits(VisualComponent, events.EventEmitter)
 VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID, device, rule, time, resultsData) {
   // which of three types of visualisations?
   // console.log('VISULAcomponentIN')
+  this.singlemulti = {}
   let status = false
   let visHASH = this.liveCrypto.evidenceProof(visUUID)
   this.visualData[visUUID] = this.liveVisSystem.visualControl(visModule, contract, device, rule, resultsData)
@@ -49,11 +50,13 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID,
 * @method filterSingleMulti
 *
 */
-VisualComponent.prototype.filterSingleMulti = function (visModule) {
+VisualComponent.prototype.filterSingleMulti = function (liveTidayData) {
   // take live list and merge data for one chart
   let multiList = []
+  let multiSourceList = []
   for (let lv of this.liveVislist) {
     multiList.push(this.visualData[lv])
+    multiSourceList.push()
   }
   let restructData = this.liveVisSystem.singlemultiControl(multiList)
   this.singlemulti = restructData

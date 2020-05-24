@@ -32,14 +32,15 @@ util.inherits(ChartSystem, events.EventEmitter)
 */
 ChartSystem.prototype.chartjsControl = function (visModule, contract, device, rule, dataIN) {
   console.log('chartjscontrl start')
+  console.log(visModule)
   console.log(contract)
-  // console.log(dataIN)
+  console.log(device)
+  console.log(rule)
   let chartData = {}
   let structureRules = this.structureChartData(rule, dataIN)
-  let dataPrep = this.prepareVueChartJS(contract, device, structureRules)
+  let dataPrep = this.prepareVueChartJS(visModule, rule, device, structureRules)
   chartData.chartPackage = dataPrep
-  // dataPrep = { 'labels': [2, 4], 'datasets': [{ label: 'Wearable', backgroundColor: 'rgb(255, 99, 132)', borderColor: 'rgb(255, 99, 132)', 'data': [1, 2] }] }
-  chartData.chartOptions = this.liveChartOptions.prepareChartOptions()
+  chartData.chartOptions = this.liveChartOptions.prepareChartOptions(device)
   return chartData
 }
 
@@ -72,12 +73,13 @@ ChartSystem.prototype.structureMulitChartData = function (multiList) {
   let aggLabels = []
   for (let ci of multiList) {
     console.log(ci)
-    aggDatasets.push(ci.chartPackage.datasets[0])
+    let setColourUpdate = this.setColourDataset(ci.chartPackage.datasets[0])
+    aggDatasets.push(setColourUpdate)
     aggLabels.push(ci.chartPackage.datasets)
   }
   console.log('data labels normalise')
   console.log(aggLabels)
-  let normaliseLabels = this.normaliseLabels(aggLabels)
+  // let normaliseLabels = this.normaliseLabels(aggLabels)
   // console.log('chart data prep over')
   // console.log(dataPrep)
   singleMulti.chartOptions =  multiList[0].chartOptions
@@ -86,6 +88,39 @@ ChartSystem.prototype.structureMulitChartData = function (multiList) {
   console.log('mulitchart single')
   console.log(singleMulti)
   return singleMulti
+}
+
+/**
+*  allocate new color to each dataset
+* @method setColourDataset
+*
+*/
+ChartSystem.prototype.setColourDataset = function (dataSet) {
+  console.log('allocate new color to dataset')
+  console.log(dataSet)
+  let colourUpdated = dataSet
+  let newColour = this.colourList()
+  colourUpdated.borderColor = newColour
+  colourUpdated.fillColor = newColour
+  return colourUpdated
+}
+
+/**
+*  list of chart colours
+* @method colourList
+*
+*/
+ChartSystem.prototype.colourList = function () {
+  console.log('colours in RGB format')
+  let colourRGB = ['rgb(255, 99, 132)', 'rgb(181, 212, 234)', 'rgb(45, 119, 175 )','rgb(90, 45, 175)', 'rgb(41, 20, 80)', 'rgb(46, 143, 22)', 'rgb(21, 81, 7)', 'rgb(153, 18, 186)']
+  let max = 6
+  let min = 0
+  let colorNumber = Math.floor(Math.random() * (max - min + 1)) + min
+  console.log(colorNumber)
+  let selectColour = colourRGB[colorNumber]
+  console.log('color selected')
+  console.log(selectColour)
+  return selectColour
 }
 
 /**
@@ -109,7 +144,7 @@ ChartSystem.prototype.normaliseLabels = function (labelList) {
 * @method prepareVueChartJS
 *
 */
-ChartSystem.prototype.prepareVueChartJS = function (rules, device, results) {
+ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, results) {
   let datacollection = {}
   // check for no data available
   if (results.yaxis.length === 0) {
@@ -141,7 +176,7 @@ ChartSystem.prototype.prepareVueChartJS = function (rules, device, results) {
     }
   } else {
     // prepare the Chart OBJECT FOR CHART.JS  Up to 2 line e.g. BMP or Steps or BPM + Steps
-    let prepareDataset = this.datasetPrep(rules, device, results)
+    let prepareDataset = this.datasetPrep(visModule, rule, device, results)
     let datasetHolder = []
     datasetHolder.push(prepareDataset.datasets)
     datacollection = {
@@ -157,14 +192,15 @@ ChartSystem.prototype.prepareVueChartJS = function (rules, device, results) {
 * @method datasetPrep
 *
 */
-ChartSystem.prototype.datasetPrep = function (rules, device, results) {
+ChartSystem.prototype.datasetPrep = function (visModule, rule, device, results) {
   // label ie x axis data for the charts
+  console.log(rule)
   let labelchart = []
   // if more than one time data source take the longest
   let labelData = []
   let datachart = []
   let chartItem = {}
-  if (rules.prime.text === 'line') {
+  if (visModule.charttype === 'line') {
     // chartItem.type = rules.prime.text
     // chartItem.borderColor = rules.color.borderColor
     // chartItem.backgroundColor = rules.color.backgroundColor
@@ -175,7 +211,7 @@ ChartSystem.prototype.datasetPrep = function (rules, device, results) {
     chartItem.borderColor = 'rgb(255, 99, 132)' // rules.color.borderColor
     chartItem.backgroundColor = '' // 'rgb(255, 99, 132)' //rules.color.backgroundColor
   }
-  chartItem.label = device // rules.datatype
+  chartItem.label = rule
   chartItem.fill = false
   let scaling = 1 // this.yAxisScaleSet(rules.datatype)
   // chartItem.scale = scaling

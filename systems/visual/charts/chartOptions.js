@@ -28,10 +28,12 @@ util.inherits(ChartOptions, events.EventEmitter)
 * @method prepareChartOptions
 *
 */
-ChartOptions.prototype.prepareChartOptions = function (settings, scale) {
+ChartOptions.prototype.prepareChartOptions = function (title, scale) {
   var localthis = this
-  settings = {}
-  settings.title = 'amazfit'
+  let settings = {}
+  settings.title = title
+  console.log('optiontiontont')
+  console.log(settings)
   // let yAxisOptions = this.prepareYoptions(datatypes, scale)
   let options = {
     maintainAspectRatio: false,

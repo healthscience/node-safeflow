@@ -320,7 +320,7 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule) {
   // this.liveSEntities[shellID].liveDeviceC.devices
   let tempDevices = ['D3:CE:05:E9:38:74'] // , 'C4:87:DB:73:19:E2']
   // this.liveSEntities[shellID].liveTimeC.timerange =  [1589760000000] // [1588114800000]
-  console.log('timerange')
+  console.log('VISUAL TIME RRRRRANGE')
   console.log(this.liveSEntities[shellID].liveTimeC.timerange)
   for (let device of tempDevices) {
     for (let rule of rules) {
@@ -346,8 +346,17 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule) {
   }
   // single or multi chart?
   if (visModule.singlemulti === true) {
+    // extract the tidy data for
+    let liveDataExtractList = []
+    console.log('livelist set in VSI component')
+    console.log(this.liveSEntities[shellID].liveVisualC.liveVislist)
+    for (let lv of this.liveSEntities[shellID].liveVisualC.liveVislist) {
+      liveDataExtractList.push(this.liveSEntities[shellID].liveDataC.liveData[lv])
+    }
+    console.log('data for muilt chart single')
+    console.log(liveDataExtractList)
     // go and structure for one chart
-    this.liveSEntities[shellID].liveVisualC.filterSingleMulti()
+    this.liveSEntities[shellID].liveVisualC.filterSingleMulti(liveDataExtractList)
   }
   return true
 }
