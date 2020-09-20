@@ -10,8 +10,8 @@
 * @version    $Id$
 */
 import SimSystem2 from '../systems/simSystem.js'
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var SimSystem = function () {
   events.EventEmitter.call(this)

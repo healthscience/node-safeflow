@@ -11,8 +11,8 @@
 */
 import KBLstorage from './kblStorage.js'
 
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var KBLedger = function (apiCNRL, setIN) {
   events.EventEmitter.call(this)

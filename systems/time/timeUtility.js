@@ -9,11 +9,12 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-import { extendMoment } from 'moment-range'
-const Moment = require('moment')
-const util = require('util')
-const events = require('events')
+import pkg from 'moment-range'
+const { extendMoment } = pkg
+import Moment from 'moment'
 const moment = extendMoment(Moment)
+import util from 'util'
+import events from 'events'
 
 var TimeUtilities = function (setUP) {
   events.EventEmitter.call(this)

@@ -10,8 +10,8 @@
 * @version    $Id$
 */
 import TestStorageAPI from '../../data/dataprotocols/teststorage/testStorage.js'
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var StatisticsSystem = function (setIN) {
   events.EventEmitter.call(this)

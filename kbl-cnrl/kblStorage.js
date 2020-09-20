@@ -9,9 +9,9 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-const util = require('util')
-const events = require('events')
-const axios = require('axios')
+import util from 'util'
+import events from 'events'
+import axios from 'axios'
 
 var KBLdatabaseUtility = function (setUP) {
   events.EventEmitter.call(this)

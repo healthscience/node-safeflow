@@ -9,13 +9,13 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-const util = require('util')
-const events = require('events')
-const axios = require('axios')
-const http = require('http')
-const csv = require('csv-parser')
-const fs = require('fs')
-const moment = require('moment')
+import util from 'util'
+import events from 'events'
+import axios from 'axios'
+import http from'http'
+import csv from 'csv-parser'
+import fs from'fs'
+import moment from 'moment'
 
 var TestStorageAPI = function (setUP) {
   events.EventEmitter.call(this)

@@ -11,9 +11,9 @@
 */
 import ChartSystem from './charts/chartSystem.js'
 import TableSystem from './table/tableSystem.js'
-const util = require('util')
-const events = require('events')
-// const moment = require('moment')
+import util from 'util'
+import events from 'events'
+// import moment from 'moment'
 
 var VisSystem = function () {
   events.EventEmitter.call(this)

@@ -16,8 +16,8 @@ import TimeComponent from './components/timeComponent.js'
 import ComputeComponent from './components/computeComponent.js'
 import VisualComponent from './components/visualComponent.js'
 // import SimComponent from './components/simComponent.js'
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var ScienceEntities = function (dAccess) {
   events.EventEmitter.call(this)

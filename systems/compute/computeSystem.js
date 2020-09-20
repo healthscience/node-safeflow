@@ -12,8 +12,8 @@
 import SumSystem from './sumSystem.js'
 import AverageSystem from './averageSystem.js'
 import RecoveryHeartrate from './wasm/recovery-heartrate.js'
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var ComputeSystem = function (setIN) {
   events.EventEmitter.call(this)

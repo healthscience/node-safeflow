@@ -9,8 +9,8 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var CNRLmaster = function (apiSettings) {
   events.EventEmitter.call(this)

@@ -11,8 +11,8 @@
 */
 
 import CNRLmaster from '../../kbl-cnrl/cnrlMaster.js'
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var CategoryDataSystem = function (setIN) {
   events.EventEmitter.call(this)

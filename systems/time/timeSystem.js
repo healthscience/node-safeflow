@@ -9,11 +9,11 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-
-import { extendMoment } from 'moment-range'
-const util = require('util')
-const events = require('events')
-const Moment = require('moment')
+import pkg from 'moment-range'
+const { extendMoment } = pkg
+import util from 'util'
+import events from 'events'
+import Moment from 'moment'
 const moment = extendMoment(Moment)
 
 var TimeSystem = function (setIN) {

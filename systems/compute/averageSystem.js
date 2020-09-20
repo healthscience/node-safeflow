@@ -17,9 +17,9 @@ import TidyDataSystem from '../data/tidydataSystem.js'
 import FilterDataSystem from '../data/filterdataSystem.js'
 import CategoryDataSystem from '../data/categorydataSystem.js'
 
-const util = require('util')
-const events = require('events')
-const moment = require('moment')
+import util from 'util'
+import events from 'events'
+import moment from 'moment'
 
 var AverageSystem = function (setIN) {
   events.EventEmitter.call(this)

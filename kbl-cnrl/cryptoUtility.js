@@ -9,11 +9,11 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-const util = require('util')
-const events = require('events')
-const crypto = require('crypto')
-const bs58 = require('bs58')
-const hashObject = require('object-hash')
+import util from 'util'
+import events from 'events'
+import crypto from 'crypto'
+import bs58 from 'bs58'
+import hashObject from 'object-hash'
 
 var KBLcryptoUtility = function () {
   events.EventEmitter.call(this)

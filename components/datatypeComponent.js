@@ -10,8 +10,8 @@
 * @version    $Id$
 */
 import DTsystem from '../systems/data/dtSystem.js'
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var DatatypeComponent = function (setIN) {
   events.EventEmitter.call(this)

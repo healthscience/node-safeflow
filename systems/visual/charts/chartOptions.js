@@ -9,9 +9,9 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-const util = require('util')
-const events = require('events')
-const moment = require('moment')
+import util from 'util'
+import events from 'events'
+import moment from 'moment'
 
 var ChartOptions = function () {
   events.EventEmitter.call(this)

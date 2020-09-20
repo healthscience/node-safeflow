@@ -13,10 +13,10 @@ import DataSystem from '../systems/data/dataSystem.js'
 import TidyDataSystem from '../systems/data/tidydataSystem.js'
 import FilterDataSystem from '../systems/data/filterdataSystem.js'
 import CategoryDataSystem from '../systems/data/categorydataSystem.js'
-const util = require('util')
-const events = require('events')
-const moment = require('moment')
-const hashObject = require('object-hash')
+import util from 'util'
+import events from 'events'
+import moment from 'moment'
+import hashObject from 'object-hash'
 
 var DataComponent = function (setIN) {
   events.EventEmitter.call(this)

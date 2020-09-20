@@ -11,8 +11,8 @@
 */
 import TimeUtilities from '../../time/timeUtility.js'
 import TestStorageAPI from '../../data/dataprotocols/teststorage/testStorage.js'
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var RecoveryHeartrate = function (setIN) {
   events.EventEmitter.call(this)

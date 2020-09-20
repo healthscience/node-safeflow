@@ -11,8 +11,8 @@
 */
 
 import TestStorageAPI from './dataprotocols/teststorage/testStorage.js'
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var DatadeviceSystem = function (setIN) {
   events.EventEmitter.call(this)

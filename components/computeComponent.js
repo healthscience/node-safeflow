@@ -10,8 +10,8 @@
 * @version    $Id$
 */
 import ComputeSystem from '../systems/compute/computeSystem.js'
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var ComputeComponent = function (setIN) {
   events.EventEmitter.call(this)

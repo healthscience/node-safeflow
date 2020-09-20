@@ -10,8 +10,8 @@
 * @version    $Id$
 */
 
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var FilterDataSystem = function (setIN) {
   events.EventEmitter.call(this)

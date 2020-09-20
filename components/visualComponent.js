@@ -11,8 +11,8 @@
 */
 import CryptoUtility from '../kbl-cnrl/cryptoUtility.js'
 import VisSystem from '../systems/visual/visSystem.js'
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var VisualComponent = function (EID) {
   events.EventEmitter.call(this)

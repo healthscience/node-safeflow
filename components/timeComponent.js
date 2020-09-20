@@ -11,9 +11,9 @@
 */
 import TimeUtilities from '../systems/time/timeUtility.js'
 import TimeSystem from '../systems/time/timeSystem.js'
-const util = require('util')
-const events = require('events')
-const moment = require('moment')
+import util from 'util'
+import events from 'events'
+import moment from 'moment'
 
 var TimeComponent = function (setIN) {
   this.liveTimeUtil = new TimeUtilities()

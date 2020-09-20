@@ -10,8 +10,8 @@
 * @version    $Id$
 */
 import EntitiesManager from './entitiesManager.js'
-const util = require('util')
-const events = require('events')
+import util from 'util'
+import events from 'events'
 
 var safeFlow = function () {
   events.EventEmitter.call(this)

@@ -11,9 +11,9 @@
 */
 import Xlibrarystorage from './xlibraryStorage.js'
 import CNRLmaster from './cnrlMaster.js'
-const util = require('util')
-const events = require('events')
-const axios = require('axios')
+import util from 'util'
+import events from 'events'
+import axios from 'axios'
 
 var CNRLUtility = function (setIN) {
   events.EventEmitter.call(this)

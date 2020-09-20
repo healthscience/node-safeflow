@@ -14,9 +14,9 @@ import TestStorageAPI from './dataprotocols/teststorage/testStorage.js'
 import LiveSimulatedDataSystem from './simulateddataSystem.js'
 import FilterDataSystem from './filterdataSystem.js'
 
-const util = require('util')
-const events = require('events')
-const moment = require('moment')
+import util from 'util'
+import events from 'events'
+import moment from 'moment'
 
 var DataSystem = function (setIN) {
   events.EventEmitter.call(this)

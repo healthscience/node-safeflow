@@ -9,20 +9,18 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-import LibComposer from './refcontractcomposer'
-import PeerLink from './kbl-cnrl/peerLink.js'
+import LibComposer from 'refcontractcomposer'
 import CNRLUtility from './kbl-cnrl/cnrlUtility.js'
 import KBLedger from './kbl-cnrl/kbledger.js'
 import CryptoUtility from './kbl-cnrl/cryptoUtility.js'
 import Entity from './scienceEntities.js'
-const util = require('util')
-const events = require('events')
-const pollingtoevent = require('polling-to-event')
+import util from 'util'
+import events from 'events'
+// import pollingtoevent from 'polling-to-event'
 
 var EntitiesManager = function (apiCNRL, auth) {
   events.EventEmitter.call(this)
   this.auth = auth
-  this.livePeerLink = new PeerLink()
   this.liveCNRLUtility = new CNRLUtility(auth)
   this.KBLlive = new KBLedger(apiCNRL, auth)
   this.liveCrypto = new CryptoUtility()
