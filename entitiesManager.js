@@ -21,6 +21,7 @@ import events from 'events'
 var EntitiesManager = function (apiCNRL, auth) {
   events.EventEmitter.call(this)
   this.auth = auth
+  this.liveLibrary = new LibComposer()
   this.liveCNRLUtility = new CNRLUtility(auth)
   this.KBLlive = new KBLedger(apiCNRL, auth)
   this.liveCrypto = new CryptoUtility()
