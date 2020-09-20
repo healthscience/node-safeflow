@@ -22,8 +22,8 @@ var EntitiesManager = function (apiCNRL, auth) {
   events.EventEmitter.call(this)
   this.auth = auth
   this.liveLibrary = new LibComposer()
-  this.liveCNRLUtility = new CNRLUtility(auth)
-  this.KBLlive = new KBLedger(apiCNRL, auth)
+  // this.liveCNRLUtility = new CNRLUtility(auth)
+  // this.KBLlive = new KBLedger(apiCNRL, auth)
   this.liveCrypto = new CryptoUtility()
   this.liveSEntities = {}
 }
@@ -42,7 +42,7 @@ util.inherits(EntitiesManager, events.EventEmitter)
 EntitiesManager.prototype.peerKBLstart = async function () {
   // read peer kbledger
   // let entityModule = {}
-  let nxpList = await this.liveCNRLUtility.startKBL()
+  // let nxpList = await this.liveCNRLUtility.startKBL()
   // should return light data to UI or go ahead and prepare entity for this NXP
   // extract device per NXP so
   return nxpList
@@ -54,10 +54,10 @@ EntitiesManager.prototype.peerKBLstart = async function () {
 *
 */
 EntitiesManager.prototype.peerKBLPeerstart = async function () {
-  let nxpList = await this.liveCNRLUtility.startPeerNXP()
+  // let nxpList = await this.liveCNRLUtility.startPeerNXP()
   // should return light data to UI or go ahead and prepare entity for this NXP
   // extract device per NXP so
-  return nxpList
+  return false // nxpList
 }
 
 /**
@@ -319,7 +319,7 @@ EntitiesManager.prototype.saveKBIDProtocol = async function (modContract, saveOb
   newKBIDentry.kbid = newKBIDhash
   newKBIDentry.token = ''
   newKBIDentry.dml = ''
-  let kbidEntryPass = await this.KBLlive.kbidEntrysave(newKBIDentry)
+  // let kbidEntryPass = await this.KBLlive.kbidEntrysave(newKBIDentry)
   if (kbidEntryPass === true) {
     let d = new Date()
     let n = d.getTime()
@@ -327,7 +327,7 @@ EntitiesManager.prototype.saveKBIDProtocol = async function (modContract, saveOb
     newIndex.timestamp = n
     newIndex.cnrl = modContract.cnrl
     newIndex.kbid = newKBIDhash
-    let indexKBID = await this.KBLlive.kbidINDEXsave(newIndex)
+    // let indexKBID = await this.KBLlive.kbidINDEXsave(newIndex)
   }
   return true
 }
@@ -342,7 +342,7 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule) {
   // console.log(visModule)
   // reset the liveVlist list
   this.liveSEntities[shellID].liveVisualC.liveVislist = []
-  let visContract = this.liveCNRLUtility.contractCNRL(visModule.visualise)
+  // let visContract = this.liveCNRLUtility.contractCNRL(visModule.visualise)
   // what has been ask for check rules
   let rules =  visModule.rules // ['cnrl-8856388711', 'cnrl-8856388712']
   // this.liveSEntities[shellID].liveDeviceC.devices
@@ -470,9 +470,9 @@ EntitiesManager.prototype.automationUpdate = function (shellID, refContract) {
   // look up time seg contract
   console.log(refContract)
   let extractContract = {}
-  let timeSeg =  this.liveCNRLUtility.contractCNRL(refContract.time.timeseg[0])
-  refContract.time.timeseg = timeSeg
-  extractContract.timeseg = timeSeg
+  // let timeSeg =  this.liveCNRLUtility.contractCNRL(refContract.time.timeseg[0])
+  // refContract.time.timeseg = timeSeg
+  //extractContract.timeseg = timeSeg
   let addTimerange = this.liveSEntities[shellID].liveTimeC.timeProfiling(refContract.time)
   // update contract time
   extractContract.range = addTimerange
@@ -499,9 +499,9 @@ EntitiesManager.prototype.compareKBIDs = function (mod, kbid) {
 EntitiesManager.prototype.NXPmodules = async function (exist, mList) {
   // if module contract not read, read peer's kbledger
   console.log('modules process')
-  let nxpList = []
-  nxpList = await this.liveCNRLUtility.modulesCNRL(mList)
-  return nxpList
+  // let nxpList = []
+  // nxpList = await this.liveCNRLUtility.modulesCNRL(mList)
+  return false // nxpList
 }
 
 /**
@@ -511,11 +511,11 @@ EntitiesManager.prototype.NXPmodules = async function (exist, mList) {
 */
 EntitiesManager.prototype.extractDevice = function (cnrl) {
   let deviceBundle = {}
-  let deviceAPI = this.liveCNRLUtility.contractCNRL(cnrl)
+  // let deviceAPI = this.liveCNRLUtility.contractCNRL(cnrl)
   let sourceAPI = {}
   // check to see if it has a source api e.g  mobile storage first?
   if(deviceAPI.source !== 'cnrl-primary') {
-    sourceAPI = this.liveCNRLUtility.contractCNRL(deviceAPI.source)
+    // sourceAPI = this.liveCNRLUtility.contractCNRL(deviceAPI.source)
   }
   deviceBundle.api = deviceAPI
   deviceBundle.primary = sourceAPI
@@ -529,7 +529,7 @@ EntitiesManager.prototype.extractDevice = function (cnrl) {
 */
 EntitiesManager.prototype.extractKBID = async function (cnrl, n) {
   let KBIDdata = {}
-  let kbidList = await this.KBLlive.kbIndexQuery(cnrl, n)
+  // let kbidList = await this.KBLlive.kbIndexQuery(cnrl, n)
   if (kbidList.length > 0) {
     for (let ki of kbidList) {
       KBIDdata = await this.kbidEntry(ki.kbid)
@@ -547,7 +547,7 @@ EntitiesManager.prototype.extractKBID = async function (cnrl, n) {
 */
 EntitiesManager.prototype.kbidEntry = async function (kbid) {
   // read peer kbledger
-  let kbidData = await this.KBLlive.kbidReader(kbid)
+  // let kbidData = await this.KBLlive.kbidReader(kbid)
   return kbidData[0]
 }
 

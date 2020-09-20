@@ -32,12 +32,24 @@ util.inherits(safeFlow, events.EventEmitter)
 *
 */
 safeFlow.prototype.networkAuthorisation = function (apiCNRL, auth) {
+  // need library to check token or verify key ownership TODO:
+  // TEMP testnetwork defaults
   auth.namespace = this.defaultStorage
   this.settings = auth
-  this.liveEManager = new EntitiesManager(apiCNRL, auth)
-  this.flowListen()
-  this.entityGetter()
-  return true
+  let authState = {}
+  let verify = false
+  // check cloud
+  verify = true
+  // verify keys
+  if (verify === true ) {
+    this.liveEManager = new EntitiesManager(apiCNRL, auth)
+    // this.flowListen()
+    // this.entityGetter()
+    authState.safeflow = true
+    authState.type = 'auth'
+    authState.auth = true
+  }
+  return authState
 }
 
 /**
