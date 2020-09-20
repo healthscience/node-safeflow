@@ -52,6 +52,18 @@ TestStorageAPI.prototype.COMPUTEbuilder = async function (dapi, device, time) {
 }
 
 /**
+*  COMPUTEbuilder  temp until smart URL builder is created
+* @method COMPUTEbuilderLuft
+*
+*/
+TestStorageAPI.prototype.COMPUTEbuilderLuft = async function (dapi, device, time) {
+  let apitime = time / 1000
+  let apitime2 = apitime + 86400
+  let jsondata = await axios.get(dapi.namespace + dapi.path + this.tempPubkey + '/' + this.tempToken + '/' + device + '/' + apitime + '/' + apitime2)
+  return jsondata.data
+}
+
+/**
 *  device REST builder
 * @method deviceRESTbuilder
 *

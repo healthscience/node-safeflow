@@ -69,8 +69,8 @@ CNRLUtility.prototype.startKBL = async function () {
 }
 
 /**
-* get the latest KBL state
-* @method startKBL
+* get the latest KBL state per Peers member
+* @method startPeerNXP
 *
 */
 CNRLUtility.prototype.startPeerNXP = async function () {

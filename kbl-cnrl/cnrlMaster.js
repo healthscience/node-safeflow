@@ -337,7 +337,7 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.tidyList = []
     dataCNRLbundle.device = '/contextdata/'
     dataCNRLbundle.devicetableStructure = [{'cnrl': 'cnrl-8856388713', 'text': 'timestamp', 'active': false}, {'cnrl': 'cnrl-', 'text': 'compref', 'active': false}, {'cnrl': 'cnrl-', 'text': 'datatype', 'active': false}, {'cnrl': 'cnrl-', 'text': 'timeseg', 'active': false}, {'cnrl': 'cnrl-', 'text': 'value', 'active': false}, {'cnrl': 'cnrl-', 'text': 'device_mac', 'active': false}, {'cnrl': 'cnrl-', 'text': 'clean', 'active': false}, {'cnrl': 'cnrl-', 'text': 'tidy', 'active': false}]
-    dataCNRLbundle.apistructure = ['computedata/<publickey>/<token>/<queryTime>/<deviceID>/', 'contexttype/<publickey>/', 'average/<publickey>/<token>/<queryTime>/<deviceID>/', 'sum/<publickey>/<token>/<queryTime>/<deviceID>/']
+    dataCNRLbundle.apistructure = ['/computedata/', 'contexttype/<publickey>/', 'average/<publickey>/<token>/<queryTime>/<deviceID>/', 'sum/<publickey>/<token>/<queryTime>/<deviceID>/']
     dataCNRLbundle.tableStructure[0] = [{'cnrl': '', 'text': '_id', 'active': false}, {'cnrl': 'cnrl-8856388713', 'text': 'timestamp', 'active': false}, {'cnrl': '', 'text': 'device_mac', 'active': false}, {'cnrl': 'cnrl-', 'text': 'device_id', 'active': false}, {'cnrl': 'cnrl-', 'text': 'user_id', 'active': false}, {'cnrl': 'cnrl-3356388733', 'text': 'raw_intensity', 'active': false}, {'cnrl': 'cnrl-8856388712', 'text': 'steps', 'active': false}, {'cnrl': 'cnrl-3356388722', 'text': 'raw_kind', 'active': false}, {'cnrl': 'cnrl-8856388711', 'text': 'heart_rate', 'active': false}, {'cnrl': 'cnrl-', 'text': 'publickey', 'active': false}, {'cnrl': '', 'text': 'compref', 'active': false}]
     dataCNRLbundle.tableStructure[1] = [{'cnrl': '', 'text': 'device_mac', 'active': false}, {'cnrl': '', 'text': 'firmware', 'active': false}]
     dataCNRLbundle.tableStructure[2] = [{'cnrl': 'cnrl-8856388724', 'text': 'average-bpm', 'active': false}, {'cnrl': 'cnrl-8856388713', 'text': 'timestamp', 'active': false}, {'cnrl': 'cnrl-8856388322', 'text': 'average-steps', 'active': false}]
@@ -384,13 +384,13 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.source = 'cnrl-primary'
     dataCNRLbundle.prime = { 'cnrl': '33221112', 'text': 'mongo-RESTAPI', 'active': false }
     dataCNRLbundle.tidy = true
-    dataCNRLbundle.tidyList = []
-    dataCNRLbundle.device = 'luftdatendevice/<publickey>/'
+    dataCNRLbundle.tidyList = {}
+    dataCNRLbundle.device = '/luftdatendevice/'
     dataCNRLbundle.devicetableStructure = [{'cnrl': 'cnrl-8856388713', 'text': 'timestamp', 'active': false}, {'cnrl': 'cnrl-', 'text': 'compref', 'active': false}, {'cnrl': 'cnrl-', 'text': 'datatype', 'active': false}, {'cnrl': 'cnrl-', 'text': 'timeseg', 'active': false}, {'cnrl': 'cnrl-', 'text': 'value', 'active': false}, {'cnrl': 'cnrl-', 'text': 'device_mac', 'active': false}, {'cnrl': 'cnrl-', 'text': 'clean', 'active': false}, {'cnrl': 'cnrl-', 'text': 'tidy', 'active': false}]
-    dataCNRLbundle.apistructure = ['luftdatenGet/<publickey>/<token>/<queryTime>/<deviceID>/']
+    dataCNRLbundle.apistructure = ['/luftdatenGet/']
     let subColumn = [{'cnrl': 'cnrl-3339949442', 'text': 'SDS_P2', 'active': false}, {'cnrl': 'cnrl-3339949443', 'text': 'SDS_P1', 'active': false}, {'cnrl': 'cnrl-3339949444', 'text': 'BME280_temperature', 'active': false}, {'cnrl': 'cnrl-3339949445', 'text': 'BME280_humidity', 'active': false}, {'cnrl': 'cnrl-3339949446', 'text': 'BME280_pressure', 'active': false}]
-    dataCNRLbundle.tableStructure[0] = [{'cnrl': 'cnrl-', 'text': 'publickey', 'active': false}, {'cnrl': 'cnrl-8856388713', 'text': 'timestamp', 'active': false}, {'cnrl': 'datasub', 'text': 'sensordata', 'active': false, 'data': subColumn}]
-    dataCNRLbundle.namespace = 'http://165.227.244.213:8881/'
+    dataCNRLbundle.tableStructure[0] = [{'cnrl': 'cnrl-', 'text': 'publickey', 'active': false}, {'cnrl': 'cnrl-8856388713', 'text': 'timestamp', 'active': false}, {'cnrl': 'datasub', 'text': 'sensordata', 'active': false, 'data': subColumn}, {'cnrl': 'cnrl-3339949442', 'text': 'SDS_P2', 'active': false}, {'cnrl': 'cnrl-3339949443', 'text': 'SDS_P1', 'active': false}, {'cnrl': 'cnrl-3339949444', 'text': 'BME280_temperature', 'active': false}, {'cnrl': 'cnrl-3339949445', 'text': 'BME280_humidity', 'active': false}, {'cnrl': 'cnrl-3339949446', 'text': 'BME280_pressure', 'active': false}]
+    dataCNRLbundle.namespace = 'http://165.227.244.213:8881'
     dataCNRLbundle.index = []
   } else if (refIN === '33221103') {
     // CNRL implementation REST API
@@ -480,7 +480,7 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.resolution = {}
     dataCNRLbundle.namespace = 'safe://cnrl/cnrl-888388233324'
     dataCNRLbundle.index = []
-    dataCNRLbundle.kentities = []
+    dataCNRLbundle.modules = ['cnrl-001238743213', 'cnrl-001297343304', 'cnrl-091234543216', 'cnrl-001234543334']
   } else if (refIN === 'cnrl-888388443324') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'experiment'
@@ -550,6 +550,14 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-001234543212'
     dataCNRLbundle.grid = [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: true }]
+  } else if (refIN === 'cnrl-001238743213') {
+    // CNRL implementation contract e.g. from mobile phone sqlite table structure
+    dataCNRLbundle.type = 'module'
+    dataCNRLbundle.source = 'cnrl-primary'
+    dataCNRLbundle.prime = { 'cnrl': 'cnrl-001238743213', 'text': 'Question', 'active': false }
+    dataCNRLbundle.livingpaper = {'link': ''}
+    dataCNRLbundle.namespace = 'safe://cnrl-001238743213'
+    dataCNRLbundle.grid = [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: true }]
   } else if (refIN === 'cnrl-001234543303') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
     dataCNRLbundle.type = 'module'
@@ -558,6 +566,15 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.device = { 'cnrl': 'cnrl-33221101'}
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-001234543303'
+    dataCNRLbundle.grid = [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '0', static: false }, { 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }]
+  } else if (refIN === 'cnrl-001297343304') {
+    // CNRL implementation contract e.g. from mobile phone sqlite table structure
+    dataCNRLbundle.type = 'module'
+    dataCNRLbundle.source = 'cnrl-primary'
+    dataCNRLbundle.prime = { 'cnrl': 'cnrl-001297343304', 'text': 'Device', 'active': false }
+    dataCNRLbundle.device = { 'cnrl': 'cnrl-33221112'}
+    dataCNRLbundle.livingpaper = {'link': ''}
+    dataCNRLbundle.namespace = 'safe://cnrl-001297343304'
     dataCNRLbundle.grid = [{ 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '0', static: false }, { 'x': 0, 'y': 0, 'w': 8, 'h': 2, 'i': '1', static: false }]
   } else if (refIN === 'cnrl-001234543304') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure
@@ -599,7 +616,7 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
     dataCNRLbundle.livingpaper = {'link': ''}
     dataCNRLbundle.namespace = 'safe://cnrl-001234543458'
     dataCNRLbundle.grid = [{ 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': 'cnrl-8856388711', static: false }, { 'x': 0, 'y': 0, 'w': 8, 'h': 20, 'i': 'cnrl-8856388712', static: false }]
-    dataCNRLbundle.rules = [{ 'xaxis': 'cnrl-8856388713', 'yaxis': 'cnrl-8856388711' }, { 'xaxis': 'cnrl-8856388713', 'yaxis': 'cnrl-8856388712' }] // cnrl-8856388712
+    dataCNRLbundle.rules = [{ 'xaxis': 'cnrl-8856388713', 'yaxis': 'cnrl-8856388711' }, { 'xaxis': 'cnrl-8856388713', 'yaxis': 'cnrl-8856388712' }]
     dataCNRLbundle.visualise = 'cnrl-813033773883'
   } else if (refIN === 'cnrl-001234543215') {
     // CNRL implementation contract e.g. from mobile phone sqlite table structure

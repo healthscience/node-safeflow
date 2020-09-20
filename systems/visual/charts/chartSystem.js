@@ -30,18 +30,30 @@ util.inherits(ChartSystem, events.EventEmitter)
 * @method chartjsControl
 *
 */
-ChartSystem.prototype.chartjsControl = function (visModule, contract, device, rule, dataIN) {
-  console.log('chartjscontrl start')
-  console.log(visModule)
-  console.log(contract)
-  console.log(device)
-  console.log(rule)
+ChartSystem.prototype.chartjsControl = function (visModule, contract, device, rule, dataIN, dtConvert) {
   let chartData = {}
-  let structureRules = this.structureChartData(rule, dataIN)
-  let dataPrep = this.prepareVueChartJS(visModule, rule, device, structureRules)
+  let structureRules = this.structureChartData(rule, dataIN, dtConvert)
+  let dataPrep = this.prepareVueChartJS(visModule, rule, device.device_mac, structureRules, dtConvert)
   chartData.chartPackage = dataPrep
-  chartData.chartOptions = this.liveChartOptions.prepareChartOptions(device)
+  chartData.chartOptions = this.liveChartOptions.prepareChartOptions(device.device_name)
   return chartData
+}
+
+/**
+* convert RefContract CNRL to text
+* @method convertCNRLtoText
+*
+*/
+ChartSystem.prototype.convertCNRLtoText = function (cnrl, dtConvert) {
+  let textdt = ''
+  for (let dtc of dtConvert) {
+    for (let dc of dtc) {
+      if (dc.cnrl === cnrl) {
+        textdt = dc.text
+      }
+    }
+  }
+  return textdt
 }
 
 /**
@@ -49,12 +61,12 @@ ChartSystem.prototype.chartjsControl = function (visModule, contract, device, ru
 * @method structureChartData
 *
 */
-ChartSystem.prototype.structureChartData = function (rule, cData) {
+ChartSystem.prototype.structureChartData = function (rule, cData, dtConvert) {
   let dataPrep = {}
-    let splitDatax = cData.map(n => (n['cnrl-8856388713'] * 1000))
-    let splitDatay = cData.map(n => n[rule])
-    dataPrep.xaxis = splitDatax
-    dataPrep.yaxis = splitDatay
+  let splitDatax = cData.map(n => (n['cnrl-8856388713'] * 1000))
+  let splitDatay = cData.map(n => n[rule])
+  dataPrep.xaxis = splitDatax
+  dataPrep.yaxis = splitDatay
   // console.log('chart data prep over')
   // console.log(dataPrep)
   return dataPrep
@@ -66,27 +78,20 @@ ChartSystem.prototype.structureChartData = function (rule, cData) {
 *
 */
 ChartSystem.prototype.structureMulitChartData = function (multiList) {
-  console.log('strucure mulit data for one chart')
-  console.log(multiList)
   let singleMulti = {}
   let aggDatasets = []
   let aggLabels = []
   for (let ci of multiList) {
-    console.log(ci)
     let setColourUpdate = this.setColourDataset(ci.chartPackage.datasets[0])
     aggDatasets.push(setColourUpdate)
     aggLabels.push(ci.chartPackage.datasets)
   }
-  console.log('data labels normalise')
-  console.log(aggLabels)
   // let normaliseLabels = this.normaliseLabels(aggLabels)
   // console.log('chart data prep over')
   // console.log(dataPrep)
   singleMulti.chartOptions =  multiList[0].chartOptions
   singleMulti.chartPackage = multiList[0].chartPackage
   singleMulti.chartPackage.datasets = aggDatasets
-  console.log('mulitchart single')
-  console.log(singleMulti)
   return singleMulti
 }
 
@@ -96,8 +101,6 @@ ChartSystem.prototype.structureMulitChartData = function (multiList) {
 *
 */
 ChartSystem.prototype.setColourDataset = function (dataSet) {
-  console.log('allocate new color to dataset')
-  console.log(dataSet)
   let colourUpdated = dataSet
   let newColour = this.colourList()
   colourUpdated.borderColor = newColour
@@ -111,15 +114,11 @@ ChartSystem.prototype.setColourDataset = function (dataSet) {
 *
 */
 ChartSystem.prototype.colourList = function () {
-  console.log('colours in RGB format')
   let colourRGB = ['rgb(255, 99, 132)', 'rgb(181, 212, 234)', 'rgb(45, 119, 175 )','rgb(90, 45, 175)', 'rgb(41, 20, 80)', 'rgb(46, 143, 22)', 'rgb(21, 81, 7)', 'rgb(153, 18, 186)']
   let max = 6
   let min = 0
   let colorNumber = Math.floor(Math.random() * (max - min + 1)) + min
-  console.log(colorNumber)
   let selectColour = colourRGB[colorNumber]
-  console.log('color selected')
-  console.log(selectColour)
   return selectColour
 }
 
@@ -129,13 +128,9 @@ ChartSystem.prototype.colourList = function () {
 *
 */
 ChartSystem.prototype.normaliseLabels = function (labelList) {
-  console.log('take each label and normalise')
-  console.log(labelList)
   let normaliseList = []
   for (let ll of labelList) {
-    console.log(ll)
   }
-  console.log(normaliseList)
   return normaliseList
 }
 
@@ -144,7 +139,7 @@ ChartSystem.prototype.normaliseLabels = function (labelList) {
 * @method prepareVueChartJS
 *
 */
-ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, results) {
+ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, results, dtConvert) {
   let datacollection = {}
   // check for no data available
   if (results.yaxis.length === 0) {
@@ -176,7 +171,7 @@ ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, res
     }
   } else {
     // prepare the Chart OBJECT FOR CHART.JS  Up to 2 line e.g. BMP or Steps or BPM + Steps
-    let prepareDataset = this.datasetPrep(visModule, rule, device, results)
+    let prepareDataset = this.datasetPrep(visModule, rule, device, results, dtConvert)
     let datasetHolder = []
     datasetHolder.push(prepareDataset.datasets)
     datacollection = {
@@ -192,9 +187,8 @@ ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, res
 * @method datasetPrep
 *
 */
-ChartSystem.prototype.datasetPrep = function (visModule, rule, device, results) {
+ChartSystem.prototype.datasetPrep = function (visModule, rule, device, results, dtConvert) {
   // label ie x axis data for the charts
-  console.log(rule)
   let labelchart = []
   // if more than one time data source take the longest
   let labelData = []
@@ -211,7 +205,7 @@ ChartSystem.prototype.datasetPrep = function (visModule, rule, device, results) 
     chartItem.borderColor = 'rgb(255, 99, 132)' // rules.color.borderColor
     chartItem.backgroundColor = '' // 'rgb(255, 99, 132)' //rules.color.backgroundColor
   }
-  chartItem.label = rule
+  // chartItem.label = this.convertCNRLtoText(rule, dtConvert)
   chartItem.fill = false
   let scaling = 1 // this.yAxisScaleSet(rules.datatype)
   // chartItem.scale = scaling
@@ -219,6 +213,7 @@ ChartSystem.prototype.datasetPrep = function (visModule, rule, device, results) 
   // chartItem.yAxisID = 'y-axis-0' // rules.color.datatype
   labelData = results.xaxis
   labelchart = this.prepareLabelchart(labelData)
+  chartItem.label = this.convertCNRLtoText(rule, dtConvert) + ' ' + labelchart[0]
   let dataHolder = {}
   dataHolder.labels = labelchart
   dataHolder.datasets = chartItem

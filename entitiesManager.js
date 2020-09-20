@@ -9,6 +9,8 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
+import LibComposer from './refcontractcomposer'
+import PeerLink from './kbl-cnrl/peerLink.js'
 import CNRLUtility from './kbl-cnrl/cnrlUtility.js'
 import KBLedger from './kbl-cnrl/kbledger.js'
 import CryptoUtility from './kbl-cnrl/cryptoUtility.js'
@@ -20,6 +22,7 @@ const pollingtoevent = require('polling-to-event')
 var EntitiesManager = function (apiCNRL, auth) {
   events.EventEmitter.call(this)
   this.auth = auth
+  this.livePeerLink = new PeerLink()
   this.liveCNRLUtility = new CNRLUtility(auth)
   this.KBLlive = new KBLedger(apiCNRL, auth)
   this.liveCrypto = new CryptoUtility()
@@ -64,7 +67,6 @@ EntitiesManager.prototype.peerKBLPeerstart = async function () {
 *
 */
 EntitiesManager.prototype.peerInput = async function (input) {
-  console.log(input)
   let entityData = {}
   entityData[input.cnrl] = await this.addHSentity(input)
   return entityData
@@ -76,13 +78,15 @@ EntitiesManager.prototype.peerInput = async function (input) {
 *
 */
 EntitiesManager.prototype.addHSentity = async function (ecsIN) {
+  console.log('ADD entity in')
+  console.log(ecsIN)
   let entitySet = {}
   let moduleState = false
   let shellID = ''
   let modules = []
   if (ecsIN.entityUUID) {
     shellID = ecsIN.entityUUID
-    modules = ecsIN.modules // keep tabs on module in entity? this.liveSEntities[shellID].modulesGet(shellID)
+    modules = ecsIN.module // keep tabs on module in entity? this.liveSEntities[shellID].modulesGet(shellID)
     console.log('entity' + shellID + 'already exists')
     moduleState = true
     // update Reference Contract do this outwith ECS but save RefContract if KBID formed
@@ -98,12 +102,12 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
     }
   } else {
     shellID = this.liveCrypto.entityID(ecsIN)
-    modules = await this.NXPmodules(shellID, ecsIN.modules)
-    console.log(modules)
-    console.log('ENTITY' + shellID + 'is new')
+    modules = ecsIN.module // await this.NXPmodules(shellID, ecsIN.modules)
+    // console.log(modules)
+    console.log('ENTITY--' + shellID + '--is new')
     // setup entity to hold components per module
     this.liveSEntities[shellID] = new Entity(this.auth)
-    this.ECSflow(shellID, ecsIN.input, modules)
+    this.ECSflow(shellID, ecsIN.input, ecsIN.module)
     moduleState = true
   }
   let entityStatus = ''
@@ -114,6 +118,8 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
   }
   entitySet.shellID = shellID
   entitySet.modules = modules
+  console.log('entity set----------')
+  console.log(entitySet)
   // emit an event best?
   return entitySet
 }
@@ -130,6 +136,7 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) 
   let deviceInfo = {}
   for (let md of modules) {
     if (ECSinput !== undefined || ECSinput === 'refUpdate') {
+      console.log('existing branch')
       // updated require compute and visualise module RefContracts input
       if (md.type === 'compute') {
         moduleState = await this.computeFlow(shellID, md, this.liveSEntities[shellID].liveDeviceC.apiData)
@@ -140,15 +147,18 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) 
         this.emit('visualUpdate', this.liveSEntities[shellID])
       }
     } else {
-      // need matcher - module type to how its processed. Only computes have KBIDS
-      if (md.type === 'Device') {
+      console.log('new FLOW')
+      console.log('type of module')
+      console.log(md.value)
+      // need matcher - module type to how its processed.
+      if (md.value.type === 'data') {
         // hook up to device
-        deviceInfo = this.extractDevice(md.device.cnrl)
+        deviceInfo = this.extractDevice(md.key)
         moduleState = await this.deviceDataflow(shellID, deviceInfo)
-      } else if (md.type === 'compute') {
+      } else if (md.value.type === 'compute') {
         // feed into ECS -KBID processor
         moduleState = await this.computeFlow(shellID, md, this.liveSEntities[shellID].liveDeviceC.apiData)
-      } else if (md.type === 'Visualise') {
+      } else if (md.value.type === 'visualise') {
         // extract visualisation contract information
         moduleState = await this.visualFlow(shellID, md)
         this.emit('visualUpdate', this.liveSEntities[shellID])
@@ -213,8 +223,14 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
 *
 */
 EntitiesManager.prototype.computeExecute = async function (shellID, modContract, contractChanges, apiData) {
+  console.log('computeExecut context contracts')
+  // console.log(modContract)
+  // console.log(contractChanges)
+  // console.log(this.liveSEntities[shellID].liveDeviceC.devices)
+  // console.log(modContract.dtcompute)
+  // console.log(this.liveSEntities[shellID].liveTimeC.timerange)
   // this.liveSEntities[shellID].liveTimeC.timerange =  [1589760000000] // [1588114800000]
-  modContract.dtcompute = ['cnrl-8856388711', 'cnrl-8856388712']
+  // modContract.dtcompute = ['cnrl-8856388711', 'cnrl-8856388712']
   // else go through creating new KBID entry
   // range of time, number of devices, number of data types  do all the loop here?
   for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
@@ -223,12 +239,15 @@ EntitiesManager.prototype.computeExecute = async function (shellID, modContract,
         // set the new updated time settings for the new contract
         modContract.time.timeseg = contractChanges.timeseg
         modContract.time.startperiod = time
+        console.log(modContract)
         // should this CNRL contract be update and saved for time changes prob. no.
         let engineReturn = await this.computeEngine(shellID, apiData, modContract, device, datatype, time)
-        // let saveResults = await this.saveResultsProtocol(shellID)
+        let saveResults = await this.saveResultsProtocol(shellID)
+        // console.log('results dsaved')
+        // console.log(saveResults)
         // new version of Ref Contract
         // await this.liveCNRLUtility.saveModule(modContract)
-        // let saveKBIDentry = await this.saveKBIDProtocol(saveResults, modContract)
+        let saveKBIDentry = await this.saveKBIDProtocol(modContract, saveResults)
       }
     }
   }
@@ -263,19 +282,24 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiData, cont
 *
 */
 EntitiesManager.prototype.saveResultsProtocol = async function (shellID) {
-  console.log('saveRESULTSProtocol')
+  // console.log('saveRESULTSProtocol')
   // first save results crypto storage
   let mockAPI = {}
   mockAPI.namespace = 'http://165.227.244.213:8882'
   mockAPI.path = '/inresults/'
   // prepare save structure
+  let d = new Date()
+  let n = d.getTime()
   let saveObject = {}
-  saveObject.timestamp = 1
+  saveObject.timestamp = n
   saveObject.hash = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData)
   saveObject.data = this.liveSEntities[shellID].liveDataC.liveData
   // console.log(saveObject2222)
   let saveResults = await this.liveSEntities[shellID].liveDataC.directSaveResults('REST', mockAPI, saveObject)
-  return saveResults
+  let completeSave = {}
+  completeSave.success = saveResults
+  completeSave.hash = saveObject.hash
+  return completeSave
 }
 
 /**
@@ -284,7 +308,9 @@ EntitiesManager.prototype.saveResultsProtocol = async function (shellID) {
 *
 */
 EntitiesManager.prototype.saveKBIDProtocol = async function (modContract, saveObject) {
-  console.log('saveKBIDProtocol')
+  // console.log('saveKBIDProtocol')
+  // console.log(modContract)
+  // console.log(saveObject)
   // prepare and save KBID entry
   let newKBIDentry = {}
   //newKBIDentry.previous = kbid.kbid
@@ -296,8 +322,10 @@ EntitiesManager.prototype.saveKBIDProtocol = async function (modContract, saveOb
   newKBIDentry.dml = ''
   let kbidEntryPass = await this.KBLlive.kbidEntrysave(newKBIDentry)
   if (kbidEntryPass === true) {
+    let d = new Date()
+    let n = d.getTime()
     let newIndex = {}
-    newIndex.timestamp = 1
+    newIndex.timestamp = n
     newIndex.cnrl = modContract.cnrl
     newIndex.kbid = newKBIDhash
     let indexKBID = await this.KBLlive.kbidINDEXsave(newIndex)
@@ -312,32 +340,31 @@ EntitiesManager.prototype.saveKBIDProtocol = async function (modContract, saveOb
 */
 EntitiesManager.prototype.visualFlow = async function (shellID, visModule) {
   console.log('VISUALFLOW-----begin')
+  // console.log(visModule)
   // reset the liveVlist list
   this.liveSEntities[shellID].liveVisualC.liveVislist = []
   let visContract = this.liveCNRLUtility.contractCNRL(visModule.visualise)
   // what has been ask for check rules
-  let rules =  ['cnrl-8856388711', 'cnrl-8856388712']
+  let rules =  visModule.rules // ['cnrl-8856388711', 'cnrl-8856388712']
   // this.liveSEntities[shellID].liveDeviceC.devices
-  let tempDevices = ['D3:CE:05:E9:38:74'] // , 'C4:87:DB:73:19:E2']
+  let tempDevices = this.liveSEntities[shellID].liveDeviceC.devices // ['D3:CE:05:E9:38:74'] // , 'C4:87:DB:73:19:E2']
   // this.liveSEntities[shellID].liveTimeC.timerange =  [1589760000000] // [1588114800000]
-  console.log('VISUAL TIME RRRRRANGE')
-  console.log(this.liveSEntities[shellID].liveTimeC.timerange)
+  // console.log(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.api.tableStructure)
+  // console.log('VISUAL TIME RRRRRANGE')
+  // console.log(this.liveSEntities[shellID].liveTimeC.timerange)
+  // console.log(tempDevices)
+  // console.log(rules)
   for (let device of tempDevices) {
     for (let rule of rules) {
       // console.log(this.liveSEntities[shellID].liveDataC.liveData[rule.yaxis])
       for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
         // hash the context device, datatype and time
         let dataID = {}
-        dataID.device = device
-        dataID.datatype = rule
-        dataID.time = time // 1589760000000 // time
+        dataID.device = device.device_mac
+        dataID.datatype = rule.yaxis
+        dataID.time = time
         let datauuid = this.liveCrypto.evidenceProof(dataID)
-        // console.log(dataID)
-        // console.log('UUID data')
-        // console.log(datauuid)
-        // console.log(this.liveSEntities[shellID].liveDataC.liveData)
-        // console.log(this.liveSEntities[shellID].liveDataC.liveData[datauuid])
-        this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, datauuid, device, rule, time,  this.liveSEntities[shellID].liveDataC.liveData[datauuid])
+        this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, datauuid, device, rule.yaxis, time,  this.liveSEntities[shellID].liveDataC.liveData[datauuid], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.api.tableStructure)
         // proof of evidence
         // this.liveCrypto.evidenceProof()
         // this.emit('visualUpdate', this.liveSEntities[shellID])
@@ -348,13 +375,13 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule) {
   if (visModule.singlemulti === true) {
     // extract the tidy data for
     let liveDataExtractList = []
-    console.log('livelist set in VSI component')
-    console.log(this.liveSEntities[shellID].liveVisualC.liveVislist)
+    // console.log('livelist set in VSI component')
+    // console.log(this.liveSEntities[shellID].liveVisualC.liveVislist)
     for (let lv of this.liveSEntities[shellID].liveVisualC.liveVislist) {
       liveDataExtractList.push(this.liveSEntities[shellID].liveDataC.liveData[lv])
     }
-    console.log('data for muilt chart single')
-    console.log(liveDataExtractList)
+    // console.log('data for muilt chart single')
+    // console.log(liveDataExtractList)
     // go and structure for one chart
     this.liveSEntities[shellID].liveVisualC.filterSingleMulti(liveDataExtractList)
   }
@@ -472,6 +499,7 @@ EntitiesManager.prototype.compareKBIDs = function (mod, kbid) {
 */
 EntitiesManager.prototype.NXPmodules = async function (exist, mList) {
   // if module contract not read, read peer's kbledger
+  console.log('modules process')
   let nxpList = []
   nxpList = await this.liveCNRLUtility.modulesCNRL(mList)
   return nxpList

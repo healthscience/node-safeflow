@@ -29,12 +29,6 @@ util.inherits(FilterDataSystem, events.EventEmitter)
 *
 */
 FilterDataSystem.prototype.dtFilterController = function (source, contract, device, datatype, time, tidyData) {
-  // console.log('filter controller start')
-  // console.log(source)
-  // console.log(contract)
-  // console.log(device)
-  // console.log(datatype)
-  // console.log(tidyData)
   let filterColumn = this.filterDataType(source, datatype, tidyData)
   return filterColumn
 }
@@ -46,18 +40,22 @@ FilterDataSystem.prototype.dtFilterController = function (source, contract, devi
 */
 FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData) {
   let singleArray = []
-  for (let di of tidyData) {
-    let dataPair = {}
-    let timestamp = di['timestamp']
-    dataPair['cnrl-8856388713'] = timestamp
-    let valueC = 0
-    if (di[datatype] === null) {
-      valueC = null
-    } else {
-      valueC = parseFloat(di[source.sourceapiquery.column])
+  if (tidyData[0].sensors === undefined || !tidyData[0].sensors) {
+    for (let di of tidyData) {
+      let dataPair = {}
+      let timestamp = di['timestamp']
+      dataPair['cnrl-8856388713'] = timestamp
+      let valueC = 0
+      if (di[datatype] === null) {
+        valueC = null
+      } else {
+        valueC = parseFloat(di[source.sourceapiquery.column])
+      }
+      dataPair[datatype] = valueC
+      singleArray.push(dataPair)
     }
-    dataPair[datatype] = valueC
-    singleArray.push(dataPair)
+  } else {
+    singleArray = this.filterDataTypeSub(source, datatype, tidyData)
   }
   return singleArray
 }
@@ -67,7 +65,7 @@ FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData
 * @method filterDataTypeSub
 *
 */
-FilterDataSystem.prototype.filterDataTypeSub = function (sourceDT, arrayIN) {
+FilterDataSystem.prototype.filterDataTypeSub = function (source, datatype, arrayIN) {
   let singleArray = []
   // check if sub data structure
   let subData = this.subStructure(arrayIN)
@@ -75,13 +73,18 @@ FilterDataSystem.prototype.filterDataTypeSub = function (sourceDT, arrayIN) {
     arrayIN = subData
   }
   for (let sing of arrayIN) {
+    // console.log(sing)
     let dataPair = {}
     let timestamp = sing['timestamp']
-    dataPair.timestamp = timestamp
-    if (sing[sourceDT.column]) {
-      dataPair[sourceDT.column] = sing[sourceDT.column]
-      singleArray.push(dataPair)
+    dataPair['cnrl-8856388713'] = timestamp
+    let valueC = 0
+    if (sing[datatype] === null) {
+      valueC = null
+    } else {
+      valueC = parseFloat(sing[source.sourceapiquery.column])
     }
+    dataPair[datatype] = valueC
+    singleArray.push(dataPair)
   }
   return singleArray
 }

@@ -1,6 +1,6 @@
 {
   "name": "node-safeflow",
-  "version": "0.5.3",
+  "version": "0.5.6",
   "description": "Node.js wrapper for safeflow protocol",
   "main": "index.js",
   "scripts": {
@@ -25,7 +25,9 @@
     "csv-parser": "^2.3.1",
     "esm": "^3.2.25",
     "moment": "^2.24.0",
-    "moment-range": "^4.0.2"
+    "moment-range": "^4.0.2",
+    "websocket": "^1.0.32",
+    "refcontractcomposer": "^0.0.5"
   },
   "bugs": {
     "url": "https://github.com/healthscience/node-safeflow/issues"

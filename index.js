@@ -10,7 +10,6 @@
 * @version    $Id$
 */
 import EntitiesManager from './entitiesManager.js'
-
 const util = require('util')
 const events = require('events')
 
@@ -67,9 +66,8 @@ safeFlow.prototype.startPeerFlow = function (apiCNRL, auth) {
 *
 */
 safeFlow.prototype.entityGetter = function (shellID) {
-  let dataVue = {}
+  // let dataVue = {}
   // dataVue = this.liveEManager.entityDataReturn(shellID)
-  console.log('safeflow LISTEN START')
   this.liveEManager.on('visualUpdate', (data) => {
     this.emit('displayUpdate', data)
   })

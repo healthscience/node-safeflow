@@ -32,13 +32,19 @@ ChartOptions.prototype.prepareChartOptions = function (title, scale) {
   var localthis = this
   let settings = {}
   settings.title = title
-  console.log('optiontiontont')
-  console.log(settings)
   // let yAxisOptions = this.prepareYoptions(datatypes, scale)
   let options = {
     maintainAspectRatio: false,
     responsive: true,
     spanGaps: true,
+    legend:
+    {
+      labels: {
+        // This more specific font property overrides the global property
+        fontColor: 'black',
+        fontSize: 16
+      }
+    },
     tooltips: {
       mode: 'index',
       intersect: true

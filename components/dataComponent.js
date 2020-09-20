@@ -62,14 +62,15 @@ DataComponent.prototype.sourceData = async function (source, contract, hash, dev
 */
 DataComponent.prototype.DataControlFlow = async function (source, contract, hash,  device, datatype, time) {
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, device, datatype, time)
-  //console.log('data back from source')
-  // console.log(dataRback)
   this.dataRaw[time] = dataRback
-  // is there a categories filter to apply?
-  this.CategoriseData(source, device, datatype, time, dataRback)
-  // is there any data tidying required
-  this.TidyData(source, contract, device, datatype, time)
-  let dataMatch = this.FilterDownDT(source, contract, device, datatype, time)
+  // is there data?
+  if (dataRback.length > 0) {
+    // is there a categories filter to apply?
+    this.CategoriseData(source, device, datatype, time, dataRback)
+    // is there any data tidying required
+    this.TidyData(source, contract, device, datatype, time)
+    let dataMatch = this.FilterDownDT(source, contract, device, datatype, time)
+  }
   return true
 }
 
@@ -92,10 +93,13 @@ DataComponent.prototype.CategoriseData = function (apiINFO, device, datatype, ti
 */
 DataComponent.prototype.TidyData = function (source, contract, device, datatype, time) {
   let tidyDataG = {}
-  tidyDataG = this.liveTidyData.tidyRawData(source, contract, device, datatype, time, this.categoryData[time])
-  this.tidyData[time] = tidyDataG
-  // set liveData based on/if category data asked for
-  // this.assessDataStatus(time)
+  let tidyKeys = Object.keys(source.tidydt)
+  if (tidyKeys.length > 0) {
+    tidyDataG = this.liveTidyData.tidyRawData(source, contract, device, datatype, time, this.categoryData[time])
+    this.tidyData[time] = tidyDataG
+  } else {
+    this.tidyData[time] = this.categoryData[time]
+  }
   return true
 }
 

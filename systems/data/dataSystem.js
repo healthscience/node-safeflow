@@ -52,8 +52,16 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     rawHolder = await this.liveTestStorage.RESTbuilder(api, hash)
   } else if (type === 'COMPUTE') {
     // console.log('compuate flow for data API')
-    sourceInfo.data.api.path = '/computedata/'
-    rawHolder = await this.liveTestStorage.COMPUTEbuilder(sourceInfo.data.api, device, time)
+    let extractURL = {}
+    extractURL.namespace = sourceInfo.data.api.namespace
+    extractURL.path = sourceInfo.data.api.apistructure[0]
+    // sourceInfo.data.api.path = '/computedata/'
+    // temp before smart rest extractor is built
+    if (extractURL.path === '/computedata/') {
+      rawHolder = await this.liveTestStorage.COMPUTEbuilder(extractURL, device, time)
+    } else if (extractURL.path === '/luftdatenGet/') {
+      rawHolder = await this.liveTestStorage.COMPUTEbuilderLuft(extractURL, device, time)
+    }
   }
   return rawHolder
 }

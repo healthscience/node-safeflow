@@ -34,13 +34,13 @@ util.inherits(VisualComponent, events.EventEmitter)
 * @method filterVisual
 *
 */
-VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID, device, rule, time, resultsData) {
+VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID, device, rule, time, resultsData, dtConvert) {
   // which of three types of visualisations?
   // console.log('VISULAcomponentIN')
   this.singlemulti = {}
   let status = false
   let visHASH = this.liveCrypto.evidenceProof(visUUID)
-  this.visualData[visUUID] = this.liveVisSystem.visualControl(visModule, contract, device, rule, resultsData)
+  this.visualData[visUUID] = this.liveVisSystem.visualControl(visModule, contract, device, rule, resultsData, dtConvert)
   this.liveVislist.push(visUUID)
   return status
 }
