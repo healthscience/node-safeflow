@@ -39,13 +39,11 @@ util.inherits(EntitiesManager, events.EventEmitter)
 * @method peerKBLstart
 *
 */
-EntitiesManager.prototype.peerKBLstart = async function () {
+EntitiesManager.prototype.peerKBLstart = async function (refCont) {
   // read peer kbledger
-  // let entityModule = {}
-  // let nxpList = await this.liveCNRLUtility.startKBL()
-  // should return light data to UI or go ahead and prepare entity for this NXP
-  // extract device per NXP so
-  return nxpList
+  let NXPexpanded = refCont // assume incoming NXP is expanded formar, need to check
+  dataSummary = this.peerInput(NXPexpanded)
+  return dataSummary
 }
 
 /**
@@ -66,8 +64,10 @@ EntitiesManager.prototype.peerKBLPeerstart = async function () {
 *
 */
 EntitiesManager.prototype.peerInput = async function (input) {
+  console.log('input nxp ecs')
+  console.log(input)
   let entityData = {}
-  entityData[input.cnrl] = await this.addHSentity(input)
+  entityData[input.exp.key] = await this.addHSentity(input)
   return entityData
 }
 

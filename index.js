@@ -57,8 +57,8 @@ safeFlow.prototype.networkAuthorisation = function (apiCNRL, auth) {
 * @method startFlow
 *
 */
-safeFlow.prototype.startFlow = function (apiCNRL, auth) {
-  let startData = this.liveEManager.peerKBLstart()
+safeFlow.prototype.startFlow = async function (refContract) {
+  let startData = this.liveEManager.peerKBLstart(reContract)
   return startData
 }
 
