@@ -34,7 +34,7 @@ util.inherits(DeviceComponent, events.EventEmitter)
 */
 DeviceComponent.prototype.setDevice = async function (apiD) {
   this.apiData = apiD
-  let deviceDetail = await this.liveDeviceSystem.storedDevices(apiD.api)
+  let deviceDetail = await this.liveDeviceSystem.storedDevices(this.apiData)
   this.devices = deviceDetail
 }
 

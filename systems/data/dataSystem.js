@@ -19,6 +19,8 @@ import events from 'events'
 import moment from 'moment'
 
 var DataSystem = function (setIN) {
+  console.log('data system start========')
+  console.log(setIN)
   events.EventEmitter.call(this)
   // this.liveSAFEnetwork = new SAFEnetwork(setSAFE)
   this.liveTestStorage = new TestStorageAPI(setIN)

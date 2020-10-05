@@ -109,14 +109,16 @@ TimeComponent.prototype.setTimeVis = function (liveVis) {
 * @method
 *
 */
-TimeComponent.prototype.timeProfiling = function (timeContract) {
+TimeComponent.prototype.timeProfiling = function (timeSet, timePeriod) {
+  console.log('timeprofiling')
+  console.log(timeSet)
+  console.log(timePeriod)
   // set the real timeout
   let realtimeMS = this.liveTimeSystem.setRealtime()
   // assess automation and build time range(s)
-  let timeSource = this.liveTimeSystem.sourceTimeRange(timeContract.startperiod, realtimeMS, timeContract.timeseg.prime.text)
+  let timeSource = this.liveTimeSystem.sourceTimeRange(timeSet, realtimeMS, timePeriod)
   this.timerange = timeSource
-  console.log(this.timerange)
-  return this.timerange
+  return true
 }
 
 /**

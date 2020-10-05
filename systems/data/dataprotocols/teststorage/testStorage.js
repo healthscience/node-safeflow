@@ -69,7 +69,7 @@ TestStorageAPI.prototype.COMPUTEbuilderLuft = async function (dapi, device, time
 *
 */
 TestStorageAPI.prototype.deviceRESTbuilder = async function (dapi) {
-  let jsondata = await axios.get(dapi.namespace + dapi.device + this.tempPubkey + '/' + this.tempToken)
+  let jsondata = await axios.get(dapi.apibase + '/contextdata/' + this.tempPubkey + '/' + this.tempToken)
   return jsondata.data
 }
 

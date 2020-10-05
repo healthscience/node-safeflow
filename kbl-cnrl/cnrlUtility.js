@@ -9,7 +9,7 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-import Xlibrarystorage from './xlibraryStorage.js'
+// import Xlibrarystorage from './xlibraryStorage.js'
 import CNRLmaster from './cnrlMaster.js'
 import util from 'util'
 import events from 'events'
@@ -18,7 +18,7 @@ import axios from 'axios'
 var CNRLUtility = function (setIN) {
   events.EventEmitter.call(this)
   this.liveCNRL = new CNRLmaster(setIN)
-  this.liveXlibrary = new Xlibrarystorage(setIN)
+  // this.liveXlibrary = new Xlibrarystorage(setIN)
 }
 
 /**
@@ -48,7 +48,7 @@ CNRLUtility.prototype.startKBL = async function () {
   // latest nxp and ledger entries, CNRL contract look ups
   let kbIndex = []
   let NXPlist = []
-  let startLedger = await this.liveXlibrary.getNXPindex('genesis', 10)
+  /* let startLedger = await this.liveXlibrary.getNXPindex('genesis', 10)
   console.log('startledgerannon')
   console.log(startLedger)
   // loop over and filter out CNRL contract  (TODO expand based on signed and KBID address ie. crytop verification)
@@ -64,7 +64,7 @@ CNRLUtility.prototype.startKBL = async function () {
     if (ki.cnrl.type === 'experiment') {
       NXPlist.push(ki.cnrl)
     }
-  }
+  } */
   return NXPlist
 }
 
@@ -77,7 +77,7 @@ CNRLUtility.prototype.startPeerNXP = async function () {
   // latest nxp and ledger entries, CNRL contract look ups
   let nxpIndex = []
   let NXPlist = []
-  let startLedger = await this.liveXlibrary.getNXPindex('contract', 10)
+  /* let startLedger = await this.liveXlibrary.getNXPindex('contract', 10)
   // exclude genesis
   for (let ki of startLedger) {
     if (ki.merkle !== 'genesis') {
@@ -91,7 +91,7 @@ CNRLUtility.prototype.startPeerNXP = async function () {
     kBundle.index = nxc
     kBundle.contract = cnrlType
     nxpIndex.push(kBundle)
-  }
+  } */
   return nxpIndex
 }
 
@@ -114,11 +114,11 @@ CNRLUtility.prototype.modulesCNRL = async function (mList) {
   // modules for NXP cnrl contract
   let moduleList = []
   // look up module cnrls
-  for (let km of mList) {
+  /* for (let km of mList) {
     let cnrlModule = await this.liveXlibrary.peerModules(km)
     // let cnrlModule = this.liveCNRL.lookupContract(km)
     moduleList.push(cnrlModule)
-  }
+  } */
   return moduleList
 }
 
@@ -130,8 +130,8 @@ CNRLUtility.prototype.modulesCNRL = async function (mList) {
 CNRLUtility.prototype.saveModule = async function (newVersion) {
   // need to bump version one forward
   newVersion.version++
-  let cnrlSaveModule = await this.liveXlibrary.newVerionContract(newVersion)
-  console.log(cnrlSaveModule)
+  // let cnrlSaveModule = await this.liveXlibrary.newVerionContract(newVersion)
+  // console.log(cnrlSaveModule)
   return true
 }
 

@@ -17,7 +17,7 @@ var safeFlow = function () {
   events.EventEmitter.call(this)
   this.defaultStorage = 'http://165.227.244.213:8882'
   this.settings = {}
-  this.liveEManager = {}
+  this.liveEManager = new EntitiesManager()
 }
 
 /**
@@ -44,7 +44,8 @@ safeFlow.prototype.networkAuthorisation = function (apiCNRL, auth) {
   if (verify === true ) {
     this.liveEManager = new EntitiesManager(apiCNRL, auth)
     // this.flowListen()
-    // this.entityGetter()
+    // set listener for ECS data back peer
+    this.entityGetter()
     authState.safeflow = true
     authState.type = 'auth'
     authState.auth = true
@@ -58,7 +59,7 @@ safeFlow.prototype.networkAuthorisation = function (apiCNRL, auth) {
 *
 */
 safeFlow.prototype.startFlow = async function (refContract) {
-  let startData = this.liveEManager.peerKBLstart(reContract)
+  let startData = await this.liveEManager.peerKBLstart(refContract)
   return startData
 }
 
@@ -78,8 +79,7 @@ safeFlow.prototype.startPeerFlow = function (apiCNRL, auth) {
 *
 */
 safeFlow.prototype.entityGetter = function (shellID) {
-  // let dataVue = {}
-  // dataVue = this.liveEManager.entityDataReturn(shellID)
+  console.log('getterFLowBACK')
   this.liveEManager.on('visualUpdate', (data) => {
     this.emit('displayUpdate', data)
   })

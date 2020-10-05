@@ -42,8 +42,12 @@ TimeSystem.prototype.setRealtime = function () {
 * @method sourceTimeRange
 *
 */
-TimeSystem.prototype.sourceTimeRange = function (startTime, nowTime, Tsegment) {
-  let timeSourceRange = this.momentRangeBuild(startTime, nowTime, Tsegment)
+TimeSystem.prototype.sourceTimeRange = function (startTime, nowTime, tSegment) {
+  console.log('sourceTimeRange')
+  console.log(startTime)
+  console.log(nowTime)
+  console.log(tSegment)
+  let timeSourceRange = this.momentRangeBuild(startTime, nowTime, tSegment)
   let rangeFormat = this.formatTimeSafeFlow(timeSourceRange)
   return rangeFormat
 }
