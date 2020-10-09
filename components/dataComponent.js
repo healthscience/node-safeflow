@@ -64,11 +64,24 @@ DataComponent.prototype.DataControlFlow = async function (source, contract, hash
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, device, datatype, time)
   this.dataRaw[time] = dataRback
   // is there data?
+  console.log('data back row')
+  console.log(this.dataRaw.length)
   if (dataRback.length > 0) {
     // is there a categories filter to apply?
-    this.CategoriseData(source, device, datatype, time, dataRback)
+    if (source.categorydt.length > 0) {
+      this.CategoriseData(source, device, datatype, time, dataRback)
+    } else {
+      console.log('no category to do')
+      this.categoryData[time] = dataRback
+    }
     // is there any data tidying required
-    this.TidyData(source, contract, device, datatype, time)
+    console.log(source.tidydt.status)
+    if (source.tidydt.status !== 'none') {
+      this.TidyData(source, contract, device, datatype, time)
+    } else {
+      console.log('no tidy to do')
+      this.tidyData[time] = this.categoryData[time]
+    }
     let dataMatch = this.FilterDownDT(source, contract, device, datatype, time)
   }
   return true
@@ -109,7 +122,8 @@ DataComponent.prototype.TidyData = function (source, contract, device, datatype,
 *
 */
 DataComponent.prototype.FilterDownDT = function (source, contract, device, datatype, time) {
-  // console.log('filteDown')
+  console.log('filteDown')
+  console.log(this.tidyData[0])
   let tidyDataG = {}
   tidyDataG = this.liveFilterData.dtFilterController(source, contract, device, datatype, time, this.tidyData[time])
   // hash the context device, datatype and time
@@ -117,10 +131,11 @@ DataComponent.prototype.FilterDownDT = function (source, contract, device, datat
   dataID.device = device
   dataID.datatype = datatype
   dataID.time = time
+  console.log('pare UUID for data object')
+  console.log(dataID)
   let datauuid = hashObject(dataID)
-  // console.log(dataID)
-  // console.log('UUID data')
-  // console.log(datauuid)
+  console.log('UUID data')
+  console.log(datauuid)
   this.liveData[datauuid] = tidyDataG
   return true
 }

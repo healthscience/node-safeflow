@@ -20,6 +20,8 @@ var TimeComponent = function (setIN) {
   this.liveTimeSystem = new TimeSystem(setIN)
   this.time = {} // holds all time info. per cnrl module???
   this.livedate = 0
+  this.timeseg = {}
+  this.resolution = null
   this.liveTime = {}
   this.timerange = []
   this.lastactiveStartTime = 0
@@ -92,7 +94,18 @@ TimeComponent.prototype.setTimeList = function (liveDate) {
 *
 */
 TimeComponent.prototype.setTimeSegments = function (liveTimeSegs) {
-  this.livedate.timeseg = liveTimeSegs
+  // console.log('time set set')
+  // console.log(liveTimeSegs)
+  this.timeseg = liveTimeSegs
+}
+
+/**
+*  set time resolution (NB resolution could be in any units)
+* @method setTimeResolution
+*
+*/
+TimeComponent.prototype.setTimeResolution = function (liveResolution) {
+  this.resolution = liveResolution
 }
 
 /**
@@ -110,9 +123,9 @@ TimeComponent.prototype.setTimeVis = function (liveVis) {
 *
 */
 TimeComponent.prototype.timeProfiling = function (timeSet, timePeriod) {
-  console.log('timeprofiling')
-  console.log(timeSet)
-  console.log(timePeriod)
+  // console.log('timeprofiling')
+  // console.log(timeSet)
+  // console.log(timePeriod)
   // set the real timeout
   let realtimeMS = this.liveTimeSystem.setRealtime()
   // assess automation and build time range(s)

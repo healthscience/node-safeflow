@@ -9,7 +9,6 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-
 import util from 'util'
 import events from 'events'
 

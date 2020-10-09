@@ -41,7 +41,7 @@ ComputeSystem.prototype.computationSystem = async function (contract, data) {
   let computeStatus = {}
   // console.log('computesystem')
   // console.log(contract)
-  // console.log(data)
+  //console.log(data)
   if (contract.cid === 'none') {
     computeStatus.state = true
     computeStatus.data = data
@@ -74,7 +74,7 @@ ComputeSystem.prototype.recoverySystem = async function (compInfo, rawIN, device
     // console.log(computeTimeRange)
     for (let dvc of deviceList) {
       let updateStatus = await this.liveRecoveryHR.prepareRecoveryCompute(computeTimeRange, dvc)
-      console.log(updateStatus)
+      // console.log(updateStatus)
     }
   }
   return stateHolder

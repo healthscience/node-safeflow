@@ -39,22 +39,6 @@ ChartSystem.prototype.chartjsControl = function (visModule, contract, device, ru
   return chartData
 }
 
-/**
-* convert RefContract CNRL to text
-* @method convertCNRLtoText
-*
-*/
-ChartSystem.prototype.convertCNRLtoText = function (cnrl, dtConvert) {
-  let textdt = ''
-  for (let dtc of dtConvert) {
-    for (let dc of dtc) {
-      if (dc.cnrl === cnrl) {
-        textdt = dc.text
-      }
-    }
-  }
-  return textdt
-}
 
 /**
 * return the data structure requested
@@ -62,6 +46,10 @@ ChartSystem.prototype.convertCNRLtoText = function (cnrl, dtConvert) {
 *
 */
 ChartSystem.prototype.structureChartData = function (rule, cData, dtConvert) {
+  console.log('chart structure data')
+  console.log(rule)
+  console.log(Object.keys(cData))
+  console.log(dtConvert)
   let dataPrep = {}
   let splitDatax = cData.map(n => (n['cnrl-8856388713'] * 1000))
   let splitDatay = cData.map(n => n[rule])
@@ -70,6 +58,72 @@ ChartSystem.prototype.structureChartData = function (rule, cData, dtConvert) {
   // console.log('chart data prep over')
   // console.log(dataPrep)
   return dataPrep
+}
+
+/**
+* convert RefContract CNRL to text
+* @method convertCNRLtoText
+*
+*/
+ChartSystem.prototype.convertCNRLtoText = function (cnrl, dtConvert) {
+  console.log('ref to text')
+  console.log(cnrl)
+  console.log(dtConvert)
+  let textdt = ''
+  for (let dtc of dtConvert) {
+    if (dtc.refcontract === cnrl) {
+      textdt = dtc.column
+    }
+  }
+  return textdt
+}
+
+/**
+* prepare DataCollection for vuechart.js
+* @method prepareVueChartJS
+*
+*/
+ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, results, dtConvert) {
+  let datacollection = {}
+  // check for no data available
+  if (results.yaxis.length === 0) {
+    // no data to display
+    this.chartmessage = 'No data to display'
+    datacollection = {
+      labels: [],
+      datasets: [
+        {
+          type: 'line',
+          label: 'chart',
+          borderColor: '#ed7d7d',
+          backgroundColor: '#ed7d7d',
+          fill: false,
+          data: results,
+          yAxisID: ''
+        }
+          /* , {
+          type: 'bar',
+          label: 'Activity Steps',
+          borderColor: '#ea1212',
+          borderWidth: 0.5,
+          backgroundColor: '#ea1212',
+          fill: false,
+          data: [],
+          yAxisID: 'steps'
+        } */
+      ]
+    }
+  } else {
+    // prepare the Chart OBJECT FOR CHART.JS  Up to 2 line e.g. BMP or Steps or BPM + Steps
+    let prepareDataset = this.datasetPrep(visModule, rule, device, results, dtConvert)
+    let datasetHolder = []
+    datasetHolder.push(prepareDataset.datasets)
+    datacollection = {
+      labels: prepareDataset.labels,
+      datasets: datasetHolder
+    }
+  }
+  return datacollection
 }
 
 /**
@@ -132,54 +186,6 @@ ChartSystem.prototype.normaliseLabels = function (labelList) {
   for (let ll of labelList) {
   }
   return normaliseList
-}
-
-/**
-* prepare DataCollection for vuechart.js
-* @method prepareVueChartJS
-*
-*/
-ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, results, dtConvert) {
-  let datacollection = {}
-  // check for no data available
-  if (results.yaxis.length === 0) {
-    // no data to display
-    this.chartmessage = 'No data to display'
-    datacollection = {
-      labels: [],
-      datasets: [
-        {
-          type: 'line',
-          label: 'chart',
-          borderColor: '#ed7d7d',
-          backgroundColor: '#ed7d7d',
-          fill: false,
-          data: results,
-          yAxisID: ''
-        }
-          /* , {
-          type: 'bar',
-          label: 'Activity Steps',
-          borderColor: '#ea1212',
-          borderWidth: 0.5,
-          backgroundColor: '#ea1212',
-          fill: false,
-          data: [],
-          yAxisID: 'steps'
-        } */
-      ]
-    }
-  } else {
-    // prepare the Chart OBJECT FOR CHART.JS  Up to 2 line e.g. BMP or Steps or BPM + Steps
-    let prepareDataset = this.datasetPrep(visModule, rule, device, results, dtConvert)
-    let datasetHolder = []
-    datasetHolder.push(prepareDataset.datasets)
-    datacollection = {
-      labels: prepareDataset.labels,
-      datasets: datasetHolder
-    }
-  }
-  return datacollection
 }
 
 /**

@@ -9,12 +9,12 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
+import Moment from 'moment'
 import pkg from 'moment-range'
 const { extendMoment } = pkg
+const moment = extendMoment(Moment)
 import util from 'util'
 import events from 'events'
-import Moment from 'moment'
-const moment = extendMoment(Moment)
 
 var TimeSystem = function (setIN) {
   events.EventEmitter.call(this)
@@ -43,10 +43,6 @@ TimeSystem.prototype.setRealtime = function () {
 *
 */
 TimeSystem.prototype.sourceTimeRange = function (startTime, nowTime, tSegment) {
-  console.log('sourceTimeRange')
-  console.log(startTime)
-  console.log(nowTime)
-  console.log(tSegment)
   let timeSourceRange = this.momentRangeBuild(startTime, nowTime, tSegment)
   let rangeFormat = this.formatTimeSafeFlow(timeSourceRange)
   return rangeFormat
@@ -58,10 +54,15 @@ TimeSystem.prototype.sourceTimeRange = function (startTime, nowTime, tSegment) {
 *
 */
 TimeSystem.prototype.momentRangeBuild = function (startTime, endTime, segment) {
+  // convert segment to moment text input
+  let segText = ''
+  if (segment === 86400000) {
+    segText = 'days'
+  }
   let startMoment = moment(parseInt(startTime)).format()
-  let endMoment = moment(endTime).format() // .startOf('day')
+  let endMoment = moment(endTime).format()
   let rangeBuild = moment.range(startMoment, endMoment)
-  let sourceTimes = Array.from(rangeBuild.by(segment))
+  let sourceTimes = Array.from(rangeBuild.by(segText))
   return sourceTimes
 }
 

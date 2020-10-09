@@ -17,6 +17,7 @@ var DatatypeComponent = function (setIN) {
   events.EventEmitter.call(this)
   this.liveDTsystem = new DTsystem(setIN)
   this.datatypeInfoLive = []
+  this.datatypesLive = []
 }
 
 /**
@@ -34,6 +35,16 @@ DatatypeComponent.prototype.dataTypeMapping = function (api, contract, device, d
   // query CNRL for hash and parse out datatype and packaging info.
   let dataTypeMapped = this.liveDTsystem.DTStartMatch(api, contract, datatype)
   this.datatypeInfoLive = dataTypeMapped
+  return true
+}
+
+/**
+*  the current data types ask for by the peer
+* @method setDataTypeLive
+*
+*/
+DatatypeComponent.prototype.setDataTypeLive = function (liveDTs) {
+  this.datatypesLive = liveDTs
   return true
 }
 

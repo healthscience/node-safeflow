@@ -20,7 +20,7 @@ import moment from 'moment'
 
 var DataSystem = function (setIN) {
   console.log('data system start========')
-  console.log(setIN)
+  // console.log(setIN)
   events.EventEmitter.call(this)
   // this.liveSAFEnetwork = new SAFEnetwork(setSAFE)
   this.liveTestStorage = new TestStorageAPI(setIN)
@@ -40,12 +40,12 @@ util.inherits(DataSystem, events.EventEmitter)
 *
 */
 DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceInfo, device, datatype, time) {
-  // console.log('datatypeQueryMapping')
-  // console.log(type)
-  // console.log(sourceInfo)
-  // console.log(hash)
-  // console.log(device)
-  // console.log(time)
+  console.log('datatypeQueryMapping')
+  console.log(type)
+  console.log(sourceInfo)
+  console.log(hash)
+  console.log(device)
+  console.log(time)
   let rawHolder = []
   if (type === 'SAFE') {
     // console.log('safeNetwork file GET')
@@ -55,8 +55,8 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
   } else if (type === 'COMPUTE') {
     // console.log('compuate flow for data API')
     let extractURL = {}
-    extractURL.namespace = sourceInfo.data.api.namespace
-    extractURL.path = sourceInfo.data.api.apistructure[0]
+    extractURL.namespace = sourceInfo.sourceapiquery.namespace
+    extractURL.path = sourceInfo.sourceapiquery.apipath
     // sourceInfo.data.api.path = '/computedata/'
     // temp before smart rest extractor is built
     if (extractURL.path === '/computedata/') {

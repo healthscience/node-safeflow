@@ -157,9 +157,9 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
 EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) {
   // ALL FLOWS MADE IMMUMATABLE via  FORTH like scripting
   console.log('start ECSflow--------')
-  console.log(shellID)
-  console.log(ECSinput)
-  console.log(modules)
+  // console.log(shellID)
+  // console.log(ECSinput)
+  // console.log(modules)
   // extract types of modules  // if existing should skip all but vis and compute
   let moduleState = false
   let deviceInfo = {}
@@ -221,9 +221,9 @@ EntitiesManager.prototype.deviceDataflow = async function (shellID, apiData) {
 */
 EntitiesManager.prototype.computeFlow = async function (shellID, modContract, apiData) {
   console.log('computeFlow START-------------')
-  console.log(shellID)
-  console.log(modContract)
-  console.log(apiData)
+  // console.log(shellID)
+  // console.log(modContract)
+  // console.log(apiData)
   let updateContract = {}
   // temporary expand out old CNRL reference for timeperiod and resultion
   let timePeriod = this.liveCNRLUtility.contractCNRL(modContract.value.info.settings.timeperiod)
@@ -231,10 +231,11 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
   // set these expand ref contracts
   modContract.value.info.settings.timeperiod = timePeriod
   modContract.value.info.settings.resolution = resolution
+  // set the data in time component
+  this.liveSEntities[shellID].liveTimeC.setTimeSegments(timePeriod)
+  this.liveSEntities[shellID].liveTimeC.setTimeResolution(resolution)
   // set the input need for compute to flow
   this.liveSEntities[shellID].liveTimeC.timeProfiling(modContract.value.info.controls.date, timePeriod.prime.unit)
-  console.log('time range set')
-  console.log(this.liveSEntities[shellID].liveTimeC.timerange)
   await this.computeExecute(shellID, modContract, apiData)
   console.log('COMPUTEFLOW9-----FINISHED')
   // console.log(this.liveSEntities[shellID])
@@ -246,28 +247,37 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
 * @method computeExecute
 *
 */
-EntitiesManager.prototype.computeExecute = async function (shellID, modContract, apiData) {
+EntitiesManager.prototype.computeExecute = async function (shellID, inContract, apiData) {
+  let modContractUpdate = inContract
   console.log('computeExecut context contracts')
-  console.log(modContract)
-  console.log(this.liveSEntities[shellID].liveDeviceC.devices)
-  console.log(modContract.dtcompute)
-  console.log(this.liveSEntities[shellID].liveTimeC.timerange)
-  // this.liveSEntities[shellID].liveTimeC.timerange =  [1589760000000] // [1588114800000]
-  // modContract.dtcompute = ['cnrl-8856388711', 'cnrl-8856388712']
+  console.log(inContract.value.info.settings.yaxis)
+  // what datatypes asked for?
+  let datatypeList = []
+  // datatypeList.push(inContract.value.info.settings.xaxis)
+  datatypeList.push(inContract.value.info.settings.yaxis[0])
+  this.liveSEntities[shellID].liveDatatypeC.setDataTypeLive(datatypeList)
+  let tempDevList = this.liveSEntities[shellID].liveDeviceC.devices[0]
+  this.liveSEntities[shellID].liveDeviceC.devices = []
+  this.liveSEntities[shellID].liveDeviceC.devices.push(tempDevList)
+  this.liveSEntities[shellID].liveTimeC.timerange = [1601506800000]
   // else go through creating new KBID entry
   // range of time, number of devices, number of data types  do all the loop here?
   for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
-    for (let datatype of modContract.dtcompute) {
+    console.log('compute---deivce')
+    console.log(device)
+    for (let datatype of datatypeList) {
+      console.log('compute---datatype')
+      console.log(datatype)
       for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
+        console.log('compute---time')
+        console.log(time)
         // set the new updated time settings for the new contract
-        modContract.time.timeseg = modContract.info.settings.timeseg
-        modContract.time.startperiod = time
-        console.log(modContract)
+        modContractUpdate.value.info.controls.date = time
         // ref contract input all complete -
-        let engineReturn = await this.computeEngine(shellID, apiData, modContract, device, datatype, time)
-        let saveResults = await this.saveResultsProtocol(shellID)
+        let engineReturn = await this.computeEngine(shellID, apiData, modContractUpdate, device, datatype, time)
+        // let saveResults = await this.saveResultsProtocol(shellID)
         console.log('results dsaved')
-        console.log(saveResults)
+        // console.log(saveResults)
         // new version of Ref Contracts of Compute Modules info
         /* prepare object to send to peerLink
         let updateModule = {}
@@ -289,7 +299,7 @@ EntitiesManager.prototype.computeExecute = async function (shellID, modContract,
 *
 */
 EntitiesManager.prototype.computeEngine = async function (shellID, apiData, contract, device, datatype, time) {
-  this.liveSEntities[shellID].liveTimeC.setMasterClock(contract.time.startperiod)
+  this.liveSEntities[shellID].liveTimeC.setMasterClock(contract.value.info.controls.date)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveTimeC)
   this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(apiData, contract, device, datatype)
@@ -342,28 +352,33 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule) {
   console.log(visModule)
   // reset the liveVlist list
   this.liveSEntities[shellID].liveVisualC.liveVislist = []
-  // let visContract = this.liveCNRLUtility.contractCNRL(visModule.visualise)
+  let visContract = visModule.value.info.visualise
   // what has been ask for check rules
-  let rules =  visModule.rules // ['cnrl-8856388711', 'cnrl-8856388712']
+  console.log(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive)
+  console.log(Object.keys(this.liveSEntities[shellID].liveDataC.liveData))
+  // the datatypes for the yaxis (assume charting for now)
+  let rules =  visModule.value.info.settings.yaxis[0]
+  console.log('rules')
+  console.log(rules)
+  rules = ['937647c8700a04bccd2c524997c015bc07951877']
   // this.liveSEntities[shellID].liveDeviceC.devices
-  let tempDevices = this.liveSEntities[shellID].liveDeviceC.devices // ['D3:CE:05:E9:38:74'] // , 'C4:87:DB:73:19:E2']
-  // this.liveSEntities[shellID].liveTimeC.timerange =  [1589760000000] // [1588114800000]
-  // console.log(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.api.tableStructure)
-  // console.log('VISUAL TIME RRRRRANGE')
-  // console.log(this.liveSEntities[shellID].liveTimeC.timerange)
-  // console.log(tempDevices)
-  // console.log(rules)
+  let tempDevices = ['D3:CE:05:E9:38:74'] // this.liveSEntities[shellID].liveDeviceC.devices // ['D3:CE:05:E9:38:74'] // , 'C4:87:DB:73:19:E2']
+  this.liveSEntities[shellID].liveTimeC.timerange = [1601506800000]
   for (let device of tempDevices) {
     for (let rule of rules) {
-      // console.log(this.liveSEntities[shellID].liveDataC.liveData[rule.yaxis])
       for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
         // hash the context device, datatype and time
         let dataID = {}
-        dataID.device = device.device_mac
-        dataID.datatype = rule.yaxis
+        dataID.device = device // .device_mac
+        dataID.datatype = rule
         dataID.time = time
+        console.log('input for GUUID')
+        console.log(dataID)
         let datauuid = this.liveCrypto.evidenceProof(dataID)
-        this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, datauuid, device, rule.yaxis, time,  this.liveSEntities[shellID].liveDataC.liveData[datauuid], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.api.tableStructure)
+        console.log('what guuid prepared')
+        console.log(datauuid)
+        this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, datauuid, device, rule, time,  this.liveSEntities[shellID].liveDataC.liveData[datauuid], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure)
+        console.log('end of vis CONTROL ECS')
         // proof of evidence
         // this.liveCrypto.evidenceProof()
         // this.emit('visualUpdate', this.liveSEntities[shellID])

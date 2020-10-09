@@ -36,6 +36,9 @@ util.inherits(TestStorageAPI, events.EventEmitter)
 *
 */
 TestStorageAPI.prototype.RESTbuilder = async function (dapi, queryIN) {
+  console.log('rest builder info')
+  console.log(dapi)
+  console.log(queryIN)
   let jsondata = await axios.get(dapi.namespace + dapi.path + this.tempPubkey + '/' + this.tempToken + '/' + queryIN)
   return jsondata.data[0]
 }
@@ -132,7 +135,7 @@ TestStorageAPI.prototype.removeStartDashboardSettings = async function (removeID
   jsonIN.kbid = removeID
   await axios.post(this.baseAPI + '/startDashboardRemove/' + this.tempPubkey + '/' + this.tempToken, jsonIN)
     .then(function (response) {
-      console.log(response)
+      // console.log(response)
     })
 }
 

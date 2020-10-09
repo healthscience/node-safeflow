@@ -28,6 +28,9 @@ util.inherits(DTSystem, events.EventEmitter)
 *
 */
 DTSystem.prototype.DTStartMatch = function (sourceAPI, contract, datatype) {
+  // console.log('dt matcheeeerrrr')
+  // console.log(sourceAPI)
+  // console.log(contract)
   // console.log(datatype)
   // use inputs to map to datastore/api/rest etc. table / layout structure
   let sourceDTmap = this.datatypeTableMapper(sourceAPI, datatype)
@@ -49,27 +52,30 @@ DTSystem.prototype.DTStartMatch = function (sourceAPI, contract, datatype) {
 *
 */
 DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
+  // console.log('datatypeTable Mapper--------')
+  // console.log(sourceAPI)
+  // console.log(dt)
   let apiMatch = {}
   // given datatypes select find match to the query string
   let tableCount = 0
   // match to source API query
-  for (let dtt of sourceAPI.api.tableStructure) {
+  for (let dtt of sourceAPI.tablestructure) {
     // is there table structure embedd in the storageStructure?
     // check to see if table contains sub structure
-    let subStructure = this.subStructure(dtt)
+    /* let subStructure = this.subStructure(dtt)
     if (subStructure.length > 0) {
       dtt = subStructure
-    }
-    const result = dtt.filter(item => item.cnrl === dt)
-    if (result.length > 0) {
+    } */
+    if (dtt.refcontract === dt) {
       let packAPImatch = {}
-      packAPImatch.cnrl = result[0].cnrl
-      packAPImatch.column = result[0].text
-      packAPImatch.api = sourceAPI.api.apistructure[tableCount]
-      packAPImatch.namespace = sourceAPI.namespace
+      packAPImatch.cnrl = dtt.refcontract
+      packAPImatch.column = dtt.column
+      packAPImatch.apipath = sourceAPI.apipath
+      packAPImatch.namespace = sourceAPI.apibase
       apiMatch = packAPImatch
     }
   }
+  // console.log(apiMatch)
   return apiMatch
 }
 
@@ -80,10 +86,18 @@ DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
 */
 DTSystem.prototype.categoryTableMapper = function (sourceAPI, category) {
   let catInfo = []
-  for (let ct of category) {
-    // map category DT to api table name
-    let catDT = this.datatypeTableMapper(sourceAPI, ct)
-    catInfo.push(catDT)
+  // check if any categories?
+  // console.log(category)
+  // let objectKeys = Object.entries(category)
+  if (category !== undefined) {
+    for (let ct of category) {
+      // map category DT to api table name
+      let catDT = this.datatypeTableMapper(sourceAPI, ct)
+      catInfo.push(catDT)
+    }
+  } else {
+    // no category return empty
+    catInfo = []
   }
   return catInfo
 }
@@ -93,15 +107,13 @@ DTSystem.prototype.categoryTableMapper = function (sourceAPI, category) {
 * @method tidyTableMapper
 *
 */
-DTSystem.prototype.tidyTableMapper = function (sourceAPI, dt) {
+DTSystem.prototype.tidyTableMapper = function (sourceAPI, tidy) {
   let tidyInfo = {}
-  if (sourceAPI.api.tidy === true) {
+  // check if any tidying required
+  // let objectKeys = Object.entries(tidy)
+  if (tidy !== undefined) {
     // trace down rules for DT's
-    if (sourceAPI.api.source !== 'cnrl-primary') {
-      tidyInfo = sourceAPI.primary.tidyList
-    } else {
-      tidyInfo = sourceAPI.api.tidyList
-    }
+    tidyInfo = sourceAPI
   } else {
     tidyInfo = {'status': 'none'}
   }
