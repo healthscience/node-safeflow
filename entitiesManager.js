@@ -250,7 +250,7 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
 EntitiesManager.prototype.computeExecute = async function (shellID, inContract, apiData) {
   let modContractUpdate = inContract
   console.log('computeExecut context contracts')
-  console.log(inContract.value.info.settings.yaxis)
+  // console.log(inContract.value.info.settings.yaxis)
   // what datatypes asked for?
   let datatypeList = []
   // datatypeList.push(inContract.value.info.settings.xaxis)
@@ -354,12 +354,12 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule) {
   this.liveSEntities[shellID].liveVisualC.liveVislist = []
   let visContract = visModule.value.info.visualise
   // what has been ask for check rules
-  console.log(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive)
-  console.log(Object.keys(this.liveSEntities[shellID].liveDataC.liveData))
+  // console.log(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive)
+  // console.log(Object.keys(this.liveSEntities[shellID].liveDataC.liveData))
   // the datatypes for the yaxis (assume charting for now)
   let rules =  visModule.value.info.settings.yaxis[0]
-  console.log('rules')
-  console.log(rules)
+  // console.log('rules')
+  // console.log(rules)
   rules = ['937647c8700a04bccd2c524997c015bc07951877']
   // this.liveSEntities[shellID].liveDeviceC.devices
   let tempDevices = ['D3:CE:05:E9:38:74'] // this.liveSEntities[shellID].liveDeviceC.devices // ['D3:CE:05:E9:38:74'] // , 'C4:87:DB:73:19:E2']

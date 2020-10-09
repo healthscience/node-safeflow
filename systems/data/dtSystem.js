@@ -35,7 +35,7 @@ DTSystem.prototype.DTStartMatch = function (sourceAPI, contract, datatype) {
   // use inputs to map to datastore/api/rest etc. table / layout structure
   let sourceDTmap = this.datatypeTableMapper(sourceAPI, datatype)
   let sourceCatmap = this.categoryTableMapper(sourceAPI, contract.category)
-  let sourceTidymap = this.tidyTableMapper(sourceAPI, contract.tidy)
+  let sourceTidymap = this.tidyTableMapper(sourceAPI)
   let apiInfo = {}
   apiInfo.data = sourceAPI
   apiInfo.sourceapiquery = sourceDTmap
@@ -107,14 +107,17 @@ DTSystem.prototype.categoryTableMapper = function (sourceAPI, category) {
 * @method tidyTableMapper
 *
 */
-DTSystem.prototype.tidyTableMapper = function (sourceAPI, tidy) {
-  let tidyInfo = {}
+DTSystem.prototype.tidyTableMapper = function (sourceAPI) {
+  let tidyInfo = []
   // check if any tidying required
-  // let objectKeys = Object.entries(tidy)
-  if (tidy !== undefined) {
-    // trace down rules for DT's
-    tidyInfo = sourceAPI
-  } else {
+  let objectKeys = Object.keys(sourceAPI.tidy)
+  if (objectKeys.length > 0) {
+    for (let ti of objectKeys) {
+      console.log(ti)
+      tidyInfo.push(sourceAPI.tidy[ti])
+    }
+  }
+  else {
     tidyInfo = {'status': 'none'}
   }
   return tidyInfo

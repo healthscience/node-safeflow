@@ -51,7 +51,7 @@ ChartSystem.prototype.structureChartData = function (rule, cData, dtConvert) {
   console.log(Object.keys(cData))
   console.log(dtConvert)
   let dataPrep = {}
-  let splitDatax = cData.map(n => (n['cnrl-8856388713'] * 1000))
+  let splitDatax = cData.map(n => (n['d6432e905c50764b93b5e685c182b23ff5352a07'] * 1000))
   let splitDatay = cData.map(n => n[rule])
   dataPrep.xaxis = splitDatax
   dataPrep.yaxis = splitDatay

@@ -75,7 +75,6 @@ DataComponent.prototype.DataControlFlow = async function (source, contract, hash
       this.categoryData[time] = dataRback
     }
     // is there any data tidying required
-    console.log(source.tidydt.status)
     if (source.tidydt.status !== 'none') {
       this.TidyData(source, contract, device, datatype, time)
     } else {
