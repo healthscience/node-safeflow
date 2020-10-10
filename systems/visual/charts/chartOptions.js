@@ -70,7 +70,13 @@ ChartOptions.prototype.prepareChartOptions = function (title, scale) {
           reverse: false
         }
       }],
-      yAxes: {} // yAxisOptions
+      yAxes: [{
+        ticks: {
+          beginAtZero: true,
+          steps: 10,
+          stepValue: 5
+        }
+      }] //yAxisOptions
     },
     annotation: {
       events: ['click'],
@@ -159,6 +165,9 @@ ChartOptions.prototype.prepareChartOptions = function (title, scale) {
 */
 ChartOptions.prototype.prepareYoptions = function (datatypes, scale) {
   // prepare y axis dependent up how many datatypes plot
+  console.log('yasis stttings')
+  console.log(datatypes)
+  console.log(scale)
   let yAxisPrep = []
   let leftorrigh = ''
   let idAxis = ''

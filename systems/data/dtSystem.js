@@ -28,9 +28,9 @@ util.inherits(DTSystem, events.EventEmitter)
 *
 */
 DTSystem.prototype.DTStartMatch = function (sourceAPI, contract, datatype) {
-  // console.log('dt matcheeeerrrr')
+  console.log('dt matcheeeerrrr')
   // console.log(sourceAPI)
-  // console.log(contract)
+  console.log(contract)
   // console.log(datatype)
   // use inputs to map to datastore/api/rest etc. table / layout structure
   let sourceDTmap = this.datatypeTableMapper(sourceAPI, datatype)
@@ -88,8 +88,8 @@ DTSystem.prototype.categoryTableMapper = function (sourceAPI, category) {
   let catInfo = []
   // check if any categories?
   // console.log(category)
-  // let objectKeys = Object.entries(category)
-  if (category !== undefined) {
+  let objectKeys = Object.keys(category)
+  if (objectKeys.length !== 0) {
     for (let ct of category) {
       // map category DT to api table name
       let catDT = this.datatypeTableMapper(sourceAPI, ct)

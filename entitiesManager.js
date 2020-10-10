@@ -93,7 +93,7 @@ EntitiesManager.prototype.peerInput = async function (input) {
   console.log('input nxp ecs')
   console.log(input)
   let entityData = {}
-  entityData[input.exp.exp.key] = await this.addHSentity(input)
+  entityData[input.exp.key] = await this.addHSentity(input)
   return entityData
 }
 
@@ -103,23 +103,21 @@ EntitiesManager.prototype.peerInput = async function (input) {
 *
 */
 EntitiesManager.prototype.addHSentity = async function (ecsIN) {
-  console.log('ADD entity in')
   let entitySet = {}
   let moduleState = false
   let shellID = ''
   let modules = []
-  if (ecsIN.entityUUID) {
-    shellID = ecsIN.entityUUID
-    modules = ecsIN.module // keep tabs on module in entity? this.liveSEntities[shellID].modulesGet(shellID)
+  if (ecsIN.update !== undefined && ecsIN.update.entityUUID) {
+    shellID = ecsIN.update.entityUUID
+    modules = ecsIN.update.modules // keep tabs on module in entity? this.liveSEntities[shellID].modulesGet(shellID)
     console.log('entity' + shellID + 'already exists')
     moduleState = true
-    // update Reference Contract do this outwith ECS but save RefContract if KBID formed
-    // let updateKbid = this.updateRefcontract(modules, ecsIN)
+    // update library Module Reference Contract but first check if KBID exist ie result prepared and ready to return
     let entityLivedata = await this.entityDataReady(shellID, ecsIN)
     if (entityLivedata === false) {
       // use existing entity and process a new kbid entry to get vis data
-      console.log('existing entity but need new kbid entry')
-      this.ECSflow(shellID, ecsIN.input, modules)
+      console.log('existing entity but need new compute & KIBID entry')
+      this.ECSflow(shellID, ecsIN.update, modules)
       // data is ready tell peer
     } else {
       this.emit('visualUpdate', this.liveSEntities[shellID])
@@ -150,6 +148,8 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
 }
 
 /**
+*  control the adding of data to the entity
+*  KnowledgeSciptingLanguage(forth/stack)to give gurantees)
 *  perform action in modules
 * @method ECSflow
 *
@@ -157,44 +157,70 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
 EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) {
   // ALL FLOWS MADE IMMUMATABLE via  FORTH like scripting
   console.log('start ECSflow--------')
-  // console.log(shellID)
-  // console.log(ECSinput)
-  // console.log(modules)
+  console.log(shellID)
+  console.log(ECSinput)
+  console.log(modules)
+  let automation = false
+  // convert modules to array to order flow
+  // module has a specific order  question, data, compute, visualise, etc.
+  let moduleOrder = this.orderModuleFlow(modules)
+  console.log('moduleOrderObject')
+  console.log(moduleOrder)
   // extract types of modules  // if existing should skip all but vis and compute
-  let moduleState = false
+  let flowState = {}
   let deviceInfo = {}
-  for (let md of modules) {
-    if (ECSinput.live !== undefined || ECSinput === 'refUpdate') {
-      console.log('existing branch')
-      // updated require compute and visualise module RefContracts input
-      if (md.type === 'compute') {
-        moduleState = await this.computeFlow(shellID, md, this.liveSEntities[shellID].liveDeviceC.apiData)
-      } else if (md.type === 'Visualise') {
-        // feed into ECS -KBID processor
-        // extract visualisation contract information
-        moduleState = await this.visualFlow(shellID, md)
-        this.emit('visualUpdate', this.liveSEntities[shellID])
-      }
-    } else {
-      console.log('new FLOW')
-      // check if automation Manager List needs updated?
-      let autoCheck = this.liveAutomation.updateAutomation(md.value.info)
-      // need matcher - module type to how its processed.
-      if (md.value.type === 'data') {
-        // hook up to device
-        deviceInfo = md.value.info.data.value
-        moduleState = await this.deviceDataflow(shellID, deviceInfo)
-      } else if (md.value.type === 'compute') {
-        // feed into ECS -KBID processor
-        moduleState = await this.computeFlow(shellID, md, this.liveSEntities[shellID].liveDeviceC.apiData)
-      } else if (md.value.type === 'visualise') {
-        // extract visualisation contract information
-        moduleState = await this.visualFlow(shellID, md)
-        this.emit('visualUpdate', this.liveSEntities[shellID])
-      } else {
-        // plain extract info. from CNRL contract
-      }
+  // first assess what first flow and create waiting list (if any)
+  let autoCheck = this.liveAutomation.updateAutomation(moduleOrder.compute.value.info)
+  if (ECSinput.input === 'refUpdate') {
+    console.log('existing entity and modules')
+    // updated require compute and visualise module RefContracts input
+    flowState = moduleOrder.compute // await this.computePrepare(shellID, md, this.liveSEntities[shellID].liveDeviceC.apiData)
+    await this.computeFlow(shellID, moduleState)
+    // process updated vis ref contract
+    await this.visualFlow(shellID, moduleOrder.visualise, moduleState)
+    this.emit('visualUpdate', this.liveSEntities[shellID])
+  } else {
+    console.log('new FLOW')
+    // need matcher - module type to how its processed.
+    // 1 Data module hook up to device
+    deviceInfo = moduleOrder.data.value.info.data.value
+    let apiData = await this.deviceDataflow(shellID, deviceInfo)
+    // 2 Compute - feed into ECS -KBID processor
+    flowState = await this.computePrepare(shellID, moduleOrder.compute)
+    console.log('compute order state prepared')
+    console.log(flowState)
+    // all automtion variales extracted, do first and then start on await list
+    // single or loop?
+    if (flowState.single === true) {
+      await this.computeFlow(shellID, flowState.updateModContract, this.liveSEntities[shellID].liveDeviceC.activedevice, this.liveSEntities[shellID].liveDatatypeC.datatypesLive[0], flowState.updateModContract.value.info.controls.date)
+      // visualise - extract visualisation contract information
+      await this.visualFlow(shellID, moduleOrder.visualise, flowState, flowState.updateModContract.value.info.controls.date)
+      this.emit('visualUpdate', this.liveSEntities[shellID])
+    } else if (flowState.wait === true && automation === true) {
+      /* for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
+        console.log('compute---deivce')
+        console.log(device)
+        for (let datatype of inPrepared.datatypeList) {
+          console.log('compute---datatype')
+          console.log(datatype)
+          for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
+            console.log('compute---time')
+            console.log(time)
+            // await this.computeFlow(shellID, updateModContract, time)
+            // visualise - extract visualisation contract information
+            // await this.visualFlow(shellID, moduleOrder.visualise, updateModContract, time)
+            // required back instant or update resutls store or both
+            if () {
+              // emit and store
+              this.emit('visualUpdate', this.liveSEntities[shellID])
+            } else {
+              // store the data only
+            }
+          }
+        }
+      } */
     }
+
   }
 }
 
@@ -214,18 +240,35 @@ EntitiesManager.prototype.deviceDataflow = async function (shellID, apiData) {
 }
 
 /**
-*  control the adding of data to the entity
-*  KnowledgeSciptingLanguage(forth/stack)to give gurantees)
-* @method computeFlow
+*
+* @method orderModuleFlow
 *
 */
-EntitiesManager.prototype.computeFlow = async function (shellID, modContract, apiData) {
-  console.log('computeFlow START-------------')
+EntitiesManager.prototype.orderModuleFlow = function (modules) {
+  let moduleOrder = {}
+  for (let mod of modules) {
+    if (mod.value.type === 'data') {
+      moduleOrder.data = mod
+    } else if (mod.value.type === 'compute') {
+      moduleOrder.compute = mod
+    } else if (mod.value.type === 'visualise') {
+      moduleOrder.visualise = mod
+    }
+  }
+  return moduleOrder
+}
+
+/**
+*
+* @method computePrepare
+*
+*/
+EntitiesManager.prototype.computePrepare = async function (shellID, modContract) {
+  console.log('computePrepare START-------------')
+  let flowOrder = {}
   // console.log(shellID)
   // console.log(modContract)
   // console.log(apiData)
-  let updateContract = {}
-  // temporary expand out old CNRL reference for timeperiod and resultion
   let timePeriod = this.liveCNRLUtility.contractCNRL(modContract.value.info.settings.timeperiod)
   let resolution = this.liveCNRLUtility.contractCNRL(modContract.value.info.settings.resolution)
   // set these expand ref contracts
@@ -236,10 +279,19 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
   this.liveSEntities[shellID].liveTimeC.setTimeResolution(resolution)
   // set the input need for compute to flow
   this.liveSEntities[shellID].liveTimeC.timeProfiling(modContract.value.info.controls.date, timePeriod.prime.unit)
-  await this.computeExecute(shellID, modContract, apiData)
-  console.log('COMPUTEFLOW9-----FINISHED')
-  // console.log(this.liveSEntities[shellID])
-  return true
+  let datatypeList = []
+  // datatypeList.push(inContract.value.info.settings.xaxis)
+  datatypeList.push(modContract.value.info.settings.yaxis[0])
+  this.liveSEntities[shellID].liveDatatypeC.setDataTypeLive(datatypeList)
+  /* let tempDevList = this.liveSEntities[shellID].liveDeviceC.devices[0]
+  this.liveSEntities[shellID].liveDeviceC.devices = []
+  this.liveSEntities[shellID].liveDeviceC.devices.push(tempDevList)
+  this.liveSEntities[shellID].liveTimeC.timerange = [1602198000000] // [1601506800000] */
+  flowOrder.single = true
+  flowOrder.wait = false
+  flowOrder.updateModContract = modContract
+  console.log('COMPUTEPREPARE9-----FINISHED')
+  return flowOrder
 }
 
 /**
@@ -247,50 +299,32 @@ EntitiesManager.prototype.computeFlow = async function (shellID, modContract, ap
 * @method computeExecute
 *
 */
-EntitiesManager.prototype.computeExecute = async function (shellID, inContract, apiData) {
-  let modContractUpdate = inContract
-  console.log('computeExecut context contracts')
-  // console.log(inContract.value.info.settings.yaxis)
-  // what datatypes asked for?
-  let datatypeList = []
-  // datatypeList.push(inContract.value.info.settings.xaxis)
-  datatypeList.push(inContract.value.info.settings.yaxis[0])
-  this.liveSEntities[shellID].liveDatatypeC.setDataTypeLive(datatypeList)
-  let tempDevList = this.liveSEntities[shellID].liveDeviceC.devices[0]
-  this.liveSEntities[shellID].liveDeviceC.devices = []
-  this.liveSEntities[shellID].liveDeviceC.devices.push(tempDevList)
-  this.liveSEntities[shellID].liveTimeC.timerange = [1601506800000]
+EntitiesManager.prototype.computeFlow = async function (shellID, updateModContract, device, datatype, time) {
+  console.log('start ComputeFLow')
+  console.log(shellID)
+  console.log(updateModContract)
+  console.log(device)
+  console.log(datatype)
+  console.log(time)
+  let modContractUpdate = updateModContract
   // else go through creating new KBID entry
-  // range of time, number of devices, number of data types  do all the loop here?
-  for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
-    console.log('compute---deivce')
-    console.log(device)
-    for (let datatype of datatypeList) {
-      console.log('compute---datatype')
-      console.log(datatype)
-      for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
-        console.log('compute---time')
-        console.log(time)
-        // set the new updated time settings for the new contract
-        modContractUpdate.value.info.controls.date = time
-        // ref contract input all complete -
-        let engineReturn = await this.computeEngine(shellID, apiData, modContractUpdate, device, datatype, time)
-        // let saveResults = await this.saveResultsProtocol(shellID)
-        console.log('results dsaved')
-        // console.log(saveResults)
-        // new version of Ref Contracts of Compute Modules info
-        /* prepare object to send to peerLink
-        let updateModule = {}
-        updateModule.type = 'library'
-        updateModule.reftype = 'module'
-        updateModule.control = ''
-        updateModule.data = {} */
-        // old await this.liveCNRLUtility.saveModule(modContract)
-        // DIDO send message to PeerLink to make library ledger KBID entry
-        // old let saveKBIDentry = await this.saveKBIDProtocol(modContract, saveResults)
-      }
-    }
-  }
+  // set the new updated time settings for the new contract
+  modContractUpdate.value.info.controls.date = time
+  // ref contract input all complete -
+  let engineReturn = await this.computeEngine(shellID, this.liveSEntities[shellID].liveDeviceC.apiData, modContractUpdate, device, datatype, time)
+  // let saveResults = await this.saveResultsProtocol(shellID)
+  console.log('results dsaved')
+  // console.log(saveResults)
+  // new version of Ref Contracts of Compute Modules info
+  /* prepare object to send to peerLink
+  let updateModule = {}
+  updateModule.type = 'library'
+  updateModule.reftype = 'module'
+  updateModule.control = ''
+  updateModule.data = {} */
+  // old await this.liveCNRLUtility.saveModule(modContract)
+  // DIDO send message to PeerLink to make library ledger KBID entry
+  // old let saveKBIDentry = await this.saveKBIDProtocol(modContract, saveResults)
 }
 
 /**
@@ -298,11 +332,11 @@ EntitiesManager.prototype.computeExecute = async function (shellID, inContract, 
 * @method computeEngine
 *
 */
-EntitiesManager.prototype.computeEngine = async function (shellID, apiData, contract, device, datatype, time) {
-  this.liveSEntities[shellID].liveTimeC.setMasterClock(contract.value.info.controls.date)
+EntitiesManager.prototype.computeEngine = async function (shellID, contract, device, datatype, time) {
+  this.liveSEntities[shellID].liveTimeC.setMasterClock(time)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveTimeC)
-  this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(apiData, contract, device, datatype)
+  this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(this.liveSEntities[shellID].liveDeviceC.apiData, contract, device, datatype)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDatatypeC)
   await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, contract, '####', device.device_mac, datatype, time)
@@ -347,44 +381,34 @@ EntitiesManager.prototype.saveResultsProtocol = async function (shellID) {
 * @method visualFlow
 *
 */
-EntitiesManager.prototype.visualFlow = async function (shellID, visModule) {
+EntitiesManager.prototype.visualFlow = async function (shellID, visModule, datatype, time) {
   console.log('VISUALFLOW-----begin')
   console.log(visModule)
+  console.log(datatype)
   // reset the liveVlist list
   this.liveSEntities[shellID].liveVisualC.liveVislist = []
   let visContract = visModule.value.info.visualise
   // what has been ask for check rules
-  // console.log(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive)
-  // console.log(Object.keys(this.liveSEntities[shellID].liveDataC.liveData))
   // the datatypes for the yaxis (assume charting for now)
   let rules =  visModule.value.info.settings.yaxis[0]
-  // console.log('rules')
-  // console.log(rules)
+  console.log('rules')
+  console.log(rules)
   rules = ['937647c8700a04bccd2c524997c015bc07951877']
-  // this.liveSEntities[shellID].liveDeviceC.devices
-  let tempDevices = ['D3:CE:05:E9:38:74'] // this.liveSEntities[shellID].liveDeviceC.devices // ['D3:CE:05:E9:38:74'] // , 'C4:87:DB:73:19:E2']
-  this.liveSEntities[shellID].liveTimeC.timerange = [1601506800000]
-  for (let device of tempDevices) {
-    for (let rule of rules) {
-      for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
-        // hash the context device, datatype and time
-        let dataID = {}
-        dataID.device = device // .device_mac
-        dataID.datatype = rule
-        dataID.time = time
-        console.log('input for GUUID')
-        console.log(dataID)
-        let datauuid = this.liveCrypto.evidenceProof(dataID)
-        console.log('what guuid prepared')
-        console.log(datauuid)
-        this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, datauuid, device, rule, time,  this.liveSEntities[shellID].liveDataC.liveData[datauuid], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure)
-        console.log('end of vis CONTROL ECS')
-        // proof of evidence
-        // this.liveCrypto.evidenceProof()
-        // this.emit('visualUpdate', this.liveSEntities[shellID])
-      }
-    }
-  }
+  // hash the context device, datatype and time
+  let dataID = {}
+  dataID.device = this.liveSEntities[shellID].liveDeviceC.activedevice
+  dataID.datatype = rules
+  dataID.time = time
+  console.log('input for GUUID')
+  console.log(dataID)
+  let datauuid = this.liveCrypto.evidenceProof(dataID)
+  console.log('what guuid prepared')
+  console.log(datauuid)
+  this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, datauuid, this.liveSEntities[shellID].liveDeviceC.activedevice, rules, time,  this.liveSEntities[shellID].liveDataC.liveData[datauuid], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure)
+  console.log('end of vis CONTROL ECS')
+  // proof of evidence
+  // this.liveCrypto.evidenceProof()
+  // this.emit('visualUpdate', this.liveSEntities[shellID])
   // single or multi chart?
   if (visModule.singlemulti === true) {
     // extract the tidy data for
@@ -410,15 +434,16 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule) {
 EntitiesManager.prototype.entityDataReady = async function (shellID, ecsIN) {
   let resultExist = false
   let hashMatcher = false
-  // what is the RefCompute contract CNRL?
+  // check ptop Datastore for existing results  (below old test network cloud)
+  // what is the module Compute Ref contract?
   let inputComputeMod = {}
-  for (let mod of ecsIN.modules) {
-    if (mod.type === 'compute') {
+  for (let mod of ecsIN.update.modules) {
+    if (mod.value.type === 'compute') {
       inputComputeMod = mod
     }
   }
   // does the data exist in Memory for this input request?
-  let checkDataExist = this.checkForResultsMemory(shellID, ecsIN.entityUUID)
+  /* let checkDataExist = this.checkForResultsMemory(shellID, ecsIN.entityUUID)
   if (checkDataExist === true) {
     console.log('vis data in MEMORY')
     // this.emit('visualUpdate', this.liveSEntities[ecsIN.entityUUID])
@@ -451,8 +476,8 @@ EntitiesManager.prototype.entityDataReady = async function (shellID, ecsIN) {
       // entry does not exist. Process new KBID ECSflow
       resultExist = false
     }
-  }
-  return resultExist
+  } */
+  return false // resultExist
 }
 
 /**

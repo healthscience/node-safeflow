@@ -19,6 +19,7 @@ var DeviceComponent = function (setIN) {
   this.liveDeviceSystem = new DeviceSystem(setIN)
   this.apiData = {}
   this.devices = []
+  this.activedevice = ''
 }
 
 /**
@@ -36,6 +37,7 @@ DeviceComponent.prototype.setDevice = async function (apiD) {
   this.apiData = apiD
   let deviceDetail = await this.liveDeviceSystem.storedDevices(this.apiData)
   this.devices = deviceDetail
+  this.activedevice = this.devices[0]
 }
 
 export default DeviceComponent
