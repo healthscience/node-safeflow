@@ -60,12 +60,12 @@ DataComponent.prototype.sourceData = async function (source, contract, hash, dev
 * @method DataControlFlow
 *
 */
-DataComponent.prototype.DataControlFlow = async function (source, contract, hash,  device, datatype, time) {
+DataComponent.prototype.DataControlFlow = async function (source, contract, hash, device, datatype, time) {
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, device, datatype, time)
   this.dataRaw[time] = dataRback
   // is there data?
   console.log('data back row')
-  console.log(this.dataRaw.length)
+  console.log(this.dataRaw[time][0])
   if (dataRback.length > 0) {
     // is there a categories filter to apply?
     if (source.categorydt.length > 0) {

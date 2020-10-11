@@ -164,8 +164,6 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) 
   // convert modules to array to order flow
   // module has a specific order  question, data, compute, visualise, etc.
   let moduleOrder = this.orderModuleFlow(modules)
-  console.log('moduleOrderObject')
-  console.log(moduleOrder)
   // extract types of modules  // if existing should skip all but vis and compute
   let flowState = {}
   let deviceInfo = {}
@@ -173,11 +171,12 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) 
   let autoCheck = this.liveAutomation.updateAutomation(moduleOrder.compute.value.info)
   if (ECSinput.input === 'refUpdate') {
     console.log('existing entity and modules')
-    // updated require compute and visualise module RefContracts input
-    flowState = moduleOrder.compute // await this.computePrepare(shellID, md, this.liveSEntities[shellID].liveDeviceC.apiData)
-    await this.computeFlow(shellID, moduleState)
+    flowState = await this.computePrepare(shellID, moduleOrder.compute)
+    console.log('fllowww state prepared')
+    console.log(flowState)
+    await this.computeFlow(shellID, flowState.updateModContract, this.liveSEntities[shellID].liveDeviceC.activedevice, this.liveSEntities[shellID].liveDatatypeC.datatypesLive[0], flowState.updateModContract.value.info.controls.date)
     // process updated vis ref contract
-    await this.visualFlow(shellID, moduleOrder.visualise, moduleState)
+    await this.visualFlow(shellID, moduleOrder.visualise, flowState, flowState.updateModContract.value.info.controls.date)
     this.emit('visualUpdate', this.liveSEntities[shellID])
   } else {
     console.log('new FLOW')
@@ -192,6 +191,7 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) 
     // all automtion variales extracted, do first and then start on await list
     // single or loop?
     if (flowState.single === true) {
+      console.log('single compute flow')
       await this.computeFlow(shellID, flowState.updateModContract, this.liveSEntities[shellID].liveDeviceC.activedevice, this.liveSEntities[shellID].liveDatatypeC.datatypesLive[0], flowState.updateModContract.value.info.controls.date)
       // visualise - extract visualisation contract information
       await this.visualFlow(shellID, moduleOrder.visualise, flowState, flowState.updateModContract.value.info.controls.date)
@@ -332,14 +332,15 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
 * @method computeEngine
 *
 */
-EntitiesManager.prototype.computeEngine = async function (shellID, contract, device, datatype, time) {
+EntitiesManager.prototype.computeEngine = async function (shellID, contract, modUpdateContract, device, datatype, time) {
+  console.log('startcomputeEEENNGGINE')
   this.liveSEntities[shellID].liveTimeC.setMasterClock(time)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveTimeC)
   this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(this.liveSEntities[shellID].liveDeviceC.apiData, contract, device, datatype)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDatatypeC)
-  await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, contract, '####', device.device_mac, datatype, time)
+  await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, contract, 'empty', device.device_mac, datatype, time)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
   // this.emit('computation', 'in-progress')
@@ -381,10 +382,8 @@ EntitiesManager.prototype.saveResultsProtocol = async function (shellID) {
 * @method visualFlow
 *
 */
-EntitiesManager.prototype.visualFlow = async function (shellID, visModule, datatype, time) {
+EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowContract, time) {
   console.log('VISUALFLOW-----begin')
-  console.log(visModule)
-  console.log(datatype)
   // reset the liveVlist list
   this.liveSEntities[shellID].liveVisualC.liveVislist = []
   let visContract = visModule.value.info.visualise
@@ -396,8 +395,8 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule, datat
   rules = ['937647c8700a04bccd2c524997c015bc07951877']
   // hash the context device, datatype and time
   let dataID = {}
-  dataID.device = this.liveSEntities[shellID].liveDeviceC.activedevice
-  dataID.datatype = rules
+  dataID.device = this.liveSEntities[shellID].liveDeviceC.activedevice.device_mac
+  dataID.datatype = rules[0]
   dataID.time = time
   console.log('input for GUUID')
   console.log(dataID)

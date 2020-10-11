@@ -46,10 +46,6 @@ ChartSystem.prototype.chartjsControl = function (visModule, contract, device, ru
 *
 */
 ChartSystem.prototype.structureChartData = function (rule, cData, dtConvert) {
-  console.log('chart structure data')
-  console.log(rule)
-  console.log(Object.keys(cData))
-  console.log(dtConvert)
   let dataPrep = {}
   let splitDatax = cData.map(n => (n['d6432e905c50764b93b5e685c182b23ff5352a07'] * 1000))
   let splitDatay = cData.map(n => n[rule])
@@ -66,9 +62,6 @@ ChartSystem.prototype.structureChartData = function (rule, cData, dtConvert) {
 *
 */
 ChartSystem.prototype.convertCNRLtoText = function (cnrl, dtConvert) {
-  console.log('ref to text')
-  console.log(cnrl)
-  console.log(dtConvert)
   let textdt = ''
   for (let dtc of dtConvert) {
     if (dtc.refcontract === cnrl) {

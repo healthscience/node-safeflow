@@ -41,8 +41,6 @@ ComputeComponent.prototype.filterCompute = async function (contract, device, dat
   // console.log(data)
   let computeState = await this.liveComputeSystem.computationSystem(contract, data)
   this.compute[contract.compute] = computeState
-  console.log('after compulte filleeerrr')
-  console.log(this.compute)
   return this.compute
 }
 

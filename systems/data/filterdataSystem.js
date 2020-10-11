@@ -39,10 +39,10 @@ FilterDataSystem.prototype.dtFilterController = function (source, contract, devi
 *
 */
 FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData) {
-  console.log('filterdown columns')
-  console.log(source)
-  console.log(datatype)
-  console.log(tidyData[0])
+  // console.log('filterdown columns')
+  // console.log(source)
+  // console.log(datatype)
+  // console.log(tidyData[0])
   let singleArray = []
   if (tidyData[0].sensors === undefined || !tidyData[0].sensors) {
     for (let di of tidyData) {
@@ -59,8 +59,8 @@ FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData
       singleArray.push(dataPair)
     }
   }
-  console.log('filter complete')
-  console.log(singleArray[0])
+  // console.log('filter complete')
+  // console.log(singleArray[0])
   return singleArray
 }
 

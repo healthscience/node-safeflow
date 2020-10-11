@@ -43,7 +43,7 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID,
   // console.log(device)
   // console.log(rule)
   // console.log(time)
-  // console.log(Object.keys(resultsData))
+  // console.log(resultsData)
   // console.log(dtConvert)
   this.singlemulti = {}
   let status = false
