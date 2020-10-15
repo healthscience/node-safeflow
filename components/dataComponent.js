@@ -64,8 +64,8 @@ DataComponent.prototype.DataControlFlow = async function (source, contract, hash
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, device, datatype, time)
   this.dataRaw[time] = dataRback
   // is there data?
-  console.log('data back row')
-  console.log(this.dataRaw[time][0])
+  // console.log('data back row')
+  // console.log(this.dataRaw[time][0])
   if (dataRback.length > 0) {
     // is there a categories filter to apply?
     if (source.categorydt.length > 0) {
@@ -121,8 +121,8 @@ DataComponent.prototype.TidyData = function (source, contract, device, datatype,
 *
 */
 DataComponent.prototype.FilterDownDT = function (source, contract, device, datatype, time) {
-  console.log('filteDown')
-  console.log(this.tidyData[0])
+  // console.log('filteDown')
+  // console.log(this.tidyData[0])
   let tidyDataG = {}
   tidyDataG = this.liveFilterData.dtFilterController(source, contract, device, datatype, time, this.tidyData[time])
   // hash the context device, datatype and time
@@ -130,11 +130,11 @@ DataComponent.prototype.FilterDownDT = function (source, contract, device, datat
   dataID.device = device
   dataID.datatype = datatype
   dataID.time = time
-  console.log('pare UUID for data object')
-  console.log(dataID)
+  // console.log('pare UUID for data object')
+  // console.log(dataID)
   let datauuid = hashObject(dataID)
-  console.log('UUID data')
-  console.log(datauuid)
+  // console.log('UUID data')
+  // console.log(datauuid)
   this.liveData[datauuid] = tidyDataG
   return true
 }

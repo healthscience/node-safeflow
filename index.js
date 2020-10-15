@@ -79,9 +79,14 @@ safeFlow.prototype.startPeerFlow = function (apiCNRL, auth) {
 *
 */
 safeFlow.prototype.entityGetter = function (shellID) {
-  console.log('getterFLowBACK')
+  this.liveEManager.on('visualFirst', (data) => {
+    this.emit('displayEntity', data)
+  })
   this.liveEManager.on('visualUpdate', (data) => {
-    this.emit('displayUpdate', data)
+    this.emit('displayUpdateEntity', data)
+  })
+  this.liveEManager.on('visualUpdateRange', (data) => {
+    this.emit('displayUpdateEntityRange', data)
   })
 }
 

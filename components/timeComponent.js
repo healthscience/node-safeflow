@@ -118,6 +118,38 @@ TimeComponent.prototype.setTimeVis = function (liveVis) {
 }
 
 /**
+*  setDateRange set by peer
+* @method setDateRange
+*
+*/
+TimeComponent.prototype.setDateRange = function (dateRange) {
+  this.timerange = dateRange
+}
+
+/**
+*  remove a time from the list
+* @method removeTime
+*
+*/
+TimeComponent.prototype.removeTime = function () {
+  // remove time this  this.livedate
+  let arr = this.timerange
+  let updateList= arr.filter(item => item !== this.livedate)
+  this.timerange = updateList
+  console.log('update list remove')
+  console.log(this.timerange)
+}
+
+/**
+*  restTimerange
+* @method restTimerange
+*
+*/
+TimeComponent.prototype.restTimerange = function () {
+  this.timerange = []
+}
+
+/**
 *  what time segement is required?
 * @method
 *
@@ -130,7 +162,7 @@ TimeComponent.prototype.timeProfiling = function (timeSet, timePeriod) {
   let realtimeMS = this.liveTimeSystem.setRealtime()
   // assess automation and build time range(s)
   let timeSource = this.liveTimeSystem.sourceTimeRange(timeSet, realtimeMS, timePeriod)
-  this.timerange = timeSource
+  this.autotimerange = timeSource
   return true
 }
 

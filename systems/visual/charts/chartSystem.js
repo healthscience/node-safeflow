@@ -125,18 +125,19 @@ ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, res
 *
 */
 ChartSystem.prototype.structureMulitChartData = function (multiList) {
+  console.log('structure mulit single syste')
   let singleMulti = {}
   let aggDatasets = []
   let aggLabels = []
+  console.log('liststart')
+  console.log(multiList)
   for (let ci of multiList) {
     let setColourUpdate = this.setColourDataset(ci.chartPackage.datasets[0])
     aggDatasets.push(setColourUpdate)
     aggLabels.push(ci.chartPackage.datasets)
   }
   // let normaliseLabels = this.normaliseLabels(aggLabels)
-  // console.log('chart data prep over')
-  // console.log(dataPrep)
-  singleMulti.chartOptions =  multiList[0].chartOptions
+  singleMulti.chartOptions = multiList[0].chartOptions
   singleMulti.chartPackage = multiList[0].chartPackage
   singleMulti.chartPackage.datasets = aggDatasets
   return singleMulti

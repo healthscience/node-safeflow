@@ -20,7 +20,7 @@ var VisualComponent = function (EID) {
   this.liveCrypto = new CryptoUtility()
   this.liveVisSystem = new VisSystem()
   this.visualData = {}
-  this.liveVislist = []
+  this.liveVislist = {}
 }
 
 /**
@@ -36,11 +36,11 @@ util.inherits(VisualComponent, events.EventEmitter)
 */
 VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID, device, rule, time, resultsData, dtConvert) {
   // which of three types of visualisations?
-  console.log('VISULAcomponentIN')
+  // console.log('VISULAcomponentIN###############')
   // console.log(visModule)
   // console.log(contract)
   // console.log(visUUID)
-  // console.log(device)
+  // console.log(device.device_name)
   // console.log(rule)
   // console.log(time)
   // console.log(resultsData)
@@ -49,22 +49,36 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID,
   let status = false
   let visHASH = this.liveCrypto.evidenceProof(visUUID)
   this.visualData[visUUID] = this.liveVisSystem.visualControl(visModule, contract, device, rule, resultsData, dtConvert)
-  this.liveVislist.push(visUUID)
+  // console.log('add to vis list=================')
+  if (!this.liveVislist[device.device_mac]) {
+    this.liveVislist[device.device_mac] = []
+  }
+  this.liveVislist[device.device_mac].push(visUUID)
+  // console.log(this.liveVislist)
   return status
 }
 
 /**
 *
+* @method restVisDataList
+*
+*/
+VisualComponent.prototype.restVisDataList = function () {
+  this.visualData = {}
+}
+/**
+*
 * @method filterSingleMulti
 *
 */
-VisualComponent.prototype.filterSingleMulti = function (liveTidayData) {
+VisualComponent.prototype.filterSingleMulti = function () {
   // take live list and merge data for one chart
   let multiList = []
-  let multiSourceList = []
-  for (let lv of this.liveVislist) {
-    multiList.push(this.visualData[lv])
-    multiSourceList.push()
+  let devicesList = Object.keys(this.liveVislist)
+  for (let dl of devicesList) {
+    for (let lv of this.liveVislist[dl]) {
+      multiList.push(this.visualData[lv])
+    }
   }
   let restructData = this.liveVisSystem.singlemultiControl(multiList)
   this.singlemulti = restructData

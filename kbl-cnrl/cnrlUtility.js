@@ -142,7 +142,7 @@ CNRLUtility.prototype.saveModule = async function (newVersion) {
 */
 CNRLUtility.prototype.traceSource = function (dataSource) {
   console.log('datasource')
-  console.log(dataSource)
+  // console.log(dataSource)
   let soureInfoDTs = {}
   // are the DataTypes primary or derived?
   let sourceDTextract = this.mapSourceDTs(dataSource.datatypein)

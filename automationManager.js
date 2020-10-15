@@ -40,7 +40,7 @@ AutomationManager.prototype.assessAutomation = function () {
 */
 AutomationManager.prototype.updateAutomation = function (settings) {
   console.log('automation UPDATE')
-  console.log(settings)
+  // console.log(settings)
   // check if need added, updated or delete from automation (ledger)/ list
   return true
 }
