@@ -36,15 +36,15 @@ util.inherits(VisualComponent, events.EventEmitter)
 */
 VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID, device, rule, time, resultsData, dtConvert) {
   // which of three types of visualisations?
-  // console.log('VISULAcomponentIN###############')
-  // console.log(visModule)
-  // console.log(contract)
-  // console.log(visUUID)
-  // console.log(device.device_name)
-  // console.log(rule)
-  // console.log(time)
-  // console.log(resultsData)
-  // console.log(dtConvert)
+  console.log('VISULAcomponentIN###############')
+  /* console.log(visModule)
+  console.log(contract)
+  console.log(visUUID)
+  console.log(device.device_name)
+  console.log(rule)
+  console.log(time)
+  console.log(resultsData[0])
+  console.log(dtConvert) */
   this.singlemulti = {}
   let status = false
   let visHASH = this.liveCrypto.evidenceProof(visUUID)

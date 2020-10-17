@@ -82,6 +82,9 @@ safeFlow.prototype.entityGetter = function (shellID) {
   this.liveEManager.on('visualFirst', (data) => {
     this.emit('displayEntity', data)
   })
+  this.liveEManager.on('visualFirstRange', (data) => {
+    this.emit('displayEntityRange', data)
+  })
   this.liveEManager.on('visualUpdate', (data) => {
     this.emit('displayUpdateEntity', data)
   })
