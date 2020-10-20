@@ -46,15 +46,22 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID,
   console.log(resultsData[0])
   console.log(dtConvert) */
   this.singlemulti = {}
+  let dataID = {}
+  dataID.device = device.device_mac
+  dataID.datatype = rule
+  dataID.time = time
   let status = false
-  let visHASH = this.liveCrypto.evidenceProof(visUUID)
-  this.visualData[visUUID] = this.liveVisSystem.visualControl(visModule, contract, device, rule, resultsData, dtConvert)
   // console.log('add to vis list=================')
   if (!this.liveVislist[device.device_mac]) {
     this.liveVislist[device.device_mac] = []
   }
   this.liveVislist[device.device_mac].push(visUUID)
-  // console.log(this.liveVislist)
+  let visHASH = this.liveCrypto.evidenceProof(visUUID)
+  let visData = {}
+  visData.data = this.liveVisSystem.visualControl(visModule, contract, device, rule, resultsData, dtConvert)
+  visData.context = dataID
+  // this.visualData[visUUID] = this.liveVisSystem.visualControl(visModule, contract, device, rule, resultsData, dtConvert)
+  this.visualData[visUUID] = visData
   return status
 }
 
@@ -73,6 +80,8 @@ VisualComponent.prototype.restVisDataList = function () {
 */
 VisualComponent.prototype.filterSingleMulti = function () {
   // take live list and merge data for one chart
+  console.log('filter muilt data sets')
+  console.log(this.liveVislist)
   let multiList = []
   let devicesList = Object.keys(this.liveVislist)
   for (let dl of devicesList) {
@@ -80,8 +89,9 @@ VisualComponent.prototype.filterSingleMulti = function () {
       multiList.push(this.visualData[lv])
     }
   }
+  console.log(multiList)
   let restructData = this.liveVisSystem.singlemultiControl(multiList)
-  this.singlemulti = restructData
+  this.singlemultidata = restructData
   return true
 }
 

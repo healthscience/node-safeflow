@@ -136,8 +136,6 @@ TimeComponent.prototype.removeTime = function () {
   let arr = this.timerange
   let updateList= arr.filter(item => item !== this.livedate)
   this.timerange = updateList
-  console.log('update list remove')
-  console.log(this.timerange)
 }
 
 /**

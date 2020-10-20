@@ -1,8 +1,8 @@
 {
-  "_from": "node-safeflow@^0.6.2",
-  "_id": "node-safeflow@0.6.2",
+  "_from": "node-safeflow@^0.6.3",
+  "_id": "node-safeflow@0.6.3",
   "_inBundle": false,
-  "_integrity": "sha512-od/7Vd+xcPFA2b0qgoxPnHrE3YTz/z4c0k+EzfUNlRN5BrZJrsgS5V+ILkyuo5N8tmyCNHJ4KV/Y/Ax9S7Bcuw==",
+  "_integrity": "sha512-Ef6L829loi/seLeI36mCoQF4uGoyUEibQ19JX+G3JAwR7UlGm9LpVR24zHCGSxGUiaONzRiacrFFO0nJEnU9pg==",
   "_location": "/node-safeflow",
   "_phantomChildren": {
     "bs58": "4.0.1"
@@ -10,19 +10,19 @@
   "_requested": {
     "type": "range",
     "registry": true,
-    "raw": "node-safeflow@^0.6.2",
+    "raw": "node-safeflow@^0.6.3",
     "name": "node-safeflow",
     "escapedName": "node-safeflow",
-    "rawSpec": "^0.6.2",
+    "rawSpec": "^0.6.3",
     "saveSpec": null,
-    "fetchSpec": "^0.6.2"
+    "fetchSpec": "^0.6.3"
   },
   "_requiredBy": [
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/node-safeflow/-/node-safeflow-0.6.2.tgz",
-  "_shasum": "f7270d821508a109ccd180f9456a4c579cd83ea6",
-  "_spec": "node-safeflow@^0.6.2",
+  "_resolved": "https://registry.npmjs.org/node-safeflow/-/node-safeflow-0.6.3.tgz",
+  "_shasum": "5a9a930a68485c5700f4fb6decc0ef0377ca5f23",
+  "_spec": "node-safeflow@^0.6.3",
   "_where": "/var/www/html/damahub/code/peerlink",
   "author": {
     "name": "aboynejames"
@@ -62,5 +62,5 @@
     "test": "test"
   },
   "type": "module",
-  "version": "0.6.3"
+  "version": "0.6.4"
 }
