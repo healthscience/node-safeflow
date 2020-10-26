@@ -51,7 +51,7 @@
     "network"
   ],
   "license": "GPLv3",
-  "main": "index.js",
+  "main": "src/index.js",
   "name": "node-safeflow",
   "repository": {
     "type": "git",
@@ -62,7 +62,7 @@
     "build": "babel src -d babout"
   },
   "type": "module",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0"

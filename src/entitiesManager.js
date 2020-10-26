@@ -44,12 +44,13 @@ util.inherits(EntitiesManager, events.EventEmitter)
 * @method eventErrorListen
 *
 */
-EntitiesManager.eventErrorListen = function (refCont) {
+EntitiesManager.prototype.eventErrorListen = function (refCont) {
+  const logger = console
   this.on('error', (err) => {
     logger.error('Unexpected error on emitter', err)
   })
   // test the emitter
-  this.emit('error', new Error('Whoops!'));
+  // this.emit('error', new Error('Whoops!'));
   // Unexpected error on emitter Error: Whoops!
 }
 
