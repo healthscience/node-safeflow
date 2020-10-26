@@ -15,6 +15,8 @@ import events from 'events'
 
 var safeFlow = function () {
   events.EventEmitter.call(this)
+  // start error even listener
+  this.eventErrorListen()
   this.defaultStorage = 'http://165.227.244.213:8882'
   this.settings = {}
   this.liveEManager = new EntitiesManager()
@@ -25,6 +27,21 @@ var safeFlow = function () {
 * @method inherits
 */
 util.inherits(safeFlow, events.EventEmitter)
+
+/**
+* listen for error on event triggered
+* @method eventErrorListen
+*
+*/
+EntitiesManager.prototype.eventErrorListen = function (refCont) {
+  const logger = console
+  this.on('error', (err) => {
+    logger.error('Unexpected error on emitter', err)
+  })
+  // test the emitter
+  // this.emit('error', new Error('Whoops!'));
+  // Unexpected error on emitter Error: Whoops!
+}
 
 /**
 * Network Authorisation
