@@ -33,7 +33,7 @@ util.inherits(safeFlow, events.EventEmitter)
 * @method eventErrorListen
 *
 */
-EntitiesManager.prototype.eventErrorListen = function (refCont) {
+safeFlow.prototype.eventErrorListen = function (refCont) {
   const logger = console
   this.on('error', (err) => {
     logger.error('Unexpected error on emitter', err)
