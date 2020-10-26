@@ -21,6 +21,8 @@ import events from 'events'
 
 var EntitiesManager = function (apiCNRL, auth) {
   events.EventEmitter.call(this)
+  // start error even listener
+  this.eventErrorListen()
   this.auth = auth
   this.liveAutomation = new AutomationManager()
   this.liveLibrary = new LibComposer()
@@ -36,6 +38,20 @@ var EntitiesManager = function (apiCNRL, auth) {
 * @method inherits
 */
 util.inherits(EntitiesManager, events.EventEmitter)
+
+/**
+* listen for error on event triggered
+* @method eventErrorListen
+*
+*/
+EntitiesManager.eventErrorListen = function (refCont) {
+  this.on('error', (err) => {
+    logger.error('Unexpected error on emitter', err)
+  })
+  // test the emitter
+  this.emit('error', new Error('Whoops!'));
+  // Unexpected error on emitter Error: Whoops!
+}
 
 /**
 * assess automation and go ahead with updates

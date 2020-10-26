@@ -1,6 +1,5 @@
 {
   "_from": "node-safeflow@^0.6.3",
-  "_id": "node-safeflow@0.6.3",
   "_inBundle": false,
   "_integrity": "sha512-Ef6L829loi/seLeI36mCoQF4uGoyUEibQ19JX+G3JAwR7UlGm9LpVR24zHCGSxGUiaONzRiacrFFO0nJEnU9pg==",
   "_location": "/node-safeflow",
@@ -30,7 +29,7 @@
   "bugs": {
     "url": "https://github.com/healthscience/node-safeflow/issues"
   },
-  "bundleDependencies": false,
+  "bundleDependencies": [],
   "dependencies": {
     "axios": "^0.16.1",
     "bs58": "^4.0.1",
@@ -59,8 +58,13 @@
     "url": "git+https://github.com/healthscience/node-safeflow.git"
   },
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "build": "babel src -d babout"
   },
   "type": "module",
-  "version": "0.6.4"
+  "version": "0.6.5",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0"
+  }
 }
