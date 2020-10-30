@@ -52,9 +52,9 @@ DTSystem.prototype.DTStartMatch = function (sourceAPI, contract, datatype) {
 *
 */
 DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
-  // console.log('datatypeTable Mapper--------')
-  // console.log(sourceAPI)
-  // console.log(dt)
+  console.log('datatypeTable Mapper--------')
+  console.log(sourceAPI)
+  console.log(dt)
   let apiMatch = {}
   // given datatypes select find match to the query string
   let tableCount = 0
@@ -75,7 +75,7 @@ DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
       apiMatch = packAPImatch
     }
   }
-  // console.log(apiMatch)
+  console.log(apiMatch)
   return apiMatch
 }
 
@@ -87,14 +87,13 @@ DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
 DTSystem.prototype.categoryTableMapper = function (sourceAPI, category) {
   let catInfo = []
   // check if any categories?
-  console.log(category)
-  if (category !== 'none') {
+  let objectKeys = Object.keys(category)
+  if (objectKeys.length !== 0) {
+    for (let ct of objectKeys) {
       // map category DT to api table name
-      let catDT = this.datatypeTableMapper(sourceAPI, category)
+      let catDT = this.datatypeTableMapper(sourceAPI, category[ct].column)
       catInfo.push(catDT)
-  } else {
-    // no category return empty
-    catInfo = []
+    }
   }
   return catInfo
 }

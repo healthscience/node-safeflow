@@ -445,15 +445,15 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
 * @method computeEngine
 *
 */
-EntitiesManager.prototype.computeEngine = async function (shellID, contract, modUpdateContract, device, datatype, time) {
+EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modUpdateContract, device, datatype, time) {
   console.log('startcomputeEEENNGGINE')
   this.liveSEntities[shellID].liveTimeC.setMasterClock(time)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveTimeC)
-  this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(this.liveSEntities[shellID].liveDeviceC.apiData, contract, device, datatype)
+  this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(this.liveSEntities[shellID].liveDeviceC.apiData, apiInfo, device, datatype)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDatatypeC)
-  await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, contract, 'empty', device.device_mac, datatype, time)
+  await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, modUpdateContract, 'empty', device.device_mac, datatype, time)
   // proof of evidence
   // this.liveCrypto.evidenceProof()
   // this.emit('computation', 'in-progress')
