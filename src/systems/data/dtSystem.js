@@ -87,14 +87,11 @@ DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
 DTSystem.prototype.categoryTableMapper = function (sourceAPI, category) {
   let catInfo = []
   // check if any categories?
-  // console.log(category)
-  let objectKeys = Object.keys(category)
-  if (objectKeys.length !== 0) {
-    for (let ct of category) {
+  console.log(category)
+  if (category !== 'none') {
       // map category DT to api table name
-      let catDT = this.datatypeTableMapper(sourceAPI, ct)
+      let catDT = this.datatypeTableMapper(sourceAPI, category)
       catInfo.push(catDT)
-    }
   } else {
     // no category return empty
     catInfo = []
