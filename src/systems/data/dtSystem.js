@@ -28,10 +28,6 @@ util.inherits(DTSystem, events.EventEmitter)
 *
 */
 DTSystem.prototype.DTStartMatch = function (sourceAPI, contract, datatype) {
-  // console.log('dt matcheeeerrrr')
-  // console.log(sourceAPI)
-  // console.log(contract)
-  // console.log(datatype)
   // use inputs to map to datastore/api/rest etc. table / layout structure
   let sourceDTmap = this.datatypeTableMapper(sourceAPI, datatype)
   let sourceCatmap = this.categoryTableMapper(sourceAPI, contract.category)
@@ -41,8 +37,6 @@ DTSystem.prototype.DTStartMatch = function (sourceAPI, contract, datatype) {
   apiInfo.sourceapiquery = sourceDTmap
   apiInfo.categorydt = sourceCatmap
   apiInfo.tidydt = sourceTidymap
-  // console.log('api DT prepred')
-  // console.log(apiInfo)
   return apiInfo
 }
 
@@ -52,9 +46,6 @@ DTSystem.prototype.DTStartMatch = function (sourceAPI, contract, datatype) {
 *
 */
 DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
-  console.log('datatypeTable Mapper--------')
-  console.log(sourceAPI)
-  console.log(dt)
   let apiMatch = {}
   // given datatypes select find match to the query string
   let tableCount = 0
@@ -75,7 +66,6 @@ DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
       apiMatch = packAPImatch
     }
   }
-  console.log(apiMatch)
   return apiMatch
 }
 
@@ -109,7 +99,6 @@ DTSystem.prototype.tidyTableMapper = function (sourceAPI) {
   let objectKeys = Object.keys(sourceAPI.tidy)
   if (objectKeys.length > 0) {
     for (let ti of objectKeys) {
-      console.log(ti)
       tidyInfo.push(sourceAPI.tidy[ti])
     }
   }

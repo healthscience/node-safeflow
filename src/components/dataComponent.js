@@ -50,8 +50,8 @@ DataComponent.prototype.setDevicesLive = async function () {
 * @method RawData
 *
 */
-DataComponent.prototype.sourceData = async function (source, contract, hash, device, datatype, time) {
-  await this.DataControlFlow(source, contract, hash, device, datatype, time)
+DataComponent.prototype.sourceData = async function (source, dataAPI, contract, hash, device, datatype, time) {
+  await this.DataControlFlow(source, dataAPI, contract, hash, device, datatype, time)
   return true
 }
 
@@ -60,14 +60,14 @@ DataComponent.prototype.sourceData = async function (source, contract, hash, dev
 * @method DataControlFlow
 *
 */
-DataComponent.prototype.DataControlFlow = async function (source, contract, hash, device, datatype, time) {
+DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, device, datatype, time) {
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, device, datatype, time)
   this.dataRaw[time] = dataRback
   // is there data?
   if (dataRback.length > 0) {
     // is there a categories filter to apply?
     if (contract.value.info.settings.category !== 'none') {
-      this.CategoriseData(source, device, datatype, time, dataRback)
+      this.CategoriseData(source, dataAPI.category, contract, device, datatype, time)
     } else {
       console.log('no category to do')
       this.categoryData[time] = dataRback
@@ -89,10 +89,10 @@ DataComponent.prototype.DataControlFlow = async function (source, contract, hash
 * @method CategoriseData
 *
 */
-DataComponent.prototype.CategoriseData = function (apiINFO, device, datatype, time) {
+DataComponent.prototype.CategoriseData = function (apiINFO, catInfo, contract, device, datatype, time) {
   let catDataG = {}
   // console.log(systemBundle)
-  catDataG = this.liveCategoryData.categorySorter(apiINFO, device, datatype, time, this.dataRaw[time])
+  catDataG = this.liveCategoryData.categorySorter(apiINFO, catInfo, contract, device, datatype, time, this.dataRaw[time])
   this.categoryData[time] = catDataG
 }
 

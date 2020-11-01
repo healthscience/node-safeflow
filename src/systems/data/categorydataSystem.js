@@ -30,16 +30,11 @@ util.inherits(CategoryDataSystem, events.EventEmitter)
 * @method categorySorter
 *
 */
-CategoryDataSystem.prototype.categorySorter = function (dataQuery, device, datatype, time, rawData) {
-  // console.log('categorySORTER')
-  // console.log(dataQuery)
-  // console.log(device)
-  // console.log(time)
-  // console.log(rawData)
+CategoryDataSystem.prototype.categorySorter = function (dataQuery, catInfo,  contract, device, datatype, time, rawData) {
   let catHolder = {}
   if (dataQuery.categorydt.length > 1) {
     for (let cdt of dataQuery.categorydt) {
-      catHolder = this.categoriseWorker(dataQuery, rawData, time)
+      catHolder = this.categoriseWorker(dataQuery, catInfo, contract, rawData, time)
     }
   } else {
     catHolder = rawData
@@ -52,47 +47,32 @@ CategoryDataSystem.prototype.categorySorter = function (dataQuery, device, datat
 * @method categoriseWorker
 *
 */
-CategoryDataSystem.prototype.categoriseWorker = function (dataQuery, rawData, time) {
+CategoryDataSystem.prototype.categoriseWorker = function (dataQuery, catInfo, contract, rawData, time) {
+  // need match ref to column name (need to think when to switch source ref ID after query TODO think out)
+  let keysCat = Object.keys(catInfo)
+  let catColumn = []
+  for (let dtc of dataQuery.categorydt) {
+    for (let catc of keysCat) {
+      if (dtc.cnrl === catInfo[catc].column) {
+        let catPair = {}
+        catPair.column = dtc.column
+        catPair.rule = catInfo[catc].rule
+        catColumn.push(catPair)
+      }
+    }
+  }
   let catHolder = {}
-  const excludeCodes = (e, tItem, column) => {
-    for (let fCode of tItem) {
-      let codeP = parseInt(fCode.code, 10)
-      let colP = parseInt(e[column], 10)
+  const excludeCodes = (e, cItem) => {
+    for (let cCode of cItem) {
+      let codeP = parseInt(cCode.rule, 10)
+      let colP = parseInt(e[cCode.column], 10)
       if (colP === codeP) {
         return true
       }
     }
   }
-  let catData = []
-  for (let dev of dataQuery.devices) {
-    catHolder[dev] = []
-    if (dataQuery.apiInfo[dev].categorycodes.length !== 0) {
-      let catColumnQueryName = this.extractColumnName(dataQuery.apiInfo[dev].categorycodes)
-      // is it for primary or derive data types?
-      for (let dti of dataQuery.apiInfo[dev].sourceapiquery) {
-        for (let ts of dataQuery.timeseg) {
-          console.log(ts)
-          let catTempHold = {}
-          catTempHold[ts] = catData
-          catHolder[dev][dti.cnrl] = catTempHold
-        }
-      }
-    } else {
-      catHolder = rawData
-    }
-  }
-  return catHolder
-}
-
-/**
-* give back name of cat code name
-* @method extractColumnName
-*
-*/
-CategoryDataSystem.prototype.extractColumnName = function (cCodes) {
-  let columnName = ''
-  columnName = this.liveCNRL.lookupContract(cCodes[0].column)
-  return columnName.prime.text
+  const newCatData = rawData.filter(n => excludeCodes(n, catColumn))
+  return newCatData
 }
 
 export default CategoryDataSystem
