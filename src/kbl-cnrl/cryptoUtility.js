@@ -82,6 +82,7 @@ KBLcryptoUtility.prototype.entityID = function (addressIN) {
 *
 */
 KBLcryptoUtility.prototype.evidenceProof = function (dataEvidence) {
+  console.log('proof of evidence')
   let kbundleHashPart = hashObject(dataEvidence)
   // need some sort of holder back in ECS to build up evidence trail
   return kbundleHashPart

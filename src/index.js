@@ -108,6 +108,12 @@ safeFlow.prototype.entityGetter = function (shellID) {
   this.liveEManager.on('visualUpdateRange', (data) => {
     this.emit('displayUpdateEntityRange', data)
   })
+  this.liveEManager.on('storePeerResults', (data) => {
+    this.emit('storePeerResults', data)
+  })
+  this.liveEManager.on('kbledgerEntry', (data) => {
+    this.emit('kbledgerEntry', data)
+  })
   this.liveEManager.on("error", (error) => {
       console.error(`Gracefully handling our error: ${error}`);
   })

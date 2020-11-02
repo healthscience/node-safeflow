@@ -206,9 +206,6 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) 
     }
     if (flowState.timerange === true || flowState.datatyperange === true) {
       console.log('multiple SECOND----------------')
-      // remove time already processed
-      // this.liveSEntities[shellID].liveTimeC.removeTime()
-      console.log('muit second===========')
       for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
         // console.log('compute---deivce')
         // console.log(device)
@@ -225,10 +222,6 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) 
           }
         }
       }
-      // single or multi chart?
-      /* if (moduleOrder.visualise.value.info.settings.singlemulti === true) {
-        this.visSingleVis(shellID)
-      } */
       let entityContext = {}
       entityContext.context = ECSinput
       entityContext.data = this.liveSEntities[shellID]
@@ -391,9 +384,12 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
   modContractUpdate.value.info.controls.date = time
   // ref contract input all complete -
   let engineReturn = await this.computeEngine(shellID, this.liveSEntities[shellID].liveDeviceC.apiData, modContractUpdate, device, datatype, time)
-  // let saveResults = await this.saveResultsProtocol(shellID)
-  console.log('results dsaved')
-  // console.log(saveResults)
+  let dataID = {}
+  dataID.device = device.device_mac
+  dataID.datatype = datatype
+  dataID.time = time
+  let datauuid = this.liveCrypto.evidenceProof(dataID)
+  // let saveStatus = this.saveResultsProtocol(shellID, datauuid)
   // new version of Ref Contracts of Compute Modules info
   /* prepare object to send to peerLink
   let updateModule = {}
@@ -401,9 +397,11 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
   updateModule.reftype = 'module'
   updateModule.control = ''
   updateModule.data = {} */
-  // old await this.liveCNRLUtility.saveModule(modContract)
   // DIDO send message to PeerLink to make library ledger KBID entry
   // old let saveKBIDentry = await this.saveKBIDProtocol(modContract, saveResults)
+  // gather proof of evidence chain and hash and send KBLedger store
+  let proofChain = 'hash' // hash of all hashes through ECS plus hash of results?
+  this.emit('kbledgerEntry', proofChain)
 }
 
 /**
@@ -435,23 +433,23 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
 * @method saveResultsProtocol
 *
 */
-EntitiesManager.prototype.saveResultsProtocol = async function (shellID) {
+EntitiesManager.prototype.saveResultsProtocol = function (shellID, dataID) {
+  let localthis = this
   // first save results crypto storage
-  let mockAPI = {}
-  mockAPI.namespace = 'http://165.227.244.213:8882'
-  mockAPI.path = '/inresults/'
   // prepare save structure
   let d = new Date()
   let n = d.getTime()
-  let saveObject = {}
-  saveObject.timestamp = n
-  saveObject.hash = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData)
-  saveObject.data = this.liveSEntities[shellID].liveDataC.liveData
-  let saveResults = await this.liveSEntities[shellID].liveDataC.directSaveResults('REST', mockAPI, saveObject)
-  let completeSave = {}
-  completeSave.success = saveResults
-  completeSave.hash = saveObject.hash
-  return completeSave
+  if (this.liveSEntities[shellID].liveDataC.liveData[dataID] !== undefined) {
+    let saveObject = {}
+    saveObject.timestamp = n
+    saveObject.hash = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData[dataID])
+    saveObject.data = this.liveSEntities[shellID].liveDataC.liveData[dataID]
+    // console.log(saveObject)
+    localthis.emit('storePeerResults', saveObject)
+  } else {
+    console.log('no data to save')
+  }
+  return true
 }
 
 /**
@@ -517,18 +515,14 @@ EntitiesManager.prototype.entityDataReady = async function (shellID, ecsIN) {
     resultExist = true
   } else {
     console.log('check datastore ')
-    // check datestore for data  use kbid UUID to get source hash and query that hash
+    // check datestore for data  use kbid UUID to get source hash and query that hash to see if results data prepared already?
     // form hash of inputs KIBs and then query results
     // let kbidInfo = await this.extractKBID(md.cnrl, 1)
     let checkKbid = this.extractKBID('cnrl', 1)
     hashMatcher = this.compareKBIDs({}, {})
     if (hashMatcher === true) {
       // query store for source and emit back to Peer UI
-      // look up source reference
-      let mockAPI = {}
-      mockAPI.namespace = 'http://165.227.244.213:8882'
-      mockAPI.path = '/results/'
-      let checkResults = await this.liveSEntities[shellID].liveDataC.directResults('REST', mockAPI, checkKbid.result)
+      // form message for PeerLink
       if (checkResults.length > 0) {
         // yes data so get it back to Peer
         console.log('yes, results in datastore')
