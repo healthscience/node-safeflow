@@ -37,8 +37,6 @@ util.inherits(TestStorageAPI, events.EventEmitter)
 */
 TestStorageAPI.prototype.RESTbuilder = async function (dapi, queryIN) {
   console.log('rest builder info')
-  console.log(dapi)
-  console.log(queryIN)
   let jsondata = await axios.get(dapi.namespace + dapi.path + this.tempPubkey + '/' + this.tempToken + '/' + queryIN)
   return jsondata.data[0]
 }
@@ -72,7 +70,13 @@ TestStorageAPI.prototype.COMPUTEbuilderLuft = async function (dapi, device, time
 *
 */
 TestStorageAPI.prototype.deviceRESTbuilder = async function (dapi) {
-  let jsondata = await axios.get(dapi.apibase + '/contextdata/' + this.tempPubkey + '/' + this.tempToken)
+  console.log('device builder')
+  let jsondata = []
+  if (dapi.apipath === '/computedata/' ) {
+   jsondata = await axios.get(dapi.apibase + '/contextdata/' + this.tempPubkey + '/' + this.tempToken)
+  } else if (dapi.apipath === '/luftdatenGet/') {
+   jsondata = await axios.get(dapi.apibase + '/luftdatendevice/' + this.tempPubkey + '/' + this.tempToken)
+  }
   return jsondata.data
 }
 

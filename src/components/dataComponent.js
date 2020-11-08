@@ -63,21 +63,30 @@ DataComponent.prototype.sourceData = async function (source, dataAPI, contract, 
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, device, datatype, time) {
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, device, datatype, time)
   this.dataRaw[time] = dataRback
+  // console.log(dataRback[0])
+  let catFlag = false
   // is there data?
   if (dataRback.length > 0) {
     // is there a categories filter to apply?
     if (contract.value.info.settings.category !== 'none') {
       this.CategoriseData(source, dataAPI.category, contract, device, datatype, time)
+      catFlag = true
     } else {
       console.log('no category to do')
+      catFlag = false
       this.categoryData[time] = dataRback
     }
     // is there any data tidying required
     if (source.tidydt.status !== 'none') {
       this.TidyData(source, contract, device, datatype, time)
     } else {
-      console.log('no tidy to do')
-      this.tidyData[time] = this.categoryData[time]
+      if (catFlag === true) {
+        // was category data but no tidy
+        this.tidyData[time] = this.categoryData[time]
+      } else {
+        // no category or tidy data
+        this.tidyData[time] = dataRback
+      }
     }
     let dataMatch = this.FilterDownDT(source, contract, device, datatype, time)
   }
@@ -119,8 +128,6 @@ DataComponent.prototype.TidyData = function (source, contract, device, datatype,
 *
 */
 DataComponent.prototype.FilterDownDT = function (source, contract, device, datatype, time) {
-  // console.log('filteDown')
-  // console.log(this.tidyData[0])
   let tidyDataG = {}
   tidyDataG = this.liveFilterData.dtFilterController(source, contract, device, datatype, time, this.tidyData[time])
   // hash the context device, datatype and time
@@ -131,8 +138,6 @@ DataComponent.prototype.FilterDownDT = function (source, contract, device, datat
   // console.log('pare UUID for data object')
   // console.log(dataID)
   let datauuid = hashObject(dataID)
-  // console.log('UUID data')
-  // console.log(datauuid)
   this.liveData[datauuid] = tidyDataG
   return true
 }

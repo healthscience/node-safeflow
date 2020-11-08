@@ -50,6 +50,7 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
     rawHolder = await this.liveTestStorage.RESTbuilder(api, hash).catch(e => console.log('Error: ', e.message))
   } else if (type === 'COMPUTE') {
+    console.log(sourceInfo)
     // console.log('compuate flow for data API')
     let extractURL = {}
     extractURL.namespace = sourceInfo.sourceapiquery.namespace

@@ -80,8 +80,8 @@ VisualComponent.prototype.restVisDataList = function () {
 */
 VisualComponent.prototype.filterSingleMulti = function () {
   // take live list and merge data for one chart
-  console.log('filter muilt data sets')
-  console.log(this.liveVislist)
+  // console.log('filter muilt data sets')
+  // console.log(this.liveVislist)
   let multiList = []
   let devicesList = Object.keys(this.liveVislist)
   for (let dl of devicesList) {

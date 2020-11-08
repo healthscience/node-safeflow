@@ -470,6 +470,10 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowC
   dataID.datatype = rules
   dataID.time = time
   let datauuid = this.liveCrypto.evidenceProof(dataID)
+  console.log('data live')
+  console.log(datauuid)
+  console.log(Object.keys(this.liveSEntities[shellID].liveDataC.liveData))
+  console.log(this.liveSEntities[shellID].liveDataC.liveData)
   if (this.liveSEntities[shellID].liveDataC.liveData[datauuid]) {
     // yes data to visualise
     this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, datauuid, device, rules, time,  this.liveSEntities[shellID].liveDataC.liveData[datauuid], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure)

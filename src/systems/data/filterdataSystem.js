@@ -39,12 +39,8 @@ FilterDataSystem.prototype.dtFilterController = function (source, contract, devi
 *
 */
 FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData) {
-  // console.log('filterdown columns')
-  // console.log(source)
-  // console.log(datatype)
-  // console.log(tidyData[0])
   let singleArray = []
-  if (tidyData[0].sensors === undefined || !tidyData[0].sensors) {
+  if (tidyData.length > 0) {
     for (let di of tidyData) {
       let dataPair = {}
       let timestamp = di['timestamp']
@@ -59,8 +55,6 @@ FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData
       singleArray.push(dataPair)
     }
   }
-  // console.log('filter complete')
-  // console.log(singleArray[0])
   return singleArray
 }
 
@@ -77,7 +71,6 @@ FilterDataSystem.prototype.filterDataTypeSub = function (source, datatype, array
     arrayIN = subData
   }
   for (let sing of arrayIN) {
-    // console.log(sing)
     let dataPair = {}
     let timestamp = sing['timestamp']
     dataPair['cnrl-8856388713'] = timestamp
