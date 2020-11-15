@@ -50,6 +50,8 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID,
   dataID.device = device.device_mac
   dataID.datatype = rule
   dataID.time = time
+  console.log('context in vis')
+  console.log(dataID)
   let status = false
   // console.log('add to vis list=================')
   if (!this.liveVislist[device.device_mac]) {
@@ -60,7 +62,6 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID,
   let visData = {}
   visData.data = this.liveVisSystem.visualControl(visModule, contract, device, rule, resultsData, dtConvert)
   visData.context = dataID
-  // this.visualData[visUUID] = this.liveVisSystem.visualControl(visModule, contract, device, rule, resultsData, dtConvert)
   this.visualData[visUUID] = visData
   return status
 }

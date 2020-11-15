@@ -159,7 +159,7 @@ ChartSystem.prototype.setColourDataset = function (dataSet) {
 *
 */
 ChartSystem.prototype.colourList = function () {
-  let colourRGB = ['rgb(255, 99, 132)', 'rgb(181, 212, 234)', 'rgb(45, 119, 175 )','rgb(90, 45, 175)', 'rgb(41, 20, 80)', 'rgb(46, 143, 22)', 'rgb(21, 81, 7)', 'rgb(153, 18, 186)']
+  let colourRGB = ['rgb(255, 99, 132)', 'rgb(37, 56, 70)', 'rgb(45, 119, 175)', 'rgb(0, 100, 0)', 'rgb(41, 20, 80)', 'rgb(46, 143, 22)', 'rgb(38,15,187)', 'rgb(255, 20, 147)']
   let max = 6
   let min = 0
   let colorNumber = Math.floor(Math.random() * (max - min + 1)) + min

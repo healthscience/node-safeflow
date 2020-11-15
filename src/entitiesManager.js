@@ -73,7 +73,6 @@ EntitiesManager.prototype.automationReview = function (refCont) {
     // no automation require
     automationInfo.data = 'none'
   }
-  console.log('automation assessed and complete')
   return automationInfo
 }
 
@@ -107,8 +106,6 @@ EntitiesManager.prototype.peerKBLPeerstart = async function () {
 *
 */
 EntitiesManager.prototype.peerInput = async function (input) {
-  console.log('input nxp ecs')
-  console.log(input)
   let entityData = {}
   entityData[input.exp.key] = await this.addHSentity(input)
   return entityData
@@ -158,9 +155,6 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
   entitySet.type = 'ecssummary'
   entitySet.shellID = shellID
   entitySet.modules = modules
-  console.log('entity summary new----------')
-  // console.log(entitySet)
-  // emit an event best?
   return entitySet
 }
 
@@ -173,7 +167,6 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
 */
 EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) {
   // ALL FLOWS MADE IMMUMATABLE via  FORTH like scripting
-  console.log('start ECSflow--------')
   let automation = true
   // convert modules to array to order flow
   // module has a specific order  question, data, compute, visualise, etc.
@@ -184,48 +177,49 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) 
   // first assess what first flow and create waiting list (if any)
   let autoCheck = this.liveAutomation.updateAutomation(moduleOrder.compute.value.info)
   if (ECSinput.input === 'refUpdate') {
-    console.log('entityUpdateStart===============')
-    // reset time range
-    // this.liveSEntities[shellID].liveTimeC.restTimerange()
     // reset the visualise chart data list
     this.liveSEntities[shellID].liveVisualC.restVisDataList()
     flowState = await this.computePrepare(shellID, moduleOrder.compute)
-    console.log('UPDATES--flow state prepared')
-    console.log(flowState)
     if (moduleOrder.visualise.value.info.settings.single === true) {
-      // console.log('UPDATE SINGLE start')
+      // form dataID
+      // hash the context device, datatype and time
+      let dataID = {}
+      dataID.device = this.liveSEntities[shellID].liveDeviceC.activedevice.device_mac
+      dataID.datatype = moduleOrder.visualise.value.info.settings.yaxis[0]
+      dataID.time = flowState.updateModContract.value.info.controls.date
+      let datauuid = this.liveCrypto.evidenceProof(dataID)
       await this.computeFlow(shellID, flowState.updateModContract, this.liveSEntities[shellID].liveDeviceC.activedevice, this.liveSEntities[shellID].liveDatatypeC.datatypesLive[0], flowState.updateModContract.value.info.controls.date)
       // process updated vis ref contract
-      await this.visualFlow(shellID, moduleOrder.visualise, flowState, this.liveSEntities[shellID].liveDeviceC.activedevice, moduleOrder.visualise.value.info.settings.yaxis[0],  flowState.updateModContract.value.info.controls.date)
+      await this.visualFlow(shellID, moduleOrder.visualise, flowState, this.liveSEntities[shellID].liveDeviceC.activedevice, moduleOrder.visualise.value.info.settings.yaxis[0],  flowState.updateModContract.value.info.controls.date, datauuid)
       let entityContext = {}
       entityContext.context = ECSinput
-      entityContext.data = this.liveSEntities[shellID]
+      entityContext.data = this.liveSEntities[shellID].liveVisualC
       this.emit('visualUpdate', entityContext)
-      //console.log('update EMIT')
       this.liveSEntities[shellID].liveVisualC.liveVislist = {}
     }
-    if (flowState.timerange === true || flowState.datatyperange === true) {
-      console.log('multiple SECOND----------------')
+    if (flowState.devicerange === true || flowState.datatyperange === true || flowState.timerange === true) {
       for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
-        // console.log('compute---deivce')
-        // console.log(device)
         for (let datatype of this.liveSEntities[shellID].liveDatatypeC.datatypesLive) {
-          // console.log('compute---datatype')
-          // console.log(datatype)
           for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
-            // console.log('compute---time')
-            // console.log(time)
+            // form dataID
+            // hash the context device, datatype and time
+            let dataID = {}
+            dataID.device = device.device_mac
+            dataID.datatype = datatype
+            dataID.time = time
+            let datauuid = this.liveCrypto.evidenceProof(dataID)
             await this.computeFlow(shellID, flowState.updateModContract, device, datatype, time)
             // visualise - extract visualisation contract information
-            await this.visualFlow(shellID, moduleOrder.visualise, flowState, device, datatype, time)
+            await this.visualFlow(shellID, moduleOrder.visualise, flowState, device, datatype, time, datauuid)
             // required back instant or update resutls store or both
+            let entityContext = {}
+            entityContext.context = ECSinput
+            entityContext.data = this.liveSEntities[shellID].liveVisualC
+            entityContext.devices = this.liveSEntities[shellID].liveDeviceC.devices
+            this.emit('visualUpdateRange', entityContext)
           }
         }
       }
-      let entityContext = {}
-      entityContext.context = ECSinput
-      entityContext.data = this.liveSEntities[shellID]
-      this.emit('visualUpdateRange', entityContext)
       this.liveSEntities[shellID].liveVisualC.liveVislist = {}
     }
     // if automation == true process list TODO
@@ -235,46 +229,59 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) 
     let apiData = await this.deviceDataflow(shellID, deviceInfo)
     // 2 Compute - feed into ECS -KBID processor
     flowState = await this.computePrepare(shellID, moduleOrder.compute)
-    console.log('FIRST flowstate prepared')
-    console.log(flowState)
+    // form dataID
+    // hash the context device, datatype and time
+    let dataID = {}
+    dataID.device = this.liveSEntities[shellID].liveDeviceC.activedevice.device_mac
+    dataID.datatype = this.liveSEntities[shellID].liveDatatypeC.datatypesLive[0]
+    dataID.time = flowState.updateModContract.value.info.controls.date
+    let datauuid = this.liveCrypto.evidenceProof(dataID)
     // all automtion variales extracted, do first and then start on await list
     // single or loop
     if (moduleOrder.visualise.value.info.settings.single === true) {
-      console.log('single compute flow##############')
       await this.computeFlow(shellID, flowState.updateModContract, this.liveSEntities[shellID].liveDeviceC.activedevice, this.liveSEntities[shellID].liveDatatypeC.datatypesLive[0], flowState.updateModContract.value.info.controls.date)
       // visualise - extract visualisation contract information
-      await this.visualFlow(shellID, moduleOrder.visualise, flowState, this.liveSEntities[shellID].liveDeviceC.activedevice, moduleOrder.visualise.value.info.settings.yaxis[0], flowState.updateModContract.value.info.controls.date)
-      this.emit('visualFirst', this.liveSEntities[shellID])
+      await this.visualFlow(shellID, moduleOrder.visualise, flowState, this.liveSEntities[shellID].liveDeviceC.activedevice, moduleOrder.visualise.value.info.settings.yaxis[0], flowState.updateModContract.value.info.controls.date, datauuid)
+      let visDataBack = {}
+      visDataBack.context = moduleOrder.visualise
+      visDataBack.data = this.liveSEntities[shellID].liveVisualC
+      visDataBack.devices = this.liveSEntities[shellID].liveDeviceC.devices
+      this.emit('visualFirst', visDataBack)
       this.liveSEntities[shellID].liveVisualC.liveVislist = {}
     }
     // is a range of devices, datatype or time ranges and single or multi display?
-    if (flowState.timerange === true || flowState.datatyperange === true) {
-      console.log('multiple FIRST----------------')
+    if (flowState.devicerange === true || flowState.datatyperange === true || flowState.timerange === true) {
       if (flowState.datatyperange === true) {
         // remove the first datatype already returned
-        this.liveSEntities[shellID].liveDatatypeC.datatypesLive.shift()
+        // this.liveSEntities[shellID].liveDatatypeC.datatypesLive.shift()
       }
-      console.log('muit first===========')
       for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
         for (let datatype of this.liveSEntities[shellID].liveDatatypeC.datatypesLive) {
           for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
+            // form dataID
+            // hash the context device, datatype and time
+            let dataID = {}
+            dataID.device = device.device_mac
+            dataID.datatype = datatype
+            dataID.time = time
+            let datauuid = this.liveCrypto.evidenceProof(dataID)
             await this.computeFlow(shellID, flowState.updateModContract, device, datatype, time)
             // visualise - extract visualisation contract information
-            await this.visualFlow(shellID, moduleOrder.visualise, flowState, device, datatype, time)
+            await this.visualFlow(shellID, moduleOrder.visualise, flowState, device, datatype, time, datauuid)
+            // return data bundle
+            if (this.liveSEntities[shellID].liveDataC.liveData[datauuid]) {
+              let entityContext = {}
+              entityContext.context = ECSinput
+              entityContext.data = this.liveSEntities[shellID].liveVisualC
+              entityContext.devices = this.liveSEntities[shellID].liveDeviceC.devices
+              // required back instant or update resutls store or both
+              this.emit('visualFirstRange', entityContext)
+            } else {
+              console.log('no data for this device, datatype, time')
+            }
           }
         }
       }
-      // single or multi chart?
-      /* console.log('multi or single chart data sets???')
-      console.log(moduleOrder.visualise.value.info.settings.singlemulti)
-      if (moduleOrder.visualise.value.info.settings.singlemulti === true) {
-        this.visSingleVis(shellID)
-      } */
-      let entityContext = {}
-      entityContext.context = ECSinput
-      entityContext.data = this.liveSEntities[shellID]
-      // required back instant or update resutls store or both
-      this.emit('visualFirstRange', entityContext)
       this.liveSEntities[shellID].liveVisualC.liveVislist = {}
     }
   }
@@ -339,12 +346,15 @@ EntitiesManager.prototype.computePrepare = async function (shellID, modContract)
     // automation time range settings
     this.liveSEntities[shellID].liveTimeC.timeProfiling(modContract.value.info.controls.date, timePeriod.prime.unit)
   }
+  let deviceRange = false
+  if (this.liveSEntities[shellID].liveDeviceC.devices.length > 0) {
+    deviceRange = true
+  }
   // first check if peer has set time range?
   if (modContract.value.info.controls.rangedate !== undefined && modContract.value.info.controls.rangedate.length > 0 ) {
     // peer set
     this.liveSEntities[shellID].liveTimeC.setDateRange(modContract.value.info.controls.rangedate)
   } else {
-    console.log('no range to set i.e. single')
     // set array for single date incase mulitpel data set per request
     let singleRangeTime = []
     singleRangeTime.push(modContract.value.info.controls.date)
@@ -365,8 +375,9 @@ EntitiesManager.prototype.computePrepare = async function (shellID, modContract)
 
   flowOrder.single = singleStatus
   flowOrder.auto = autotimeRange
-  flowOrder.timerange = timeRange
+  flowOrder.devicerange = deviceRange
   flowOrder.datatyperange = dtRange
+  flowOrder.timerange = timeRange
   flowOrder.updateModContract = modContract
   return flowOrder
 }
@@ -377,7 +388,6 @@ EntitiesManager.prototype.computePrepare = async function (shellID, modContract)
 *
 */
 EntitiesManager.prototype.computeFlow = async function (shellID, updateModContract, device, datatype, time) {
-  console.log('start ComputeFLow-------------------')
   let modContractUpdate = updateModContract
   // else go through creating new KBID entry
   // set the new updated time settings for the new contract
@@ -410,7 +420,6 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
 *
 */
 EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modUpdateContract, device, datatype, time) {
-  console.log('startCOMPUTEENGINE-------------')
   this.liveSEntities[shellID].liveTimeC.setMasterClock(time)
   // proof of evidence
   // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveTimeC)
@@ -444,7 +453,6 @@ EntitiesManager.prototype.saveResultsProtocol = function (shellID, dataID) {
     saveObject.timestamp = n
     saveObject.hash = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData[dataID])
     saveObject.data = this.liveSEntities[shellID].liveDataC.liveData[dataID]
-    // console.log(saveObject)
     localthis.emit('storePeerResults', saveObject)
   } else {
     console.log('no data to save')
@@ -457,23 +465,12 @@ EntitiesManager.prototype.saveResultsProtocol = function (shellID, dataID) {
 * @method visualFlow
 *
 */
-EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowContract, device, datatype, time) {
-  console.log('VISUALFLOWbegin------------------------')
+EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowContract, device, datatype, time, datauuid) {
   // reset the liveVlist list
   let visContract = visModule.value.info.visualise
   // what has been ask for check rules
   // the datatypes for the yaxis (assume charting for now)
   let rules =  datatype
-  // hash the context device, datatype and time
-  let dataID = {}
-  dataID.device = device.device_mac
-  dataID.datatype = rules
-  dataID.time = time
-  let datauuid = this.liveCrypto.evidenceProof(dataID)
-  console.log('data live')
-  console.log(datauuid)
-  console.log(Object.keys(this.liveSEntities[shellID].liveDataC.liveData))
-  console.log(this.liveSEntities[shellID].liveDataC.liveData)
   if (this.liveSEntities[shellID].liveDataC.liveData[datauuid]) {
     // yes data to visualise
     this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, datauuid, device, rules, time,  this.liveSEntities[shellID].liveDataC.liveData[datauuid], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure)

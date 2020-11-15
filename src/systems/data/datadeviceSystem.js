@@ -56,8 +56,6 @@ DatadeviceSystem.prototype.storedDevices = async function (dapi) {
   } else {
     currentDevices = result
   }
-  console.log('devices per api')
-  console.log(currentDevices)
   return currentDevices
 }
 
