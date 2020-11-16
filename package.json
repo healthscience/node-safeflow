@@ -1,46 +1,6 @@
 {
-  "_from": "node-safeflow@^0.6.3",
-  "_inBundle": false,
-  "_integrity": "sha512-Ef6L829loi/seLeI36mCoQF4uGoyUEibQ19JX+G3JAwR7UlGm9LpVR24zHCGSxGUiaONzRiacrFFO0nJEnU9pg==",
-  "_location": "/node-safeflow",
-  "_phantomChildren": {
-    "bs58": "4.0.1"
-  },
-  "_requested": {
-    "type": "range",
-    "registry": true,
-    "raw": "node-safeflow@^0.6.3",
-    "name": "node-safeflow",
-    "escapedName": "node-safeflow",
-    "rawSpec": "^0.6.3",
-    "saveSpec": null,
-    "fetchSpec": "^0.6.3"
-  },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "https://registry.npmjs.org/node-safeflow/-/node-safeflow-0.6.3.tgz",
-  "_shasum": "5a9a930a68485c5700f4fb6decc0ef0377ca5f23",
-  "_spec": "node-safeflow@^0.6.3",
-  "_where": "/var/www/html/damahub/code/peerlink",
-  "author": {
-    "name": "aboynejames"
-  },
-  "bugs": {
-    "url": "https://github.com/healthscience/node-safeflow/issues"
-  },
-  "bundleDependencies": [],
-  "dependencies": {
-    "axios": "^0.16.1",
-    "bs58": "^4.0.1",
-    "csv-parser": "^2.3.1",
-    "esm": "^3.2.25",
-    "moment": "^2.29.0",
-    "moment-range": "^4.0.2",
-    "object-hash": "^1.3.1",
-    "refcontractcomposer": "^0.0.5",
-    "websocket": "^1.0.32"
-  },
+  "name": "node-safeflow",
+  "version": "0.7.5",
   "deprecated": false,
   "description": "Node.js wrapper for safeflow protocol",
   "homepage": "https://github.com/healthscience/node-safeflow#readme",
@@ -52,7 +12,6 @@
   ],
   "license": "GPLv3",
   "main": "src/index.js",
-  "name": "node-safeflow",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/healthscience/node-safeflow.git"
@@ -62,7 +21,27 @@
     "build": "babel src -d babout"
   },
   "type": "module",
-  "version": "0.7.4",
+  "author": {
+    "name": "aboynejames"
+  },
+  "bugs": {
+    "url": "https://github.com/healthscience/node-safeflow/issues"
+  },
+  "private": false,
+  "type": "module",
+  "scripts": {
+  },
+  "dependencies": {
+    "axios": "^0.16.1",
+    "bs58": "^4.0.1",
+    "csv-parser": "^2.3.1",
+    "esm": "^3.2.25",
+    "moment": "^2.29.0",
+    "moment-range": "^4.0.2",
+    "object-hash": "^1.3.1",
+    "refcontractcomposer": "^0.0.5",
+    "websocket": "^1.0.32"
+  },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0"
