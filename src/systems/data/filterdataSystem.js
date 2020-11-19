@@ -94,9 +94,7 @@ FilterDataSystem.prototype.filterDataTypeSub = function (source, datatype, array
 FilterDataSystem.prototype.subStructure = function (dataStructure) {
   let subStructure = []
   for (let tcI of dataStructure) {
-    // console.log(tcI)
     if (tcI['sensors']) {
-      // console.log('yes sub structure')
       for (let sdata of tcI.sensors) {
         let sdHolder = {}
         sdHolder['timestamp'] = tcI['timestamp']

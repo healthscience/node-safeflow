@@ -100,7 +100,6 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
 */
 DataComponent.prototype.CategoriseData = function (apiINFO, catInfo, contract, device, datatype, time) {
   let catDataG = {}
-  // console.log(systemBundle)
   catDataG = this.liveCategoryData.categorySorter(apiINFO, catInfo, contract, device, datatype, time, this.dataRaw[time])
   this.categoryData[time] = catDataG
 }
@@ -135,8 +134,6 @@ DataComponent.prototype.FilterDownDT = function (source, contract, device, datat
   dataID.device = device
   dataID.datatype = datatype
   dataID.time = time
-  // console.log('pare UUID for data object')
-  // console.log(dataID)
   let datauuid = hashObject(dataID)
   this.liveData[datauuid] = tidyDataG
   return true

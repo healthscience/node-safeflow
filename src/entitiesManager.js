@@ -123,24 +123,15 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
   let modules = []
   if (ecsIN.update !== undefined && ecsIN.update.entityUUID) {
     shellID = ecsIN.update.entityUUID
-    modules = ecsIN.update.modules // keep tabs on module in entity? this.liveSEntities[shellID].modulesGet(shellID)
-    console.log('entity--' + shellID + '--exists')
+    modules = ecsIN.update.modules
     moduleState = true
-    // update library Module Reference Contract but first check if KBID exist ie result prepared and ready to return
-    let entityLivedata = await this.entityDataReady(shellID, ecsIN)
-    if (entityLivedata === false) {
-      // use existing entity and process a new kbid entry to get vis data
-      console.log('existing entity but need new compute & KIBID entry')
-      this.ECSflow(shellID, ecsIN.update, modules)
-      // data is ready tell peer
-    } else {
-      this.emit('visualUpdate', this.liveSEntities[shellID])
-    }
+    // use existing entity and process a new kbid entry to get vis data
+    this.ECSflow(shellID, ecsIN.update, modules)
+    // data is ready tell peer
   } else {
     // need to setup new ECS entity for this network experiment
     shellID = this.liveCrypto.entityID(ecsIN.exp)
     modules = ecsIN.modules // await this.NXPmodules(shellID, ecsIN.modules)
-    console.log('ENTITY--' + shellID + '--is new')
     // setup entity to hold components per module
     this.liveSEntities[shellID] = new Entity(this.auth)
     this.ECSflow(shellID, ecsIN.exp, modules)
@@ -188,6 +179,8 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) 
       dataID.datatype = moduleOrder.visualise.value.info.settings.yaxis[0]
       dataID.time = flowState.updateModContract.value.info.controls.date
       let datauuid = this.liveCrypto.evidenceProof(dataID)
+      // update library Module Reference Contract but first check if KBID exist ie result prepared and ready to return
+      // let entityLivedata = await this.entityDataReady(shellID, ecsIN)
       await this.computeFlow(shellID, flowState.updateModContract, this.liveSEntities[shellID].liveDeviceC.activedevice, this.liveSEntities[shellID].liveDatatypeC.datatypesLive[0], flowState.updateModContract.value.info.controls.date)
       // process updated vis ref contract
       await this.visualFlow(shellID, moduleOrder.visualise, flowState, this.liveSEntities[shellID].liveDeviceC.activedevice, moduleOrder.visualise.value.info.settings.yaxis[0],  flowState.updateModContract.value.info.controls.date, datauuid)
@@ -224,7 +217,6 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) 
     }
     // if automation == true process list TODO
   } else {
-    console.log('new FLOW=============')
     deviceInfo = moduleOrder.data.value.info.data.value
     let apiData = await this.deviceDataflow(shellID, deviceInfo)
     // 2 Compute - feed into ECS -KBID processor
@@ -297,7 +289,8 @@ EntitiesManager.prototype.deviceDataflow = async function (shellID, apiData) {
   // set the device in module
   statusD = await this.liveSEntities[shellID].liveDeviceC.setDevice(apiData.concept)
   // proof of evidence
-  // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDeviceC)
+  let evProof = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDeviceC.devices)
+  this.liveSEntities[shellID].evidenceChain.push(evProof)
   statusD = true
   return statusD
 }
@@ -399,19 +392,22 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
   dataID.datatype = datatype
   dataID.time = time
   let datauuid = this.liveCrypto.evidenceProof(dataID)
-  // let saveStatus = this.saveResultsProtocol(shellID, datauuid)
-  // new version of Ref Contracts of Compute Modules info
-  /* prepare object to send to peerLink
+  let saveStatus = this.saveResultsProtocol(shellID, datauuid)
+  // new version of Ref Contracts of Compute Modules info TODO
+  // prepare object to send to peerLink
   let updateModule = {}
   updateModule.type = 'library'
-  updateModule.reftype = 'module'
-  updateModule.control = ''
-  updateModule.data = {} */
+  updateModule.reftype = 'update'
+  updateModule.info = modContractUpdate
+  this.emit('updateModule', updateModule)
   // DIDO send message to PeerLink to make library ledger KBID entry
-  // old let saveKBIDentry = await this.saveKBIDProtocol(modContract, saveResults)
   // gather proof of evidence chain and hash and send KBLedger store
-  let proofChain = 'hash' // hash of all hashes through ECS plus hash of results?
+  let hashofProofs = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].evidenceChain)
+  let proofChain = {} // hash of all hashes through ECS plus hash of results?
+  proofChain.hash = hashofProofs
+  proofChain.data = datauuid
   this.emit('kbledgerEntry', proofChain)
+  this.liveSEntities[shellID].evidenceChain = []
 }
 
 /**
@@ -422,41 +418,22 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
 EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modUpdateContract, device, datatype, time) {
   this.liveSEntities[shellID].liveTimeC.setMasterClock(time)
   // proof of evidence
-  // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveTimeC)
+  let evProof = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveTimeC.liveTime)
+  this.liveSEntities[shellID].evidenceChain.push(evProof)
   this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(this.liveSEntities[shellID].liveDeviceC.apiData, apiInfo, device, datatype)
   // proof of evidence
-  // this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDatatypeC)
+  let evProof1 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDatatypeC.datatypesLive)
+  this.liveSEntities[shellID].evidenceChain.push(evProof1)
   await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDeviceC.apiData, modUpdateContract, 'empty', device.device_mac, datatype, time)
   // proof of evidence
-  // this.liveCrypto.evidenceProof()
+  let evProof2 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.dataRaw)
+  this.liveSEntities[shellID].evidenceChain.push(evProof2)
   // this.emit('computation', 'in-progress')
   this.computeStatus = await this.liveSEntities[shellID].liveComputeC.filterCompute(apiInfo, device.device_mac, datatype, time, this.liveSEntities[shellID].liveDataC.liveData)
   // proof of evidence
-  // this.liveCrypto.evidenceProof()
+  let evProof3 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.tidyData)
+  this.liveSEntities[shellID].evidenceChain.push(evProof3)
   // this.emit('computation', 'finished')
-  return true
-}
-
-/**
-*  save Results protocol  temporary for test Network REST storage
-* @method saveResultsProtocol
-*
-*/
-EntitiesManager.prototype.saveResultsProtocol = function (shellID, dataID) {
-  let localthis = this
-  // first save results crypto storage
-  // prepare save structure
-  let d = new Date()
-  let n = d.getTime()
-  if (this.liveSEntities[shellID].liveDataC.liveData[dataID] !== undefined) {
-    let saveObject = {}
-    saveObject.timestamp = n
-    saveObject.hash = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData[dataID])
-    saveObject.data = this.liveSEntities[shellID].liveDataC.liveData[dataID]
-    localthis.emit('storePeerResults', saveObject)
-  } else {
-    console.log('no data to save')
-  }
   return true
 }
 
@@ -478,7 +455,35 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowC
     console.log('not data there to visualise')
   }
   // proof of evidence
-  // this.liveCrypto.evidenceProof()
+  let evProof = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveVisualC.visualData[datauuid])
+  this.liveSEntities[shellID].evidenceChain.push(evProof)
+  return true
+}
+
+/**
+*  save Results protocol  temporary for test Network REST storage
+* @method saveResultsProtocol
+*
+*/
+EntitiesManager.prototype.saveResultsProtocol = function (shellID, dataID) {
+  let localthis = this
+  // first save results crypto storage
+  // prepare save structure
+  let d = new Date()
+  let n = d.getTime()
+  if (this.liveSEntities[shellID].liveDataC.liveData[dataID] !== undefined) {
+    let saveObject = {}
+    // saveObject.timestamp = n
+    saveObject.hash = dataID
+    // hash and source data ready for visulisation or use
+    let dataCouple = {}
+    dataCouple. hash =  this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData[dataID])
+    dataCouple.tidydata = this.liveSEntities[shellID].liveDataC.liveData[dataID]
+    saveObject.data = dataCouple
+    localthis.emit('storePeerResults', saveObject)
+  } else {
+    console.log('no data to save')
+  }
   return true
 }
 
@@ -543,17 +548,6 @@ EntitiesManager.prototype.entityDataReady = async function (shellID, ecsIN) {
 }
 
 /**
-*  return data from an entity
-* @method entityDataReturn
-*
-*/
-EntitiesManager.prototype.entityDataReturn = function (entityDID) {
-  // need to poll / made responsive to new updates
-  // this.emit('displayUpdate', this.liveSEntities[entityDID].visualData)
-  return this.liveSEntities[entityDID]
-}
-
-/**
 * logic control over kbid need prepared
 * @method compareKBIDs
 *
@@ -589,16 +583,6 @@ EntitiesManager.prototype.listEntities = function () {
 *
 */
 EntitiesManager.prototype.addComponent = function (entID) {
-}
-
-/**
-*  extract the lastest ie most uptodate data in entity
-* @method latestData
-*
-*/
-EntitiesManager.prototype.latestData = function (dataIn) {
-  let lastArray = dataIn.slice(-1)
-  return lastArray
 }
 
 /**

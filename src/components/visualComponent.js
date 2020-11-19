@@ -36,24 +36,12 @@ util.inherits(VisualComponent, events.EventEmitter)
 */
 VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID, device, rule, time, resultsData, dtConvert) {
   // which of three types of visualisations?
-  console.log('VISULAcomponentIN###############')
-  /* console.log(visModule)
-  console.log(contract)
-  console.log(visUUID)
-  console.log(device.device_name)
-  console.log(rule)
-  console.log(time)
-  console.log(resultsData[0])
-  console.log(dtConvert) */
   this.singlemulti = {}
   let dataID = {}
   dataID.device = device.device_mac
   dataID.datatype = rule
   dataID.time = time
-  console.log('context in vis')
-  console.log(dataID)
   let status = false
-  // console.log('add to vis list=================')
   if (!this.liveVislist[device.device_mac]) {
     this.liveVislist[device.device_mac] = []
   }
@@ -81,8 +69,6 @@ VisualComponent.prototype.restVisDataList = function () {
 */
 VisualComponent.prototype.filterSingleMulti = function () {
   // take live list and merge data for one chart
-  // console.log('filter muilt data sets')
-  // console.log(this.liveVislist)
   let multiList = []
   let devicesList = Object.keys(this.liveVislist)
   for (let dl of devicesList) {
@@ -90,7 +76,6 @@ VisualComponent.prototype.filterSingleMulti = function () {
       multiList.push(this.visualData[lv])
     }
   }
-  console.log(multiList)
   let restructData = this.liveVisSystem.singlemultiControl(multiList)
   this.singlemultidata = restructData
   return true

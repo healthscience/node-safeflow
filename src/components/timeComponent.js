@@ -94,8 +94,6 @@ TimeComponent.prototype.setTimeList = function (liveDate) {
 *
 */
 TimeComponent.prototype.setTimeSegments = function (liveTimeSegs) {
-  // console.log('time set set')
-  // console.log(liveTimeSegs)
   this.timeseg = liveTimeSegs
 }
 
@@ -153,9 +151,6 @@ TimeComponent.prototype.restTimerange = function () {
 *
 */
 TimeComponent.prototype.timeProfiling = function (timeSet, timePeriod) {
-  // console.log('timeprofiling')
-  // console.log(timeSet)
-  // console.log(timePeriod)
   // set the real timeout
   let realtimeMS = this.liveTimeSystem.setRealtime()
   // assess automation and build time range(s)
