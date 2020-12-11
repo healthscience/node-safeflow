@@ -451,12 +451,12 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowC
   if (this.liveSEntities[shellID].liveDataC.liveData[datauuid]) {
     // yes data to visualise
     this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, datauuid, device, rules, time,  this.liveSEntities[shellID].liveDataC.liveData[datauuid], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure)
+    // proof of evidence
+    let evProof = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveVisualC.visualData[datauuid])
+    this.liveSEntities[shellID].evidenceChain.push(evProof)
   } else {
     console.log('not data there to visualise')
   }
-  // proof of evidence
-  let evProof = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveVisualC.visualData[datauuid])
-  this.liveSEntities[shellID].evidenceChain.push(evProof)
   return true
 }
 
