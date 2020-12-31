@@ -106,9 +106,36 @@ EntitiesManager.prototype.peerKBLPeerstart = async function () {
 *
 */
 EntitiesManager.prototype.peerInput = async function (input) {
-  let entityData = {}
-  entityData[input.exp.key] = await this.addHSentity(input)
-  return entityData
+  // validate input data structure e.g. not empty etc.
+  let inputValid = this.validateInput(input)
+  if (inputValid === true) {
+    let entityData = {}
+    entityData[input.exp.key] = await this.addHSentity(input)
+    return entityData
+  } else {
+    let entitySet = {}
+    entitySet.type = 'ecssummary'
+    entitySet.shellID = 'error'
+    entitySet.modules = []
+    return entitySet
+  }
+}
+
+/**
+*  does the input object in SF-ECS compliant structure?
+* @method validateInput
+*
+*/
+EntitiesManager.prototype.validateInput = function (input) {
+  let validStructure = false
+  // is the object empty?
+  let inputParts = Object.keys(input)
+  if (inputParts.length === 0) {
+    validStructure = false
+  } else {
+    validStructure = true
+  }
+  return validStructure
 }
 
 /**
