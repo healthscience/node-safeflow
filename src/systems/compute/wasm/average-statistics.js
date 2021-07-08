@@ -9,13 +9,11 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-import TestStorageAPI from '../../data/dataprotocols/teststorage/testStorage.js'
 import util from 'util'
 import events from 'events'
 
 var StatisticsSystem = function (setIN) {
   events.EventEmitter.call(this)
-  this.liveTestStorage = new TestStorageAPI(setIN)
 }
 
 /**
@@ -39,7 +37,9 @@ StatisticsSystem.prototype.statisticsSystem = function () {
 *
 */
 StatisticsSystem.prototype.averageStatistics = function (dataArray) {
-  // statistical avg. smart contract/crypt ID ref & verfied wasm/network/trubit assume done
+  // statistical avg. has the compute been validated? trubit to ZNP, self certified???
+  // console.log('datato average')
+  // console.log(dataArray)
   let AvgHolder = {}
   let numberEntries = dataArray.length
   // accumulate sum the daily data
@@ -52,39 +52,6 @@ StatisticsSystem.prototype.averageStatistics = function (dataArray) {
   AvgHolder.count = numberEntries
   AvgHolder.average = roundAverage
   return AvgHolder
-}
-
-/**
-* statical Monthly average
-* @method averageMonthlyStatistics
-*
-*/
-StatisticsSystem.prototype.averageMonthlyStatistics = function () {
-  console.log('start MONTH average')
-}
-
-/**
-* statical current history daily average
-* @method averageCurrentDailyStatistics
-*
-*/
-StatisticsSystem.prototype.averageCurrentDailyStatistics = async function (startDate, device, compType, datatype, timeseg, category) {
-  let dataBatch = await this.liveTestStorage.getAverageData(startDate, device, compType, datatype, timeseg, category)
-  let numberEntries = dataBatch.length
-  // form single arrays
-  let singleAvgArray = []
-  for (let sav of dataBatch) {
-    singleAvgArray.push(sav.value)
-  }
-  // accumulate sum the daily data
-  let sum = singleAvgArray.reduce(add, 0)
-  function add (a, b) {
-    return a + b
-  }
-  let averageResult = sum / numberEntries
-  let roundAverage = Math.round(averageResult)
-  // where to save
-  return roundAverage
 }
 
 /**

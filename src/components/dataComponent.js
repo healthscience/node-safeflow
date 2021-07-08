@@ -62,8 +62,10 @@ DataComponent.prototype.sourceData = async function (source, dataAPI, contract, 
 */
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, device, datatype, time) {
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, device, datatype, time)
+  console.log('databackRAW------------')
+  console.log(dataRback.length)
   this.dataRaw[time] = dataRback
-  // console.log(dataRback[0])
+
   let catFlag = false
   // is there data?
   if (dataRback.length > 0) {
@@ -72,7 +74,6 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
       this.CategoriseData(source, dataAPI.category, contract, device, datatype, time)
       catFlag = true
     } else {
-      console.log('no category to do')
       catFlag = false
       this.categoryData[time] = dataRback
     }
@@ -136,6 +137,16 @@ DataComponent.prototype.FilterDownDT = function (source, contract, device, datat
   dataID.time = time
   let datauuid = hashObject(dataID)
   this.liveData[datauuid] = tidyDataG
+  return true
+}
+
+/**
+*
+* @method setFilterResults
+*
+*/
+DataComponent.prototype.setFilterResults = function (duuid, resultData) {
+  this.liveData[duuid] = resultData
   return true
 }
 

@@ -34,24 +34,33 @@ util.inherits(VisualComponent, events.EventEmitter)
 * @method filterVisual
 *
 */
-VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID, device, rule, time, resultsData, dtConvert) {
-  // which of three types of visualisations?
+VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrint, resultsData, dtConvert) {
   this.singlemulti = {}
-  let dataID = {}
-  dataID.device = device.device_mac
-  dataID.datatype = rule
-  dataID.time = time
   let status = false
-  if (!this.liveVislist[device.device_mac]) {
-    this.liveVislist[device.device_mac] = []
+  if (!this.liveVislist[dataPrint.triplet.device]) {
+    this.liveVislist[dataPrint.triplet.device] = []
   }
-  this.liveVislist[device.device_mac].push(visUUID)
-  let visHASH = this.liveCrypto.evidenceProof(visUUID)
+  this.liveVislist[dataPrint.triplet.device].push(dataPrint.hash)
+  let visHASH = this.liveCrypto.evidenceProof(dataPrint.hash)
   let visData = {}
-  visData.data = this.liveVisSystem.visualControl(visModule, contract, device, rule, resultsData, dtConvert)
-  visData.context = dataID
-  this.visualData[visUUID] = visData
+  visData.data = this.liveVisSystem.visualControl(visModule, contract, dataPrint.triplet.device, dataPrint.triplet.datatype, resultsData, dtConvert)
+  visData.context = dataPrint
+  visData.list = this.liveVislist
+  this.visualData[dataPrint.hash] = visData
   return status
+}
+
+/**
+*
+* @method nodataInfo
+*
+*/
+VisualComponent.prototype.nodataInfo = function (visUUID, device) {
+  if (!this.liveVislist[device]) {
+    this.liveVislist[device] = []
+  }
+  this.liveVislist[device].push(visUUID)
+  this.visualData[visUUID] = {}
 }
 
 /**
@@ -62,6 +71,7 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, visUUID,
 VisualComponent.prototype.restVisDataList = function () {
   this.visualData = {}
 }
+
 /**
 *
 * @method filterSingleMulti

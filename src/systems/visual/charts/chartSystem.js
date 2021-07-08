@@ -35,7 +35,7 @@ ChartSystem.prototype.chartjsControl = function (visModule, contract, device, ru
   let structureRules = this.structureChartData(rule, dataIN, dtConvert)
   let dataPrep = this.prepareVueChartJS(visModule, rule, device.device_mac, structureRules, dtConvert)
   chartData.chartPackage = dataPrep
-  chartData.chartOptions = this.liveChartOptions.prepareChartOptions(device.device_name)
+  chartData.chartOptions = this.liveChartOptions.prepareChartOptions(device)
   return chartData
 }
 

@@ -19,8 +19,6 @@ import events from 'events'
 import moment from 'moment'
 
 var DataSystem = function (setIN) {
-  // console.log('data system start========')
-  // console.log(setIN)
   events.EventEmitter.call(this)
   // this.liveSAFEnetwork = new SAFEnetwork(setSAFE)
   this.liveTestStorage = new TestStorageAPI(setIN)
@@ -40,17 +38,12 @@ util.inherits(DataSystem, events.EventEmitter)
 *
 */
 DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceInfo, device, datatype, time) {
-  // console.log('start query mapping')
-  // console.log(type)
   let rawHolder = []
   if (type === 'SAFE') {
-    // console.log('safeNetwork file GET')
   } else if (type === 'REST') {
-    // console.log('start rest')
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
     rawHolder = await this.liveTestStorage.RESTbuilder(api, hash).catch(e => console.log('Error: ', e.message))
   } else if (type === 'COMPUTE') {
-    // console.log('compuate flow for data API')
     let extractURL = {}
     extractURL.namespace = sourceInfo.sourceapiquery.namespace
     extractURL.path = sourceInfo.sourceapiquery.apipath

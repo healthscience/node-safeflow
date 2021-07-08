@@ -36,22 +36,25 @@ util.inherits(ComputeSystem, events.EventEmitter)
 * @method computationSystem
 *
 */
-ComputeSystem.prototype.computationSystem = async function (contract, data) {
+ComputeSystem.prototype.computationSystem = function (contract, device, datatype, time, data) {
   // match computation to approprate verified compute need LOADER to add what WASM is being used/required
   let computeStatus = {}
   // console.log('computesystem')
   // console.log(contract)
-  //console.log(data)
-  if (contract.cid === 'none') {
+  // console.log(contract.value.info.compute)
+  // console.log(data)
+  if (contract.value.info.compute.key === 'a7391efedc445038cf631940a04e08e3125164a7') {
+    // console.log('no compute contract')
     computeStatus.state = true
     computeStatus.data = data
-  } else if (contract.cid === 'cnrl-2356388732') {
-    computeStatus = await this.liveAverage.averageSystemStart(contract, data)
-  } else if (contract.cid === 'cnrl-2356388737') {
+  } else if (contract.value.info.compute.key === '1dc642f0575ae4c531c29a6c998c1897df176007') {
+    computeStatus = this.liveAverage.averageSystemStart(contract, device, datatype, time, data)
+  }
+  /* else if (contract.cid === 'cnrl-2356388737') {
     computeStatus = await this.liveSum.sumSystemStart(contract, data)
   } else if (contract.cid === 'cnrl-2356388733') {
     computeStatus = await this.recoverySystem(contract, data)
-  }
+  } */
   return computeStatus
 }
 

@@ -10,9 +10,9 @@
 * @version    $Id$
 */
 import AutomationManager from './automationManager.js'
-import LibComposer from 'refcontractcomposer'
+// import LibComposer from 'refcontractcomposer'
 import CNRLUtility from './kbl-cnrl/cnrlUtility.js'
-import KBLedger from './kbl-cnrl/kbledger.js'
+// import KBLedger from './kbl-cnrl/kbledger.js'
 import CryptoUtility from './kbl-cnrl/cryptoUtility.js'
 import Entity from './scienceEntities.js'
 import util from 'util'
@@ -25,12 +25,14 @@ var EntitiesManager = function (apiCNRL, auth) {
   this.eventErrorListen()
   this.auth = auth
   this.liveAutomation = new AutomationManager()
-  this.liveLibrary = new LibComposer()
+  // this.liveLibrary = new LibComposer()
   this.liveCNRLUtility = new CNRLUtility(auth)
   // this.KBLlive = new KBLedger(apiCNRL, auth)
   this.liveCrypto = new CryptoUtility()
   this.liveSEntities = {}
   this.automationReview()
+  this.resultListener()
+  this.resultcount = 0
 }
 
 /**
@@ -83,21 +85,9 @@ EntitiesManager.prototype.automationReview = function (refCont) {
 */
 EntitiesManager.prototype.peerKBLstart = async function (refCont) {
   // read peer kbledger
-  let NXPexpanded = refCont // assume incoming NXP is expanded formar, need to check
+  let NXPexpanded = refCont // assume incoming NXP is expanded format, need to check
   let dataSummary = this.peerInput(NXPexpanded)
   return dataSummary
-}
-
-/**
-* Read KBL and setup defaults for this peer
-* @method peerKBLPeerstart
-*
-*/
-EntitiesManager.prototype.peerKBLPeerstart = async function () {
-  // let nxpList = await this.liveCNRLUtility.startPeerNXP()
-  // should return light data to UI or go ahead and prepare entity for this NXP
-  // extract device per NXP so
-  return false // nxpList
 }
 
 /**
@@ -128,7 +118,7 @@ EntitiesManager.prototype.peerInput = async function (input) {
 */
 EntitiesManager.prototype.validateInput = function (input) {
   let validStructure = false
-  // is the object empty?
+  // is the object empty?  // need some structure checker more sophisiticated
   let inputParts = Object.keys(input)
   if (inputParts.length === 0) {
     validStructure = false
@@ -184,7 +174,7 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN) {
 *
 */
 EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) {
-  // ALL FLOWS MADE IMMUMATABLE via  FORTH like scripting
+  // ALL FLOWS MADE IMMUMATABLE via  FORTH like scripting TODO
   let automation = true
   // convert modules to array to order flow
   // module has a specific order  question, data, compute, visualise, etc.
@@ -196,113 +186,198 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, modules) 
   let autoCheck = this.liveAutomation.updateAutomation(moduleOrder.compute.value.info)
   if (ECSinput.input === 'refUpdate') {
     // reset the visualise chart data list
-    this.liveSEntities[shellID].liveVisualC.restVisDataList()
-    flowState = await this.computePrepare(shellID, moduleOrder.compute)
-    if (moduleOrder.visualise.value.info.settings.single === true) {
-      // form dataID
-      // hash the context device, datatype and time
-      let dataID = {}
-      dataID.device = this.liveSEntities[shellID].liveDeviceC.activedevice.device_mac
-      dataID.datatype = moduleOrder.visualise.value.info.settings.yaxis[0]
-      dataID.time = flowState.updateModContract.value.info.controls.date
-      let datauuid = this.liveCrypto.evidenceProof(dataID)
-      // update library Module Reference Contract but first check if KBID exist ie result prepared and ready to return
-      // let entityLivedata = await this.entityDataReady(shellID, ecsIN)
-      await this.computeFlow(shellID, flowState.updateModContract, this.liveSEntities[shellID].liveDeviceC.activedevice, this.liveSEntities[shellID].liveDatatypeC.datatypesLive[0], flowState.updateModContract.value.info.controls.date)
-      // process updated vis ref contract
-      await this.visualFlow(shellID, moduleOrder.visualise, flowState, this.liveSEntities[shellID].liveDeviceC.activedevice, moduleOrder.visualise.value.info.settings.yaxis[0],  flowState.updateModContract.value.info.controls.date, datauuid)
-      let entityContext = {}
-      entityContext.context = ECSinput
-      entityContext.data = this.liveSEntities[shellID].liveVisualC
-      this.emit('visualUpdate', entityContext)
-      this.liveSEntities[shellID].liveVisualC.liveVislist = {}
-    }
-    if (flowState.devicerange === true || flowState.datatyperange === true || flowState.timerange === true) {
-      for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
-        for (let datatype of this.liveSEntities[shellID].liveDatatypeC.datatypesLive) {
-          for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
-            // form dataID
-            // hash the context device, datatype and time
-            let dataID = {}
-            dataID.device = device.device_mac
-            dataID.datatype = datatype
-            dataID.time = time
-            let datauuid = this.liveCrypto.evidenceProof(dataID)
-            await this.computeFlow(shellID, flowState.updateModContract, device, datatype, time)
-            // visualise - extract visualisation contract information
-            await this.visualFlow(shellID, moduleOrder.visualise, flowState, device, datatype, time, datauuid)
-            // required back instant or update resutls store or both
-            let entityContext = {}
-            entityContext.context = ECSinput
-            entityContext.data = this.liveSEntities[shellID].liveVisualC
-            entityContext.devices = this.liveSEntities[shellID].liveDeviceC.devices
-            this.emit('visualUpdateRange', entityContext)
-          }
-        }
-      }
-      this.liveSEntities[shellID].liveVisualC.liveVislist = {}
-    }
     // if automation == true process list TODO
+    // deviceInfo = moduleOrder.data.value.info.data.value
+    // let apiData = await this.deviceDataflow(shellID, deviceInfo)
+    // 2 Compute - feed into ECS -KBID processor
+    flowState = await this.computePrepare(shellID, moduleOrder.compute)
+    // set data science flow inputs
+    // this.setDataScienceInputs(shellID, ECSinput, moduleOrder, flowState)
+    this.flowMany(shellID)
+    let State = false
   } else {
+    // new ENTITY prepare COMPUTE
     deviceInfo = moduleOrder.data.value.info.data.value
     let apiData = await this.deviceDataflow(shellID, deviceInfo)
     // 2 Compute - feed into ECS -KBID processor
     flowState = await this.computePrepare(shellID, moduleOrder.compute)
-    // form dataID
-    // hash the context device, datatype and time
-    let dataID = {}
-    dataID.device = this.liveSEntities[shellID].liveDeviceC.activedevice.device_mac
-    dataID.datatype = this.liveSEntities[shellID].liveDatatypeC.datatypesLive[0]
-    dataID.time = flowState.updateModContract.value.info.controls.date
-    let datauuid = this.liveCrypto.evidenceProof(dataID)
-    // all automtion variales extracted, do first and then start on await list
-    // single or loop
-    if (moduleOrder.visualise.value.info.settings.single === true) {
-      await this.computeFlow(shellID, flowState.updateModContract, this.liveSEntities[shellID].liveDeviceC.activedevice, this.liveSEntities[shellID].liveDatatypeC.datatypesLive[0], flowState.updateModContract.value.info.controls.date)
-      // visualise - extract visualisation contract information
-      await this.visualFlow(shellID, moduleOrder.visualise, flowState, this.liveSEntities[shellID].liveDeviceC.activedevice, moduleOrder.visualise.value.info.settings.yaxis[0], flowState.updateModContract.value.info.controls.date, datauuid)
-      let visDataBack = {}
-      visDataBack.context = moduleOrder.visualise
-      visDataBack.data = this.liveSEntities[shellID].liveVisualC
-      visDataBack.devices = this.liveSEntities[shellID].liveDeviceC.devices
-      this.emit('visualFirst', visDataBack)
-      this.liveSEntities[shellID].liveVisualC.liveVislist = {}
+    // set data science flow inputs
+    this.setDataScienceInputs(shellID, ECSinput, moduleOrder, flowState)
+    this.flowMany(shellID)
+    let resultCheckState = false
+  }
+}
+
+/**
+* data science context set per entity
+* @method setDataScienceInputs
+*
+*/
+EntitiesManager.prototype.setDataScienceInputs = function (shellID, ecsIN, moduleOrder, flowState) {
+  let entityInput = {}
+  entityInput.input = ecsIN
+  entityInput.moduleorder = moduleOrder
+  entityInput.flowstate = flowState
+  this.liveSEntities[shellID].datascience = entityInput
+}
+
+/**
+* keep track of uuid data bundles
+* @method trackDataUUIDS
+*
+*/
+EntitiesManager.prototype.trackDataUUIDS = function (shellID, uuid, device, datatype, time) {
+  let tripletData = {}
+  tripletData.device = device
+  tripletData.timeout = time
+  tripletData.datatype = datatype
+  let trackDataUUID = {}
+  trackDataUUID.shell = shellID
+  trackDataUUID.hash = uuid
+  trackDataUUID.triplet = tripletData
+  this.liveSEntities[shellID].datauuid[uuid] = trackDataUUID
+}
+
+/**
+*  flowMany
+* @method flowMany
+*
+*/
+EntitiesManager.prototype.flowMany = async function (shellID) {
+  let ecsInput = this.liveSEntities[shellID].datascience
+  // is a range of devices, datatype or time ranges and single or multi display?
+  if (ecsInput.flowstate.devicerange === true || escInput.flowstate.datatyperange === true || escInput.flowstate.timerange === true) {
+    if (ecsInput.flowstate.datatyperange === true) {
+      // remove the first datatype already returned
+      // this.liveSEntities[shellID].liveDatatypeC.datatypesLive.shift()
     }
-    // is a range of devices, datatype or time ranges and single or multi display?
-    if (flowState.devicerange === true || flowState.datatyperange === true || flowState.timerange === true) {
-      if (flowState.datatyperange === true) {
-        // remove the first datatype already returned
-        // this.liveSEntities[shellID].liveDatatypeC.datatypesLive.shift()
-      }
-      for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
-        for (let datatype of this.liveSEntities[shellID].liveDatatypeC.datatypesLive) {
-          for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
-            // form dataID
-            // hash the context device, datatype and time
-            let dataID = {}
-            dataID.device = device.device_mac
-            dataID.datatype = datatype
-            dataID.time = time
-            let datauuid = this.liveCrypto.evidenceProof(dataID)
-            await this.computeFlow(shellID, flowState.updateModContract, device, datatype, time)
-            // visualise - extract visualisation contract information
-            await this.visualFlow(shellID, moduleOrder.visualise, flowState, device, datatype, time, datauuid)
-            // return data bundle
-            if (this.liveSEntities[shellID].liveDataC.liveData[datauuid]) {
-              let entityContext = {}
-              entityContext.context = ECSinput
-              entityContext.data = this.liveSEntities[shellID].liveVisualC
-              entityContext.devices = this.liveSEntities[shellID].liveDeviceC.devices
-              // required back instant or update resutls store or both
-              this.emit('visualFirstRange', entityContext)
-            } else {
-              console.log('no data for this device, datatype, time')
-            }
-          }
+    for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
+      for (let datatype of this.liveSEntities[shellID].liveDatatypeC.datatypesLive) {
+        for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
+          // form dataID
+          // hash the context device, datatype and time
+          let datauuid = this.resultsUUIDbuilder(device.device_mac, datatype, time)
+          this.trackDataUUIDS(shellID, datauuid, device.device_mac, datatype, time)
+          let entityLivedata = this.entityResultsReady(shellID, ecsInput.input, datauuid)
+          let resultCheckState = false
         }
       }
-      this.liveSEntities[shellID].liveVisualC.liveVislist = {}
     }
+    this.liveSEntities[shellID].liveVisualC.liveVislist = {}
+  }
+}
+
+/**
+* if the entity results ie KBLedger entry exist no need to go to source (unless full ECO flow needed)
+* @method entityResultsReady
+*
+*/
+EntitiesManager.prototype.entityResultsReady = function (shellID, ecsIN, rDUUID) {
+  // let resultExist = false
+  let hashMatcher = false
+  // check ptop Datastore for existing results query by UUID of data results
+  // does the data exist in Memory for this input request?
+  let checkDataExist = this.checkForResultsMemory(shellID, rDUUID)
+  if (checkDataExist === true) {
+    // pass to short flow cycle, just return vis data again
+    // this.emit('visualUpdate', this.liveSEntities[ecsIN.entityUUID])
+    let resultExist = true
+    return resultExist
+  } else {
+    console.log('no results in memeroy check DB')
+    let resultExist = this.checkResults(shellID, rDUUID)
+    return resultExist
+  }
+}
+
+/**
+*  ask peer to query results store a unique result data key
+* @method checkResults
+*
+*/
+EntitiesManager.prototype.checkResults = function (shellID, uuidRData) {
+  let dataPrint = {}
+  dataPrint.shell = shellID
+  dataPrint.resultuuid = uuidRData
+  this.emit('resultCheck', dataPrint)
+  return true
+}
+
+/**
+*  listener for existing results
+* @method resultListener
+*
+*/
+EntitiesManager.prototype.resultListener = function () {
+  this.on('resultsCheckback', async (checkData) => {
+    let liveContext = this.liveSEntities[checkData.entity.shell].datascience
+    if (checkData.data === false) {
+      console.log('FULL')
+      await this.subFlowFull(checkData, liveContext)
+    } else {
+      console.log('SHORT')
+      await this.subFlowShort(checkData, liveContext)
+    }
+  })
+}
+
+/**
+*  sub flow of compute and visualisation components data
+* @method subFlowFull
+*
+*/
+EntitiesManager.prototype.subFlowFull = async function (entity, entityContext) {
+  if (this.resultcount >= 0) {
+    this.resultcount++
+    // rebuild dataPrint structure
+    let dataPrint = this.liveSEntities[entity.entity.shell].datauuid[entity.entity.resultuuid]
+    entityContext.dataprint = dataPrint
+    await this.computeFlow(entity.entity.shell, entityContext.flowstate.updateModContract, dataPrint)
+    // visualise - extract visualisation contract information
+    await this.visualFlow(entity.entity.shell, entityContext.moduleorder.visualise, entityContext.flowstate, dataPrint)
+    // return data bundle
+    if (this.liveSEntities[entity.entity.shell].liveDataC.liveData[entity.entity.resultuuid]) {
+      let entityOut = {}
+      entityOut.context = entityContext
+      entityOut.data = this.liveSEntities[entity.entity.shell].liveVisualC.visualData[entity.entity.resultuuid]
+      entityOut.devices = this.liveSEntities[entity.entity.shell].liveDeviceC.devices
+      // required back instant or update resutls store or both
+      this.emit('visualFirstRange', entityOut)
+    } else {
+      console.log('no data for this device, datatype, time')
+    }
+  }
+}
+
+/**
+*  sub flow of compute and visualisation components data
+* @method subFlowShort
+*
+*/
+EntitiesManager.prototype.subFlowShort = async function (entity, context) {
+  // set dataPrint
+  let dataPrint = this.liveSEntities[entity.entity.shell].datauuid[entity.entity.resultuuid]
+  // datatype table structure needs setting for visualisation
+  this.liveSEntities[entity.entity.shell].liveDatatypeC.datatypeInfoLive = {}
+  this.liveSEntities[entity.entity.shell].liveDatatypeC.datatypeInfoLive.data = {}
+  this.liveSEntities[entity.entity.shell].liveDatatypeC.datatypeInfoLive.data.tablestructure = context.moduleorder.data.value.info.data.value.concept.tablestructure
+  // set data in entity component data
+  this.liveSEntities[entity.entity.shell].liveDataC.setFilterResults(entity.entity.resultuuid, entity.data.value.tidydata)
+  await this.visualFlow(entity.entity.shell, context.moduleorder.visualise, context.flowstate, dataPrint)
+  // return data bundle
+  if (this.liveSEntities[entity.entity.shell].liveDataC.liveData[entity.entity.resultuuid]) {
+    let entityOut = {}
+    entityOut.context = context
+    entityOut.data = this.liveSEntities[entity.entity.shell].liveVisualC.visualData[entity.entity.resultuuid]
+    entityOut.devices = this.liveSEntities[entity.entity.shell].liveDeviceC.devices
+    // required back instant or update resutls store or both
+    this.emit('visualFirstRange', entityOut)
+  } else {
+    let entityOut = {}
+    entityOut.context = context
+    entityOut.data = 'none'
+    entityOut.devices = this.liveSEntities[entity.entity.shell].liveDeviceC.devices
+    this.emit('visualFirstRange', entityOut)
   }
 }
 
@@ -320,6 +395,21 @@ EntitiesManager.prototype.deviceDataflow = async function (shellID, apiData) {
   this.liveSEntities[shellID].evidenceChain.push(evProof)
   statusD = true
   return statusD
+}
+
+/**
+*  data results UUIDbuilder
+* @method resultsUUIDbuilder
+*
+*/
+EntitiesManager.prototype.resultsUUIDbuilder = function (device, datatype, date) {
+  let resultsUUID = ''
+  let dataID = {}
+  dataID.device = device
+  dataID.datatype = datatype
+  dataID.time = date
+  resultsUUID = this.liveCrypto.evidenceProof(dataID)
+  return resultsUUID
 }
 
 /**
@@ -392,7 +482,6 @@ EntitiesManager.prototype.computePrepare = async function (shellID, modContract)
     // set the datatype range
     this.liveSEntities[shellID].liveDatatypeC.setDataTypeLive(modContract.value.info.settings.yaxis)
   }
-
   flowOrder.single = singleStatus
   flowOrder.auto = autotimeRange
   flowOrder.devicerange = deviceRange
@@ -407,19 +496,15 @@ EntitiesManager.prototype.computePrepare = async function (shellID, modContract)
 * @method computeExecute
 *
 */
-EntitiesManager.prototype.computeFlow = async function (shellID, updateModContract, device, datatype, time) {
+EntitiesManager.prototype.computeFlow = async function (shellID, updateModContract, dataPrint) {
   let modContractUpdate = updateModContract
   // else go through creating new KBID entry
   // set the new updated time settings for the new contract
-  modContractUpdate.value.info.controls.date = time
+  modContractUpdate.value.info.controls.date = dataPrint.triplet.timeout
   // ref contract input all complete -
-  let engineReturn = await this.computeEngine(shellID, this.liveSEntities[shellID].liveDeviceC.apiData, modContractUpdate, device, datatype, time)
-  let dataID = {}
-  dataID.device = device.device_mac
-  dataID.datatype = datatype
-  dataID.time = time
-  let datauuid = this.liveCrypto.evidenceProof(dataID)
-  let saveStatus = this.saveResultsProtocol(shellID, datauuid)
+  let engineReturn = await this.computeEngine(shellID, this.liveSEntities[shellID].liveDeviceC.apiData, modContractUpdate, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
+  let datauuid = this.resultsUUIDbuilder(dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
+  let saveStatus = this.saveResultsProtocol(shellID, dataPrint.hash)
   // new version of Ref Contracts of Compute Modules info TODO
   // prepare object to send to peerLink
   let updateModule = {}
@@ -432,7 +517,7 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
   let hashofProofs = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].evidenceChain)
   let proofChain = {} // hash of all hashes through ECS plus hash of results?
   proofChain.hash = hashofProofs
-  proofChain.data = datauuid
+  proofChain.data = dataPrint.hash
   this.emit('kbledgerEntry', proofChain)
   this.liveSEntities[shellID].evidenceChain = []
 }
@@ -447,16 +532,17 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
   // proof of evidence
   let evProof = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveTimeC.liveTime)
   this.liveSEntities[shellID].evidenceChain.push(evProof)
-  this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(this.liveSEntities[shellID].liveDeviceC.apiData, apiInfo, device, datatype)
+  this.liveSEntities[shellID].liveDatatypeC.dataTypeMapping(this.liveSEntities[shellID].liveDeviceC.apiData, apiInfo, datatype)
   // proof of evidence
   let evProof1 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDatatypeC.datatypesLive)
   this.liveSEntities[shellID].evidenceChain.push(evProof1)
-  await this.liveSEntities[shellID].liveDataC.sourceData(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDeviceC.apiData, modUpdateContract, 'empty', device.device_mac, datatype, time)
+  // results api and raw source here?
+  await this.liveSEntities[shellID].liveDataC.DataControlFlow(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDeviceC.apiData, modUpdateContract, 'empty', device, datatype, time)
   // proof of evidence
   let evProof2 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.dataRaw)
   this.liveSEntities[shellID].evidenceChain.push(evProof2)
   // this.emit('computation', 'in-progress')
-  this.computeStatus = await this.liveSEntities[shellID].liveComputeC.filterCompute(apiInfo, device.device_mac, datatype, time, this.liveSEntities[shellID].liveDataC.liveData)
+  this.computeStatus = this.liveSEntities[shellID].liveComputeC.filterCompute(modUpdateContract, device.device_mac, datatype, time, this.liveSEntities[shellID].liveDataC.liveData)
   // proof of evidence
   let evProof3 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.tidyData)
   this.liveSEntities[shellID].evidenceChain.push(evProof3)
@@ -469,20 +555,16 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
 * @method visualFlow
 *
 */
-EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowContract, device, datatype, time, datauuid) {
-  // reset the liveVlist list
+EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowContract, dataPrint) {
   let visContract = visModule.value.info.visualise
-  // what has been ask for check rules
-  // the datatypes for the yaxis (assume charting for now)
-  let rules =  datatype
-  if (this.liveSEntities[shellID].liveDataC.liveData[datauuid]) {
+  if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash]) {
     // yes data to visualise
-    this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, datauuid, device, rules, time,  this.liveSEntities[shellID].liveDataC.liveData[datauuid], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure)
+    this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure)
     // proof of evidence
-    let evProof = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveVisualC.visualData[datauuid])
+    let evProof = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveVisualC.visualData[dataPrint.hash])
     this.liveSEntities[shellID].evidenceChain.push(evProof)
   } else {
-    console.log('not data there to visualise')
+    this.liveSEntities[shellID].liveVisualC.nodataInfo(dataPrint.hash, dataPrint.triplet.device)
   }
   return true
 }
@@ -496,11 +578,8 @@ EntitiesManager.prototype.saveResultsProtocol = function (shellID, dataID) {
   let localthis = this
   // first save results crypto storage
   // prepare save structure
-  let d = new Date()
-  let n = d.getTime()
   if (this.liveSEntities[shellID].liveDataC.liveData[dataID] !== undefined) {
     let saveObject = {}
-    // saveObject.timestamp = n
     saveObject.hash = dataID
     // hash and source data ready for visulisation or use
     let dataCouple = {}
@@ -525,53 +604,38 @@ EntitiesManager.prototype.visSingleVis = function (shellID) {
 }
 
 /**
-* if the entity visualisation data already exists
-* @method entityDataReady
+* checkResultUUIDcheck
+* @method checkResultUUIDcheck
 *
 */
-EntitiesManager.prototype.entityDataReady = async function (shellID, ecsIN) {
+EntitiesManager.prototype.checkResultUUIDcheck = function (uuidData, rData) {
   let resultExist = false
-  let hashMatcher = false
-  // check ptop Datastore for existing results  (below old test network cloud)
-  // what is the module Compute Ref contract?
-  let inputComputeMod = {}
-  for (let mod of ecsIN.update.modules) {
-    if (mod.value.type === 'compute') {
-      inputComputeMod = mod
-    }
-  }
-  // does the data exist in Memory for this input request?
-  /* let checkDataExist = this.checkForResultsMemory(shellID, ecsIN.entityUUID)
-  if (checkDataExist === true) {
-    console.log('vis data in MEMORY')
-    // this.emit('visualUpdate', this.liveSEntities[ecsIN.entityUUID])
+  let hashMatcher = this.resultIndexExist(uuidData, rData)
+  // hashMatcherKBL = this.compareKBIDs({}, {})
+  if (hashMatcher === true) {
     resultExist = true
   } else {
-    console.log('check datastore ')
-    // check datestore for data  use kbid UUID to get source hash and query that hash to see if results data prepared already?
-    // form hash of inputs KIBs and then query results
-    // let kbidInfo = await this.extractKBID(md.cnrl, 1)
-    let checkKbid = this.extractKBID('cnrl', 1)
-    hashMatcher = this.compareKBIDs({}, {})
-    if (hashMatcher === true) {
-      // query store for source and emit back to Peer UI
-      // form message for PeerLink
-      if (checkResults.length > 0) {
-        // yes data so get it back to Peer
-        console.log('yes, results in datastore')
-        // this.emit('visualUpdate', this.liveSEntities[ecsIN.entityUUID])
-        resultExist = true
-      } else {
-        // not results must prepare new
-        resultExist = false
-        console.log('need new kbid entry to form results')
-      }
-    } else {
-      // entry does not exist. Process new KBID ECSflow
-      resultExist = false
+    // entry does not exist. Process new KBID
+    resultExist = false
+  }
+  return resultExist
+}
+
+/**
+* logic control over kbid need prepared
+* @method resultIndexExist
+*
+*/
+EntitiesManager.prototype.resultIndexExist = function (indexHash, storeHash) {
+  let resultMatch = false
+  if (storeHash !== null) {
+    if (indexHash === storeHash.key) {
+      resultMatch = true
     }
-  } */
-  return false // resultExist
+  } else {
+    resultMatch = false
+  }
+  return resultMatch
 }
 
 /**

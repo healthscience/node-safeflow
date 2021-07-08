@@ -32,14 +32,14 @@ util.inherits(ComputeComponent, events.EventEmitter)
 * @method filterCompute
 *
 */
-ComputeComponent.prototype.filterCompute = async function (contract, device, datatype, time, data) {
+ComputeComponent.prototype.filterCompute = function (contract, device, datatype, time, data) {
   /* console.log('computeCOMPONENT#################')
   console.log(contract)
   console.log(datatype)
   console.log(device)
-  console.log(time)
-  console.log(data) */
-  let computeState = await this.liveComputeSystem.computationSystem(contract, data)
+  console.log(time) */
+  // console.log(data)
+  let computeState = this.liveComputeSystem.computationSystem(contract, device, datatype, time, data)
   this.compute[contract.compute] = computeState
   return this.compute
 }

@@ -36,7 +36,6 @@ util.inherits(TestStorageAPI, events.EventEmitter)
 *
 */
 TestStorageAPI.prototype.RESTbuilder = async function (dapi, queryIN) {
-  console.log('rest builder info')
   let jsondata = await axios.get(dapi.namespace + dapi.path + this.tempPubkey + '/' + this.tempToken + '/' + queryIN)
   return jsondata.data[0]
 }
@@ -70,7 +69,6 @@ TestStorageAPI.prototype.COMPUTEbuilderLuft = async function (dapi, device, time
 *
 */
 TestStorageAPI.prototype.deviceRESTbuilder = async function (dapi) {
-  console.log('device builder')
   let jsondata = []
   if (dapi.apipath === '/computedata/' ) {
    jsondata = await axios.get(dapi.apibase + '/contextdata/' + this.tempPubkey + '/' + this.tempToken)
@@ -109,7 +107,6 @@ TestStorageAPI.prototype.getContextType = async function () {
 TestStorageAPI.prototype.saveResults = async function (api, data) {
   await axios.post(api.namespace + api.path + this.tempPubkey + '/' + this.tempToken, data)
     .then(function (response) {
-      // console.log(response)
     })
 }
 
@@ -124,7 +121,6 @@ TestStorageAPI.prototype.removeStartSettings = async function (removeID) {
   jsonIN.kbid = removeID
   await axios.post(this.baseAPI + '/startStatusRemove/' + this.tempPubkey + '/' + this.tempToken, jsonIN)
     .then(function (response) {
-      // console.log(response)
     })
 }
 
@@ -139,7 +135,6 @@ TestStorageAPI.prototype.removeStartDashboardSettings = async function (removeID
   jsonIN.kbid = removeID
   await axios.post(this.baseAPI + '/startDashboardRemove/' + this.tempPubkey + '/' + this.tempToken, jsonIN)
     .then(function (response) {
-      // console.log(response)
     })
 }
 

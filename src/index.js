@@ -17,9 +17,10 @@ var safeFlow = function () {
   events.EventEmitter.call(this)
   // start error even listener
   this.eventErrorListen()
-  this.defaultStorage = 'http://165.227.244.213:8882'
+  this.defaultStorage = 'http://165.227.244.213:8882' // for test network only will be removed
   this.settings = {}
   this.liveEManager = new EntitiesManager()
+  this.resultCount = 0
 }
 
 /**
@@ -91,6 +92,16 @@ safeFlow.prototype.startPeerFlow = function (apiCNRL, auth) {
 }
 
 /**
+* takes in new data from main results store
+* @method resultsFlow
+*
+*/
+safeFlow.prototype.resultsFlow = function (results) {
+  this.liveEManager.emit('resultsCheckback', results)
+  return true
+}
+
+/**
 * build context for Toolkit
 * @method entityGetter
 *
@@ -100,7 +111,10 @@ safeFlow.prototype.entityGetter = function (shellID) {
     this.emit('displayEntity', data)
   })
   this.liveEManager.on('visualFirstRange', (data) => {
-    this.emit('displayEntityRange', data)
+    this.resultCount++
+    if (this.resultCount < 30) {
+      this.emit('displayEntityRange', data)
+    }
   })
   this.liveEManager.on('visualUpdate', (data) => {
     this.emit('displayUpdateEntity', data)
@@ -113,6 +127,9 @@ safeFlow.prototype.entityGetter = function (shellID) {
   })
   this.liveEManager.on('storePeerResults', (data) => {
     this.emit('storePeerResults', data)
+  })
+  this.liveEManager.on('resultCheck', (data) => {
+    this.emit('checkPeerResults', data)
   })
   this.liveEManager.on('kbledgerEntry', (data) => {
     this.emit('kbledgerEntry', data)

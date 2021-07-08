@@ -28,6 +28,8 @@ var ScienceEntities = function (dAccess) {
   this.liveComputeC = new ComputeComponent(dAccess)
   this.liveVisualC = new VisualComponent()
   // this.liveSimC = new SimComponent()
+  this.datascience = {}
+  this.datauuid = {}
   this.evidenceChain = []
 }
 
