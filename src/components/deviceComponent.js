@@ -18,6 +18,7 @@ var DeviceComponent = function (setIN) {
   events.EventEmitter.call(this)
   this.liveDeviceSystem = new DeviceSystem(setIN)
   this.apiData = {}
+  this.alldevices = []
   this.devices = []
   this.activedevice = ''
 }
@@ -30,14 +31,32 @@ util.inherits(DeviceComponent, events.EventEmitter)
 
 /**
 *  set the datatype asked for
-* @method setDevicesLive
+* @method setDevice
 *
 */
 DeviceComponent.prototype.setDevice = async function (apiD) {
   this.apiData = apiD
   let deviceDetail = await this.liveDeviceSystem.storedDevices(this.apiData)
+  this.alldevices = deviceDetail
   this.devices = deviceDetail
   this.activedevice = this.devices[0]
+}
+
+/**
+*  update the device list per peer input
+* @method updateDevice
+*
+*/
+DeviceComponent.prototype.updateDevice = function (devices) {
+  let updateDevices = []
+  for (let dev of this.alldevices) {
+    // match and keep those on new list
+    if (dev.device_mac === devices[0]) {
+      updateDevices.push(dev)
+    }
+  }
+  this.devices = updateDevices
+  this.activedevice = devices[0]
 }
 
 export default DeviceComponent
