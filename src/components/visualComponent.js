@@ -25,6 +25,7 @@ var VisualComponent = function (EID) {
   this.liveVislist = {}
   this.deviceCount = {}
   this.datasetHolder = {}
+  this.dataPrintHolder = {}
   this.sourcedataHolder = {}
 }
 
@@ -44,12 +45,20 @@ VisualComponent.prototype.manageVisDatasets = function (inputBatch, expectedVis)
 }
 
 /**
+*  clear expected vis list
+* @method clearDeviceCount
+*
+*/
+VisualComponent.prototype.clearDeviceCount = function (device) {
+  this.deviceCount[device.device_mac] = 0
+}
+
+/**
 *
 * @method filterVisual
 *
 */
 VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrint, resultsData, dtConvert) {
-  console.log('vis module contract')
   // console.log(util.inspect(visModule, {showHidden: false, depth: null}))
   let timeFormat = ''
   let settingsLive = visModule.value.info.settings
@@ -102,20 +111,23 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     // not yet keep hold of data to batch
     if (this.datasetHolder[inputHash] === undefined) {
       this.datasetHolder[inputHash] = []
+      this.dataPrintHolder[inputHash] = []
     }
     if (this.sourcedataHolder[inputHash] === undefined) {
       this.sourcedataHolder[inputHash] = []
     }
     // add to holder for datasets i.e. multi dataset asked for
     this.datasetHolder[inputHash].push(this.visualData[dataPrint.hash])
-    this.sourcedataHolder[inputHash].push(resultsData)
+    this.dataPrintHolder[inputHash].push(dataPrint)
+    this.sourcedataHolder[inputHash].push({ context: dataPrint, data: resultsData })
   } else if (deviceDataPrinkCount.length === this.deviceCount[dataPrint.triplet.device] && this.deviceCount[dataPrint.triplet.device] > 1) {
     // add this dataset to list
-    console.log('dataset in to hold')
-    console.log(this.visualData[dataPrint.hash].data.chartPackage.datasets[0].data.length)
     this.datasetHolder[inputHash].push(this.visualData[dataPrint.hash])
-    this.sourcedataHolder[inputHash].push(resultsData)
+    this.dataPrintHolder[inputHash].push(dataPrint)
+    this.sourcedataHolder[inputHash].push({ context: dataPrint, data: resultsData })
     // bundle of greater than one length ready for dataSet preparation
+    // need dataPrints if more than one datatype?  Need to check TODO
+
     let datasetMulti = this.buildMultiDataset(timeFormat, inputHash, dataPrint)
     // if batch then create resUUID for the batch
     this.emit('dataout', inputHash[0], this.liveInputlist)
@@ -151,7 +163,6 @@ VisualComponent.prototype.extractVisExpected = function (inputUUID, device) {
 *
 */
 VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
-  console.log('nodata but is part of expected list?')
   if (!this.liveVislist[dataPrint.triplet.device]) {
     this.liveVislist[dataPrint.triplet.device] = []
   }
@@ -193,13 +204,13 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
       // not yet keep hold of data to batch
       if (this.datasetHolder[inputHash] === undefined) {
         this.datasetHolder[inputHash] = []
+        this.dataPrintHolder[inputHash] = []
       }
       // add to holder for datasets i.e. multi dataset asked for
       this.datasetHolder[inputHash].push(this.visualData[dataPrint.hash])
+      this.dataPrintHolder[inputHash].push(dataPrint)
     } else if (deviceDataPrinkCount.length === this.deviceCount[dataPrint.triplet.device] && this.deviceCount[dataPrint.triplet.device] > 1) {
       // add this dataset to list
-      console.log('dataset in to hold')
-      // console.log(this.visualData[dataPrint.hash].data.chartPackage.datasets[0].data.length)
       // this.datasetHolder[inputHash].push(this.visualData[dataPrint.hash])
       // bundle of greater than one length ready for dataSet preparation
       let datasetMulti = this.buildMultiDataset(timeFormat, inputHash, dataPrint)
@@ -247,7 +258,7 @@ VisualComponent.prototype.buildMultiDataset = function (type, inputHash, dataPri
   // take live list and merge data for one chart
   let formatOption = {}
   formatOption.format = type // other mode overlay format
-  let accumData = this.liveVisSystem.singlemultiControl(formatOption, dataPrint, inputHash, this.datasetHolder[inputHash], this.sourcedataHolder[inputHash])
+  let accumData = this.liveVisSystem.singlemultiControl(formatOption, dataPrint, inputHash, this.datasetHolder[inputHash], this.sourcedataHolder[inputHash], this.dataPrintHolder[inputHash])
   let visData = {}
   visData.data = accumData
   visData.context = dataPrint
@@ -255,6 +266,7 @@ VisualComponent.prototype.buildMultiDataset = function (type, inputHash, dataPri
   this.visualData[inputHash] = visData
   // reset the datasetHolder
   this.datasetHolder[inputHash] = []
+  this.dataPrintHolder[inputHash] = []
   return true
 }
 

@@ -260,6 +260,7 @@ EntitiesManager.prototype.trackINPUTvisUUIDS = function (shellID, inputUUID, ecs
   }
   this.liveSEntities[shellID].liveVisualC.manageVisDatasets(inputUUID, expectedVisData)
 }
+
 /**
 * keep track of uuid data bundles
 * @method trackDataUUIDS
@@ -288,6 +289,8 @@ EntitiesManager.prototype.flowMany = async function (shellID, inputUUID) {
   if (ecsInput.flowstate.devicerange === true && ecsInput.flowstate.datatyperange === true && ecsInput.flowstate.timerange === true) {
     // console.log('passed logic for loop')
     for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
+      // reset expect count (incase something didnt clear)
+      this.liveSEntities[shellID].liveVisualC.clearDeviceCount(device)
       for (let datatype of this.liveSEntities[shellID].liveDatatypeC.datatypesLive) {
         for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
           /* console.log('loop')
@@ -398,7 +401,8 @@ EntitiesManager.prototype.subFlowFull = async function (entity, entityContext) {
       entityOut.data = this.liveSEntities[entity.entity.shell].liveVisualC.visualData[entity.entity.resultuuid]
       entityOut.devices = this.liveSEntities[entity.entity.shell].liveDeviceC.devices
       // required back instant or update resutls store or both
-      this.emit('visualFirstRange', entityOut)
+      // console.log('viack back EMIT--1-EMIT--subflow DATA')
+      // this.emit('visualFirstRange', entityOut)
     } else {
       console.log('no data for this device, datatype, time')
       // still need to inform vis component to clear expected list
@@ -408,6 +412,7 @@ EntitiesManager.prototype.subFlowFull = async function (entity, entityContext) {
       entityNodata.context = entityContext
       entityNodata.data = this.liveSEntities[entity.entity.shell].liveVisualC.visualData[entity.entity.resultuuid]
       entityNodata.devices = this.liveSEntities[entity.entity.shell].liveDeviceC.devices
+      // console.log('viack back EMIT-2--EMIT--subflow NO data')
       this.emit('visualFirstRange', entityNodata)
     }
   }
@@ -642,12 +647,14 @@ EntitiesManager.prototype.dataoutListener = function (shellID) {
       entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID]
       entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
       // required back instant or update resutls store or both
+      // console.log('viack back EMIT-3--EMIT--dataoutlistener bundle')
       this.emit('visualFirstRange', entityOut)
     } else {
       let entityOut = {}
       entityOut.context = context
       entityOut.data = 'none'
       entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+      // console.log('viack back EMIT--4-EMIT--dataout NONE')
       this.emit('visualFirstRange', entityOut)
     }
   })

@@ -47,14 +47,12 @@ VisSystem.prototype.visualControl = function (visModule, contract, device, rule,
 * @method singlemultiControl
 *
 */
-VisSystem.prototype.singlemultiControl = function (type, dataPrint, inputHash, dataSet, sourceData) {
-  console.log('build ts or overlay?')
-  console.log(type)
+VisSystem.prototype.singlemultiControl = function (type, dataPrint, inputHash, dataSet, sourceData, dataPrints) {
   let restructureDone = {}
   if (type.format === 'timeseries') {
     restructureDone = this.liveChartSystem.structureMulitChartData(dataSet)
   } else if (type.format = 'overlay') {
-    restructureDone = this.liveChartSystem.structureOverlayChartData(dataPrint, dataSet, sourceData)
+    restructureDone = this.liveChartSystem.structureOverlayChartData(dataPrint, dataSet, sourceData, dataPrints)
   }
   return restructureDone
 }

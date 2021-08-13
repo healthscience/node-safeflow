@@ -180,10 +180,12 @@ ChartSystem.prototype.updateOptions = function (dataIN) {
 * @method structureOverlayChartData
 *
 */
-ChartSystem.prototype.structureOverlayChartData = function (dataPrint, dataSets, sourceData) {
+ChartSystem.prototype.structureOverlayChartData = function (dataPrint, dataSets, sourceData, dataPrints) {
   let overlayDataset = {}
   let aggDatasets = []
   let aggLabels = []
+  // console.log('dataset chart system')
+  // console.log(dataSets)
   // build new x-axis dataset i.e. timeseries order
   for (let cda of dataSets) {
     aggLabels.push(cda.data.chartPackage.labels)
@@ -191,7 +193,7 @@ ChartSystem.prototype.structureOverlayChartData = function (dataPrint, dataSets,
   }
   // add to y-axis list of datasets
   let newOLlabels = this.prepareOverlayLabels(aggLabels)
-  let newDataset = this.prepareOverlayDatasetData(dataPrint, newOLlabels, aggDatasets, sourceData)
+  let newDataset = this.prepareOverlayDatasetData(dataPrint, newOLlabels, aggDatasets, sourceData, dataPrints)
   // update chartOptions ie. title, legends, scale if needed etc.
   let newOptions = this.updateOptions(dataSets)
   overlayDataset.chartOptions = newOptions
@@ -232,12 +234,18 @@ ChartSystem.prototype.prepareOverlayLabels = function (labelsIN) {
 * @method prepareOverlayDatasetData
 *
 */
-ChartSystem.prototype.prepareOverlayDatasetData = function (dataPrint, labels, dataSetsIN, sourceData) {
+ChartSystem.prototype.prepareOverlayDatasetData = function (dataPrint, labels, dataSetsIN, sourceData, dataPrints) {
   let normalisedMatch = []
   let newDatasets = []
   for (let dsl of sourceData) {
-    normalisedMatch = this.timestampMatcher(dataPrint, labels, dsl)
-    newDatasets.push(normalisedMatch)
+    // loop over dataPrints, could be different datatypes asked for
+    for (let dtl of dataPrints) {
+      // if the datatype matches dataset allow matching
+      if (dtl.triplet.datatype === dsl.context.triplet.datatype && dtl.triplet.timeout === dsl.context.triplet.timeout) {
+        normalisedMatch = this.timestampMatcher(dtl, labels, dsl.data)
+        newDatasets.push(normalisedMatch)
+      }
+    }
   }
   // now prepare chart object bundle
   let newChartDataset = []
@@ -305,6 +313,7 @@ ChartSystem.prototype.timestampMatcher = function (dataPrint, mergedLabel, dataI
   // check if dataset of right length if not padd the dataset
   let matchList = []
   let dataTimeText = this.textDatetoNumberFormatDataset(dataIN)
+  // console.log(dataTimeText)
   let count = 0
   // check per existing datasets
   for (let tsi of mergedLabel) {
@@ -353,11 +362,12 @@ ChartSystem.prototype.setColourDataset = function (dataSet) {
 *
 */
 ChartSystem.prototype.colourList = function (colorIN) {
-  let colourRGB = ['rgb(255, 99, 132)', 'rgb(37, 56, 70)', 'rgb(45, 119, 175)', 'rgb(0, 100, 0)', 'rgb(41, 20, 80)', 'rgb(46, 143, 22)', 'rgb(38,15,187)', 'rgb(255, 20, 147)']
-  let max = 6
+  // let colourRGB = ['rgb(255, 99, 132)', 'rgb(37, 56, 70)', 'rgb(45, 119, 175)', 'rgb(0, 100, 0)', 'rgb(41, 20, 80)', 'rgb(46, 143, 22)', 'rgb(38,15,187)', 'rgb(255, 20, 147)']
+  let baseColours = ['rgb(255, 0, 0)', 'rgb(255, 20, 147)', 'rgb(255, 140, 0)', 'rgb(255, 215, 0)', 'rgb(0, 128, 0)', 'rgb(0, 0, 255)', 'rgb(128, 0, 128)', 'rgb(128, 128, 128)', 'rgb(0, 0, 0)']
+  let max = 9
   let min = 0
   let colorNumber = Math.floor(Math.random() * (max - min + 1)) + min
-  let selectColour = colourRGB[colorNumber]
+  let selectColour = baseColours[colorNumber]
   // check color has not been used before
   let passedCheck = ''
   if (selectColour !== colorIN) {
@@ -365,7 +375,7 @@ ChartSystem.prototype.colourList = function (colorIN) {
   } else {
     // select another color
     let colorNumber = Math.floor(Math.random() * (max - min + 1)) + min
-    let selectColour = colourRGB[colorNumber]
+    let selectColour = baseColours[colorNumber]
     passedCheck = selectColour
   }
   let r = 10
