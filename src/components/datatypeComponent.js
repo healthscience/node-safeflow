@@ -18,6 +18,7 @@ var DatatypeComponent = function (setIN) {
   this.liveDTsystem = new DTsystem(setIN)
   this.datatypeInfoLive = []
   this.datatypesLive = []
+  this.sourceDatatypes = []
 }
 
 /**
@@ -43,7 +44,33 @@ DatatypeComponent.prototype.dataTypeMapping = function (api, contract, datatype)
 *
 */
 DatatypeComponent.prototype.setDataTypeLive = function (liveDTs) {
-  this.datatypesLive = liveDTs
+  this.datatypesLive = []
+  for (let dtl of liveDTs) {
+    // check if results datatype  inclue hypon
+    let hyponDTs = dtl.includes('-')
+    if (hyponDTs === false) {
+      this.datatypesLive.push(dtl)
+    } else {
+      // split the dt into parts
+      let splitDT = dtl.split('-')
+      for (let sdt of splitDT) {
+        this.sourceDatatypes.push(sdt)
+      }
+      this.datatypesLive.push(dtl)
+    }
+  }
+  return true
+}
+
+/**
+*  switch to source data types needing compute
+* @method switchSourceDatatypes
+*
+*/
+DatatypeComponent.prototype.switchSourceDatatypes = function () {
+
+  this.datatypesLive = this.sourceDatatypes
+  // this.sourceDatatypes = []
   return true
 }
 

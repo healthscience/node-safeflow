@@ -106,6 +106,8 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
   console.log('expected v live')
   console.log(this.deviceCount[dataPrint.triplet.device])
   console.log(deviceDataPrinkCount.length)
+  console.log('memoryPrint Start')
+  console.log(process.memoryUsage())
   // decide to return or go to next vis data to process
   if (deviceDataPrinkCount.length !== this.deviceCount[dataPrint.triplet.device]) {
     // not yet keep hold of data to batch

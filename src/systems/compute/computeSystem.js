@@ -38,6 +38,8 @@ util.inherits(ComputeSystem, events.EventEmitter)
 */
 ComputeSystem.prototype.computationSystem = function (contract, device, datatype, time, data) {
   // match computation to approprate verified compute need LOADER to add what WASM is being used/required
+  console.log('compute system decide type of compute')
+  console.log(contract.value.info.compute.key)
   let computeStatus = {}
   // console.log('computesystem')
   // console.log(contract)
@@ -47,7 +49,7 @@ ComputeSystem.prototype.computationSystem = function (contract, device, datatype
     // console.log('no compute contract')
     computeStatus.state = true
     computeStatus.data = data
-  } else if (contract.value.info.compute.key === '1dc642f0575ae4c531c29a6c998c1897df176007') {
+  } else if (contract.value.info.compute.key === 'b77699abae03e0d48fbe4af5efc86c4f7d0bae7b') {
     computeStatus = this.liveAverage.averageSystemStart(contract, device, datatype, time, data)
   }
   /* else if (contract.cid === 'cnrl-2356388737') {

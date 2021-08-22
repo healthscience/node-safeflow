@@ -191,25 +191,97 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, inputUUID
   // first assess what first flow and create waiting list (if any)
   let autoCheck = this.liveAutomation.updateAutomation(moduleOrder.compute.value.info)
   if (ECSinput.input === 'refUpdate') {
+    console.log('update Entity')
     // update device list per peer input
     this.deviceUpdateDataflow(shellID, moduleOrder.compute)
     // update flow state for new input
-    flowState = await this.computePrepare(shellID, ECSinput, inputUUID, moduleOrder)
+    flowState = await this.flowPrepare(shellID, ECSinput, inputUUID, moduleOrder)
     // set data science flow inputs
     this.setDataScienceInputs(shellID, inputUUID, ECSinput, moduleOrder, flowState, 'update')
     this.flowMany(shellID, inputUUID)
     let State = false
   } else {
+    console.log('setup Entity')
     // new ENTITY prepare COMPUTE
     deviceInfo = moduleOrder.data.value.info.data.value
     let apiData = await this.deviceDataflow(shellID, deviceInfo)
     // 2 Compute - feed into ECS -KBID processor
-    flowState = await this.computePrepare(shellID, ECSinput, inputUUID, moduleOrder)
+    flowState = await this.flowPrepare(shellID, ECSinput, inputUUID, moduleOrder)
     // set data science flow inputs
     this.setDataScienceInputs(shellID, inputUUID, ECSinput, moduleOrder, flowState, 'first')
     this.flowMany(shellID, inputUUID)
     let resultCheckState = false
   }
+}
+
+/**
+*
+* @method flowPrepare
+*
+*/
+EntitiesManager.prototype.flowPrepare = async function (shellID, ECSinput, inputUUID, modContracts) {
+  let singleStatus = modContracts.visualise.value.info.settings.single
+  let flowOrder = {}
+  // these are old CNRL contract TODO update to Network Library Ref contracts
+  let timePeriod = this.liveCNRLUtility.contractCNRL(modContracts.compute.value.info.settings.timeperiod)
+  let resolution = this.liveCNRLUtility.contractCNRL(modContracts.compute.value.info.settings.resolution)
+  // set these expand ref contracts
+  modContracts.compute.value.info.settings.timeperiod = timePeriod
+  modContracts.compute.value.info.settings.resolution = resolution
+  // set the data in time component
+  this.liveSEntities[shellID].liveTimeC.setTimeSegments(timePeriod)
+  this.liveSEntities[shellID].liveTimeC.setTimeResolution(resolution)
+  // any automation required?
+  let automation = false // to set TODO
+  let autotimeRange = false
+  if (automation === true) {
+    autotimeRange = true
+    // automation time range settings
+    this.liveSEntities[shellID].liveTimeC.timeProfiling(modContracts.compute.value.info.controls.date, timePeriod.prime.unit)
+  }
+  let deviceRange = false
+  if (this.liveSEntities[shellID].liveDeviceC.devices.length > 0) {
+    deviceRange = true
+  }
+  // first check if peer has set time range?
+  if (modContracts.compute.value.info.controls.rangedate !== undefined && modContracts.compute.value.info.controls.rangedate.length > 0 ) {
+    // peer set
+    this.liveSEntities[shellID].liveTimeC.setDateRange(modContracts.compute.value.info.controls.rangedate)
+  } else {
+    // set array for single date incase mulitple dataset per request
+    let singleRangeTime = []
+    singleRangeTime.push(modContracts.compute.value.info.controls.date)
+    this.liveSEntities[shellID].liveTimeC.setDateRange(singleRangeTime)
+  }
+  // specific UI range ask for?
+  let timeRange = false
+  if (this.liveSEntities[shellID].liveTimeC.timerange.length > 0) {
+    timeRange = true
+  }
+  // how many data types, single or multi per this request
+  let dtRange = false
+  if (modContracts.compute.value.info.settings.yaxis.length > 0) {
+    dtRange = true
+    // set the datatype range
+    this.liveSEntities[shellID].liveDatatypeC.setDataTypeLive(modContracts.compute.value.info.settings.yaxis)
+  }
+  // summary logic ingredients
+  flowOrder.single = singleStatus
+  flowOrder.auto = autotimeRange
+  flowOrder.devicerange = deviceRange
+  flowOrder.datatyperange = dtRange
+  flowOrder.timerange = timeRange
+  flowOrder.updateModContract = modContracts.compute
+  // prepare datasets out profile to be constructued
+  let datasetsOutPattern = {}
+  let datasetOutUUID = 'hash'
+  datasetsOutPattern[inputUUID] = []
+  // loop over devices per this input
+  for (let dev of this.liveSEntities[shellID].liveDeviceC.devices) {
+    datasetsOutPattern[inputUUID].push(dev.device_mac)
+  }
+  this.liveSEntities[shellID].liveVisualC.datasetsOutpattern = datasetsOutPattern
+  return flowOrder
 }
 
 /**
@@ -279,12 +351,17 @@ EntitiesManager.prototype.trackDataUUIDS = function (shellID, inputUUID, uuid, d
 }
 
 /**
-*  flowMany
+*  loop through the data require per datatype time and device
 * @method flowMany
 *
 */
 EntitiesManager.prototype.flowMany = async function (shellID, inputUUID) {
   let ecsInput = this.liveSEntities[shellID].datascience
+  console.log('flow summary')
+  // console.log(ecsInput.flowstate)
+  // console.log(this.liveSEntities[shellID].liveDatatypeC.datatypesLive)
+  // console.log(this.liveSEntities[shellID].liveDeviceC.devices)
+  // console.log(this.liveSEntities[shellID].liveTimeC.timerange)
   // is a range of devices, datatype or time ranges and single or multi display?
   if (ecsInput.flowstate.devicerange === true && ecsInput.flowstate.datatyperange === true && ecsInput.flowstate.timerange === true) {
     // console.log('passed logic for loop')
@@ -293,10 +370,10 @@ EntitiesManager.prototype.flowMany = async function (shellID, inputUUID) {
       this.liveSEntities[shellID].liveVisualC.clearDeviceCount(device)
       for (let datatype of this.liveSEntities[shellID].liveDatatypeC.datatypesLive) {
         for (let time of this.liveSEntities[shellID].liveTimeC.timerange) {
-          /* console.log('loop')
+          console.log('loop')
           console.log(device)
           console.log(datatype)
-          console.log(time) */
+          console.log(time)
           // form dataID
           // hash the context device, datatype and time
           let datauuid = this.resultsUUIDbuilder(device.device_mac, datatype, time)
@@ -307,7 +384,15 @@ EntitiesManager.prototype.flowMany = async function (shellID, inputUUID) {
       }
     }
   } else {
-    console.log('no devices or datatype range or date range')
+    console.log('no devices or datatype or date')
+    // matchup input
+    let context = this.liveSEntities[shellID].datascience
+    let entityOut = {}
+    entityOut.context = context
+    entityOut.data = 'none'
+    entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+    // console.log('viack back EMIT--4-EMIT--dataout NONE')
+    this.emit('visualFirstRange', entityOut)
   }
 }
 
@@ -337,6 +422,7 @@ EntitiesManager.prototype.entityResultsReady = async function (shellID, ecsIN, r
   // does the data exist in Memory for this input request?
   let checkDataExist = this.checkForResultsMemory(shellID, rDUUID)
   if (checkDataExist === true) {
+    console.log('yes in memeory')
     let liveContext = this.liveSEntities[shellID].datascience
     // pass to short flow cycle, just return vis data again
     let dataPrint = this.liveSEntities[shellID].datauuid[rDUUID]
@@ -344,6 +430,7 @@ EntitiesManager.prototype.entityResultsReady = async function (shellID, ecsIN, r
     let resultExist = true
     return resultExist
   } else {
+    console.log('not in memory')
     let resultExist = this.checkResults(shellID, rDUUID)
     return resultExist
   }
@@ -369,12 +456,14 @@ EntitiesManager.prototype.checkResults = function (shellID, uuidRData) {
 */
 EntitiesManager.prototype.resultListener = function () {
   this.on('resultsCheckback', async (checkData) => {
+    console.log('listener for resutls')
+    console.log(checkData)
     let liveContext = this.liveSEntities[checkData.entity.shell].datascience
     if (checkData.data === false) {
-      console.log('FULL')
+      console.log('subFULL')
       await this.subFlowFull(checkData, liveContext)
     } else {
-      console.log('SHORT')
+      console.log('subSHORT')
       await this.subFlowShort(checkData, liveContext)
     }
   })
@@ -386,6 +475,8 @@ EntitiesManager.prototype.resultListener = function () {
 *
 */
 EntitiesManager.prototype.subFlowFull = async function (entity, entityContext) {
+  console.log('suFLOW results COUNT')
+  console.log(this.resultcount)
   if (this.resultcount >= 0) {
     this.resultcount++
     // rebuild dataPrint structure
@@ -404,17 +495,27 @@ EntitiesManager.prototype.subFlowFull = async function (entity, entityContext) {
       // console.log('viack back EMIT--1-EMIT--subflow DATA')
       // this.emit('visualFirstRange', entityOut)
     } else {
-      console.log('no data for this device, datatype, time')
-      // still need to inform vis component to clear expected list
-      // prepare visualisation datasets
-      await this.visualFlow(entity.entity.shell, entityContext.moduleorder.visualise, entityContext.flowstate, dataPrint)
-      let entityNodata = {}
-      entityNodata.context = entityContext
-      entityNodata.data = this.liveSEntities[entity.entity.shell].liveVisualC.visualData[entity.entity.resultuuid]
-      entityNodata.devices = this.liveSEntities[entity.entity.shell].liveDeviceC.devices
-      // console.log('viack back EMIT-2--EMIT--subflow NO data')
-      this.emit('visualFirstRange', entityNodata)
+      console.log('check if results datatype asked for?')
+      // console.log(this.liveSEntities[entity.entity.shell].liveDatatypeC.sourceDatatypes)
+      if (this.liveSEntities[entity.entity.shell].liveDatatypeC.sourceDatatypes.length > 0) {
+        console.log('yes, source datatype go check/prepare update computations if needed')
+        // form data ids for source datatypes
+        // does the source data existing for this computation?
+      } else {
+        console.log('no data for this device, datatype, time')
+        // still need to inform vis component to clear expected list
+        // prepare visualisation datasets
+        await this.visualFlow(entity.entity.shell, entityContext.moduleorder.visualise, entityContext.flowstate, dataPrint)
+        let entityNodata = {}
+        entityNodata.context = entityContext
+        entityNodata.data = this.liveSEntities[entity.entity.shell].liveVisualC.visualData[entity.entity.resultuuid]
+        entityNodata.devices = this.liveSEntities[entity.entity.shell].liveDeviceC.devices
+        // console.log('viack back EMIT-2--EMIT--subflow NO data')
+        this.emit('visualFirstRange', entityNodata)
+      }
     }
+  } else {
+    console.log('no results data from memory or saved before')
   }
 }
 
@@ -473,6 +574,8 @@ EntitiesManager.prototype.orderModuleFlow = function (modules) {
   for (let mod of modules) {
     if (mod.value.type === 'data') {
       moduleOrder.data = mod
+    } else if (mod.value.type === 'question') {
+      moduleOrder.question = mod
     } else if (mod.value.type === 'compute') {
       moduleOrder.compute = mod
     } else if (mod.value.type === 'visualise') {
@@ -480,76 +583,6 @@ EntitiesManager.prototype.orderModuleFlow = function (modules) {
     }
   }
   return moduleOrder
-}
-
-/**
-*
-* @method computePrepare
-*
-*/
-EntitiesManager.prototype.computePrepare = async function (shellID, ECSinput, inputUUID, modContracts) {
-  let singleStatus = modContracts.visualise.value.info.settings.single
-  let flowOrder = {}
-  // these are old CNRL contract TODO update to Network Library Ref contracts
-  let timePeriod = this.liveCNRLUtility.contractCNRL(modContracts.compute.value.info.settings.timeperiod)
-  let resolution = this.liveCNRLUtility.contractCNRL(modContracts.compute.value.info.settings.resolution)
-  // set these expand ref contracts
-  modContracts.compute.value.info.settings.timeperiod = timePeriod
-  modContracts.compute.value.info.settings.resolution = resolution
-  // set the data in time component
-  this.liveSEntities[shellID].liveTimeC.setTimeSegments(timePeriod)
-  this.liveSEntities[shellID].liveTimeC.setTimeResolution(resolution)
-  // any automation required?
-  let automation = false // to set TODO
-  let autotimeRange = false
-  if (automation === true) {
-    autotimeRange = true
-    // automation time range settings
-    this.liveSEntities[shellID].liveTimeC.timeProfiling(modContracts.compute.value.info.controls.date, timePeriod.prime.unit)
-  }
-  let deviceRange = false
-  if (this.liveSEntities[shellID].liveDeviceC.devices.length > 0) {
-    deviceRange = true
-  }
-  // first check if peer has set time range?
-  if (modContracts.compute.value.info.controls.rangedate !== undefined && modContracts.compute.value.info.controls.rangedate.length > 0 ) {
-    // peer set
-    this.liveSEntities[shellID].liveTimeC.setDateRange(modContracts.compute.value.info.controls.rangedate)
-  } else {
-    // set array for single date incase mulitple dataset per request
-    let singleRangeTime = []
-    singleRangeTime.push(modContracts.compute.value.info.controls.date)
-    this.liveSEntities[shellID].liveTimeC.setDateRange(singleRangeTime)
-  }
-  // specific UI range ask for?
-  let timeRange = false
-  if (this.liveSEntities[shellID].liveTimeC.timerange.length > 0) {
-    timeRange = true
-  }
-  // how many data types, single or multi per this request
-  let dtRange = false
-  if (modContracts.compute.value.info.settings.yaxis.length > 0) {
-    dtRange = true
-    // set the datatype range
-    this.liveSEntities[shellID].liveDatatypeC.setDataTypeLive(modContracts.compute.value.info.settings.yaxis)
-  }
-  // summary logic ingredients
-  flowOrder.single = singleStatus
-  flowOrder.auto = autotimeRange
-  flowOrder.devicerange = deviceRange
-  flowOrder.datatyperange = dtRange
-  flowOrder.timerange = timeRange
-  flowOrder.updateModContract = modContracts.compute
-  // prepare datasets out profile to be constructued
-  let datasetsOutPattern = {}
-  let datasetOutUUID = 'hash'
-  datasetsOutPattern[inputUUID] = []
-  // loop over devices per this input
-  for (let dev of this.liveSEntities[shellID].liveDeviceC.devices) {
-    datasetsOutPattern[inputUUID].push(dev.device_mac)
-  }
-  this.liveSEntities[shellID].liveVisualC.datasetsOutpattern = datasetsOutPattern
-  return flowOrder
 }
 
 /**
@@ -565,7 +598,7 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
   // ref contract input all complete -
   let engineReturn = await this.computeEngine(shellID, this.liveSEntities[shellID].liveDeviceC.apiData, modContractUpdate, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
   let saveStatus = this.saveResultsProtocol(shellID, dataPrint.hash)
-  // new version of Ref Contracts of Compute Modules info TODO
+  // new version of Ref Contracts of Compute Modules info
   // prepare object to send to peerLink
   let updateModule = {}
   updateModule.type = 'library'

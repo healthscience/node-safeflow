@@ -184,8 +184,6 @@ ChartSystem.prototype.structureOverlayChartData = function (dataPrint, dataSets,
   let overlayDataset = {}
   let aggDatasets = []
   let aggLabels = []
-  // console.log('dataset chart system')
-  // console.log(dataSets)
   // build new x-axis dataset i.e. timeseries order
   for (let cda of dataSets) {
     aggLabels.push(cda.data.chartPackage.labels)
@@ -291,7 +289,6 @@ ChartSystem.prototype.mergeLabelData = function (baseLabel, newLabel) {
     const [h, m] = time.split(':')
     return (+h + (+m/60)).toFixed(2)
   }
-  // uniqueXaxis.forEach( time => console.log(time, ' >> ', minuteConverter(time)))
   let decTimeList = []
   uniqueXaxis.forEach(time => decTimeList.push({ time: time, number: minuteConverter(time) }))
   // sort date in order of day
@@ -313,7 +310,6 @@ ChartSystem.prototype.timestampMatcher = function (dataPrint, mergedLabel, dataI
   // check if dataset of right length if not padd the dataset
   let matchList = []
   let dataTimeText = this.textDatetoNumberFormatDataset(dataIN)
-  // console.log(dataTimeText)
   let count = 0
   // check per existing datasets
   for (let tsi of mergedLabel) {
