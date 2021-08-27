@@ -42,31 +42,27 @@ AverageSystem.prototype.verifyComputeWASM = function (wasmFile) {
 * @method averageSystem
 *
 */
-AverageSystem.prototype.averageSystemStart = function (contract, device, datatype, time, data) {
-  // console.log('start prepare avg compute')
-  // console.log(contract)
-  // console.log(data)
+AverageSystem.prototype.averageSystemStart = function (contract, dataPrint, data) {
+  console.log('start prepare ===========avg compute')
+  // console.log(dataPrint)
+  // console.log(data[0])
+  let saveJSON = []
   if (data.length > 0) {
-    let saveReady = this.avgliveStatistics.averageStatistics(data)
+    let saveReady = this.avgliveStatistics.averageStatistics(data, dataPrint.triplet.datatype)
     let batchSize = data.length
-    // prepare JSON object for POST
-    let saveJSON = {}
-    saveJSON.publickey = ''
-    saveJSON.timestamp = time
-    saveJSON.compref = contract
-    saveJSON.datatype = datatype
-    saveJSON.value = saveReady.average
-    saveJSON.device_mac = device
-    saveJSON.clean = saveReady.count
-    saveJSON.tidy = batchSize - saveReady.count
-    saveJSON.size = batchSize
-    saveJSON.timeseg = 'day'
-    saveJSON.category = contract
-    // console.log('save average bundle')
-    // console.log(saveJSON)
-    // this.liveTestStorage.saveaverageData(saveJSON)
+    // simple key(hash time datatype): value
+    // key(hash datatype): value
+    // time in seconds not milliseconds
+    let saveTime = dataPrint.couple.triplet.timeout / 1000
+    let formData = {}
+    formData['d6432e905c50764b93b5e685c182b23ff5352a07'] = saveTime
+    formData[dataPrint.couple.triplet.datatype] = saveReady.average
+    saveJSON.push(formData)
+  } else {
+    console.log('no data presented to compute')
+    saveJSON = {}
   }
-  return true
+  return saveJSON
 }
 
 export default AverageSystem

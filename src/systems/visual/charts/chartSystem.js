@@ -30,12 +30,12 @@ util.inherits(ChartSystem, events.EventEmitter)
 * @method chartjsControl
 *
 */
-ChartSystem.prototype.chartjsControl = function (visModule, contract, device, rule, dataIN, dtConvert) {
+ChartSystem.prototype.chartjsControl = function (visModule, contract, dataPrint, dataIN, dtConvert) {
   let chartData = {}
-  let structureRules = this.structureChartData(rule, dataIN, dtConvert)
-  let dataPrep = this.prepareVueChartJS(visModule, rule, device.device_mac, structureRules, dtConvert)
+  let structureRules = this.structureChartData(dataPrint.triplet.datatype, dataIN, dtConvert)
+  let dataPrep = this.prepareVueChartJS(visModule, dataPrint.triplet.datatype, dataPrint.triplet.device, structureRules, dtConvert)
   chartData.chartPackage = dataPrep
-  chartData.chartOptions = this.liveChartOptions.prepareChartOptions(device)
+  chartData.chartOptions = this.liveChartOptions.prepareChartOptions(dataPrint.triplet.device)
   return chartData
 }
 

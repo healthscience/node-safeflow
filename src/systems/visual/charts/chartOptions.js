@@ -30,6 +30,8 @@ util.inherits(ChartOptions, events.EventEmitter)
 */
 ChartOptions.prototype.prepareChartOptions = function (title, scale) {
   var localthis = this
+  let analysisStart = 100
+  let analysisEnd = 300
   let settings = {}
   settings.title = title
   // let yAxisOptions = this.prepareYoptions(datatypes, scale)
@@ -80,7 +82,7 @@ ChartOptions.prototype.prepareChartOptions = function (title, scale) {
     },
     annotation: {
       events: ['click'],
-      annotations: [{
+      annotations: [ /*{
         drawTime: 'afterDatasetsDraw',
         type: 'line',
         mode: 'horizontal',
@@ -111,13 +113,14 @@ ChartOptions.prototype.prepareChartOptions = function (title, scale) {
         draggable: true,
         onClick: function (e) {
         }
-      },
+      }, */
       {
         id: 'time',
         scaleID: 'x-axis-0',
+        drawTime: 'afterDatasetsDraw',
         type: 'line',
         mode: 'vertical',
-        value: 0,
+        value: analysisStart,
         borderColor: 'blue',
         borderWidth: 12,
         label: {
@@ -125,19 +128,23 @@ ChartOptions.prototype.prepareChartOptions = function (title, scale) {
           content: 'start point'
         },
         draggable: true,
-        onClick: function (e) {
-          localthis.analysisStart = options.value
+        onDrag: function(event) {
+          console.log(event)
         },
-        onDrag: function (event) {
-          localthis.analysisStart = event.subject.config.value
+        onClick: function(e) {
+          console.log(e)
+        },
+        onWheel: function(e) {
+          console.log(e)
         }
-      },
+      } /* ,
       {
         id: 'time2',
         scaleID: 'x-axis-0',
+        drawTime: 'afterDatasetsDraw',
         type: 'line',
         mode: 'vertical',
-        value: 0,
+        value: analysisEnd,
         borderColor: '#7A33FF',
         borderWidth: 12,
         label: {
@@ -146,12 +153,21 @@ ChartOptions.prototype.prepareChartOptions = function (title, scale) {
         },
         draggable: true,
         onClick: function (et) {
-          localthis.analysisEnd = options.value
+          console.log('click slider2')
+          console.log(et)
         },
         onDrag: function (eventt) {
-          localthis.analysisEnd = eventt.subject.config.value
+          console.log('drag slider2')
+          console.log(eventt)
+          console.log(eventt.subject.config.value)
+        },
+        onDrag: function(event) {
+          console.log(event)
+        },
+        onDragEnd: function(event) {
+          console.log(event)
         }
-      }]
+      } */ ]
     }
   }
   // options = {}

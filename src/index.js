@@ -114,8 +114,8 @@ safeFlow.prototype.entityGetter = function (shellID) {
     this.resultCount++
     if (this.resultCount < 32) {
       this.emit('displayEntityRange', data)
-      console.log('memoryPrint Start')
-      console.log(process.memoryUsage())
+      // console.log('memoryPrint Start')
+      // console.log(process.memoryUsage())
     }
   })
   this.liveEManager.on('visualUpdate', (data) => {

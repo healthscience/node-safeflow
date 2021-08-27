@@ -58,8 +58,10 @@ VisualComponent.prototype.clearDeviceCount = function (device) {
 * @method filterVisual
 *
 */
-VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrint, resultsData, dtConvert) {
+VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrint, resultsData, dtConvert, flag) {
   // console.log(util.inspect(visModule, {showHidden: false, depth: null}))
+  console.log('VISUAL__COMPONENT')
+  console.log(dataPrint)
   let timeFormat = ''
   let settingsLive = visModule.value.info.settings
   let timeFormatSet = settingsLive.hasOwnProperty('timeformat')
@@ -78,7 +80,7 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
   this.liveVislist[dataPrint.triplet.device].push(dataPrint.hash)
   // prepare the dataset to return
   let visData = {}
-  visData.data = this.liveVisSystem.visualControl(visModule, contract, dataPrint.triplet.device, dataPrint.triplet.datatype, resultsData, dtConvert)
+  visData.data = this.liveVisSystem.visualControl(visModule, contract, dataPrint, resultsData, dtConvert)
   visData.context = dataPrint
   visData.list = this.liveVislist
   // hold the data in the entity component
@@ -86,30 +88,54 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
   // if dataset profile complete or just signals, return to peer
   // check against profile
   // device is matched to what input hash?
-  let inputHash = Object.keys(this.datasetsOutpattern) // this.datasetsOutpattern[dataPrint.triplet.device]
-  // expected vis results
-  let deviceDataPrinkCount = this.extractVisExpected(inputHash[0], dataPrint.triplet.device)
+  let inputHash = {}
+  if (flag !== true) {
+    console.log('flag NOT true')
+    console.log(this.datasetsOutPattern)
+    console.log(this.liveInputlist)
+    let howManyInputUUID = Object.keys(this.datasetsOutpattern)
+    inputHash = howManyInputUUID[0]
+  } else {
+    console.log('flag TRUE')
+    console.log(this.datasetsOutPattern)
+    console.log(this.liveInputlist)
+    let howManyInputUUID = Object.keys(this.liveInputlist)
+    console.log(howManyInputUUID)
+    inputHash = howManyInputUUID[0] // howManyInputUUID.slice(-1)
+  }
+  // expected vis results  source or compute flag?
+  let deviceDataPrintCount = this.extractVisExpected(inputHash, dataPrint.triplet.device)
+  console.log('deviceDataPrintCOUNT')
+  console.log(deviceDataPrintCount)
   // is there a list to bundle together?
   let completeVisList = []
-  if (deviceDataPrinkCount.length > 0) {
-    for (let dphash of deviceDataPrinkCount) {
+  if (deviceDataPrintCount.length > 0) {
+    for (let dphash of deviceDataPrintCount) {
+      console.log(dphash)
+      console.log(dataPrint.hash)
       if (dphash === dataPrint.hash) {
+        console.log('hash match')
         if (this.deviceCount[dataPrint.triplet.device] === undefined) {
           this.deviceCount[dataPrint.triplet.device] = 0
+        } else {
+          console.log('count already set')
         }
         this.deviceCount[dataPrint.triplet.device]++
         // yes in list
         completeVisList.push(dataPrint.triplet.device)
+      } else {
+        console.log('hash miss march-------')
       }
     }
   }
   console.log('expected v live')
   console.log(this.deviceCount[dataPrint.triplet.device])
-  console.log(deviceDataPrinkCount.length)
-  console.log('memoryPrint Start')
-  console.log(process.memoryUsage())
+  console.log(deviceDataPrintCount.length)
+  // console.log('memoryPrint Start')
+  // console.log(process.memoryUsage())
   // decide to return or go to next vis data to process
-  if (deviceDataPrinkCount.length !== this.deviceCount[dataPrint.triplet.device]) {
+  if (deviceDataPrintCount.length !== this.deviceCount[dataPrint.triplet.device]) {
+    console.log('logic 1')
     // not yet keep hold of data to batch
     if (this.datasetHolder[inputHash] === undefined) {
       this.datasetHolder[inputHash] = []
@@ -122,29 +148,33 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     this.datasetHolder[inputHash].push(this.visualData[dataPrint.hash])
     this.dataPrintHolder[inputHash].push(dataPrint)
     this.sourcedataHolder[inputHash].push({ context: dataPrint, data: resultsData })
-  } else if (deviceDataPrinkCount.length === this.deviceCount[dataPrint.triplet.device] && this.deviceCount[dataPrint.triplet.device] > 1) {
+    // remove item from inputList?
+    // delete this.liveInputlist[inputHash]
+  } else if (deviceDataPrintCount.length === this.deviceCount[dataPrint.triplet.device] && this.deviceCount[dataPrint.triplet.device] > 1) {
+    console.log('logic 2')
     // add this dataset to list
     this.datasetHolder[inputHash].push(this.visualData[dataPrint.hash])
     this.dataPrintHolder[inputHash].push(dataPrint)
     this.sourcedataHolder[inputHash].push({ context: dataPrint, data: resultsData })
     // bundle of greater than one length ready for dataSet preparation
     // need dataPrints if more than one datatype?  Need to check TODO
-
     let datasetMulti = this.buildMultiDataset(timeFormat, inputHash, dataPrint)
-    // if batch then create resUUID for the batch
-    this.emit('dataout', inputHash[0], this.liveInputlist)
     // clear the input tracking this.deviceCount
     this.deviceCount[dataPrint.triplet.device] = []
     this.datasetsOutpattern[inputHash] = []
+    delete this.liveInputlist[inputHash]
     this.liveVislist = []
+    this.emit('dataout', inputHash)
   } else {
+    console.log('logic 3')
     // if batch then create resUUID for the batch
     let resultPrint = dataPrint.hash
-    this.emit('dataout', resultPrint, this.liveInputlist)
     // clear the input tracking
     this.deviceCount[dataPrint.triplet.device] = []
     this.datasetsOutpattern[inputHash] = []
+    delete this.liveInputlist[inputHash]
     this.liveVislist = []
+    this.emit('dataout', resultPrint)
   }
   return true
 }
@@ -155,6 +185,11 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
 *
 */
 VisualComponent.prototype.extractVisExpected = function (inputUUID, device) {
+  console.log('extract VIS EXPECTED')
+  console.log(inputUUID)
+  console.log(device)
+  // console.log(this.liveInputlist[inputUUID])
+  console.log(this.liveInputlist)
   let matchDataList = this.liveInputlist[inputUUID]
   return matchDataList[device]
 }
@@ -165,11 +200,15 @@ VisualComponent.prototype.extractVisExpected = function (inputUUID, device) {
 *
 */
 VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
+  console.log('visCOMPONENT---no data')
   if (!this.liveVislist[dataPrint.triplet.device]) {
     this.liveVislist[dataPrint.triplet.device] = []
   }
   this.liveVislist[dataPrint.triplet.device].push(dataPrint.hash)
   let inputHash = Object.keys(this.datasetsOutpattern) // this.datasetsOutpattern[dataPrint.triplet.device]
+  console.log('inputHASH key')
+  console.log(this.datasetsOutPattern)
+  console.log(inputHash)
   // expected vis results
   let deviceDataPrinkCount = this.extractVisExpected(inputHash[0], dataPrint.triplet.device)
   // single or part of expected list
@@ -229,6 +268,7 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
       // clear the input tracking
       this.deviceCount[dataPrint.triplet.device] = []
       this.datasetsOutpattern[inputHash] = []
+      this.liveInputlist[inputHash] = {}
       this.liveVislist = []
     }
   } else {

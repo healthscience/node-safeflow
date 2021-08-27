@@ -53,9 +53,9 @@ DatatypeComponent.prototype.setDataTypeLive = function (liveDTs) {
     } else {
       // split the dt into parts
       let splitDT = dtl.split('-')
-      for (let sdt of splitDT) {
-        this.sourceDatatypes.push(sdt)
-      }
+      // for (let sdt of splitDT) {
+      this.sourceDatatypes.push(splitDT[0])
+      // }
       this.datatypesLive.push(dtl)
     }
   }
@@ -68,9 +68,8 @@ DatatypeComponent.prototype.setDataTypeLive = function (liveDTs) {
 *
 */
 DatatypeComponent.prototype.switchSourceDatatypes = function () {
-
+  this.sourceDatatypes = [...new Set(this.sourceDatatypes)]
   this.datatypesLive = this.sourceDatatypes
-  // this.sourceDatatypes = []
   return true
 }
 

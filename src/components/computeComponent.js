@@ -32,9 +32,12 @@ util.inherits(ComputeComponent, events.EventEmitter)
 * @method filterCompute
 *
 */
-ComputeComponent.prototype.filterCompute = function (contract, device, datatype, time, data) {
-  let computeState = this.liveComputeSystem.computationSystem(contract, device, datatype, time, data)
-  this.compute[contract.compute] = computeState
+ComputeComponent.prototype.filterCompute = function (contract, dataPrint, data) {
+  console.log('COMPUTE----COMPONENT')
+  // console.log(contract)
+  // console.log(dataPrint)
+  let computeState = this.liveComputeSystem.computationSystem(contract, dataPrint, data)
+  this.compute = computeState
   return this.compute
 }
 

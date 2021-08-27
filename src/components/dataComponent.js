@@ -60,36 +60,35 @@ DataComponent.prototype.sourceData = async function (source, dataAPI, contract, 
 * @method DataControlFlow
 *
 */
-DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, device, datatype, time) {
-  let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, device, datatype, time)
+DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, dataPrint) {
+  let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
   console.log('databackRAW------------')
   console.log(dataRback.length)
-  this.dataRaw[time] = dataRback
-
+  this.dataRaw[dataPrint.triplet.timeout] = dataRback
   let catFlag = false
   // is there data?
   if (dataRback.length > 0) {
     // is there a categories filter to apply?
     if (contract.value.info.settings.category !== 'none') {
-      this.CategoriseData(source, dataAPI.category, contract, device, datatype, time)
+      this.CategoriseData(source, dataAPI.category, contract, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
       catFlag = true
     } else {
       catFlag = false
-      this.categoryData[time] = dataRback
+      this.categoryData[dataPrint.triplet.timeout] = dataRback
     }
     // is there any data tidying required
     if (source.tidydt.status !== 'none') {
-      this.TidyData(source, contract, device, datatype, time)
+      this.TidyData(source, contract, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
     } else {
       if (catFlag === true) {
         // was category data but no tidy
-        this.tidyData[time] = this.categoryData[time]
+        this.tidyData[dataPrint.triplet.timeout] = this.categoryData[dataPrint.triplet.timeout]
       } else {
         // no category or tidy data
-        this.tidyData[time] = dataRback
+        this.tidyData[dataPrint.triplet.timeout] = dataRback
       }
     }
-    let dataMatch = this.FilterDownDT(source, contract, device, datatype, time)
+    let dataMatch = this.FilterDownDT(source, contract, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
   }
   return true
 }
@@ -135,7 +134,11 @@ DataComponent.prototype.FilterDownDT = function (source, contract, device, datat
   dataID.device = device
   dataID.datatype = datatype
   dataID.time = time
+  console.log('DATACOMP---form hashDATAprint')
+  console.log(dataID)
   let datauuid = hashObject(dataID)
+  console.log(datauuid)
+  console.log(tidyDataG[0])
   this.liveData[datauuid] = tidyDataG
   return true
 }

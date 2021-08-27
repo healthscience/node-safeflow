@@ -36,22 +36,20 @@ StatisticsSystem.prototype.statisticsSystem = function () {
 * @method averageStatistics
 *
 */
-StatisticsSystem.prototype.averageStatistics = function (dataArray) {
+StatisticsSystem.prototype.averageStatistics = function (dataArray, datatype) {
   // statistical avg. has the compute been validated? trubit to ZNP, self certified???
-  // console.log('datato average')
-  // console.log(dataArray)
-  let AvgHolder = {}
+  let avgHolder = {}
   let numberEntries = dataArray.length
   // accumulate sum the daily data
-  let sum = dataArray.reduce(add, 0)
-  function add (a, b) {
-    return a + b
-  }
+  // let sum = dataArray.reduce(add, 0)
+  let sum = dataArray.reduce(function (total, currentValue) {
+    return total + currentValue[datatype]
+  }, 0)
   let averageResult = sum / numberEntries
   let roundAverage = Math.round(averageResult)
-  AvgHolder.count = numberEntries
-  AvgHolder.average = roundAverage
-  return AvgHolder
+  avgHolder.count = numberEntries
+  avgHolder.average = roundAverage
+  return avgHolder
 }
 
 /**
