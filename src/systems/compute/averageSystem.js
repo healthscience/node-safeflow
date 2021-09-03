@@ -59,7 +59,7 @@ AverageSystem.prototype.averageSystemStart = function (contract, dataPrint, data
     formData[dataPrint.couple.triplet.datatype] = saveReady.average
     saveJSON.push(formData)
   } else {
-    console.log('no data presented to compute')
+    console.log('AVG--system-no data presented to compute')
     saveJSON = {}
   }
   return saveJSON

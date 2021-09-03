@@ -26,6 +26,7 @@ var TimeComponent = function (setIN) {
   this.timerange = []
   this.lastactiveStartTime = 0
   this.history = []
+  this.sourceTime = []
 }
 
 /**
@@ -86,6 +87,15 @@ TimeComponent.prototype.setLastTimeperiod = function (laststarttime) {
 */
 TimeComponent.prototype.setTimeList = function (liveDate) {
   this.history.push(liveDate.startperiod)
+}
+
+/**
+*  keep list of timePeriods that data has been asked for
+* @method setSourceTime
+*
+*/
+TimeComponent.prototype.setSourceTime = function (sourcetime) {
+  this.sourceTime.push(sourcetime)
 }
 
 /**
