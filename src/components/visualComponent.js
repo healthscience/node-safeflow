@@ -331,6 +331,14 @@ VisualComponent.prototype.buildMultiDataset = function (dataList, type, inputHas
     this.dataPrintHolder[inputHash] = []
   } else {
     console.log('no data for this deivce group')
+    let visData = {}
+    visData.data = 'none'
+    visData.context = dataPrint
+    visData.list = this.liveVislist
+    this.visualData[inputHash] = visData
+    // reset the datasetHolder
+    this.datasetHolder[inputHash] = []
+    this.dataPrintHolder[inputHash] = []
   }
   return true
 }

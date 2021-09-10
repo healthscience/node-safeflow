@@ -372,15 +372,15 @@ EntitiesManager.prototype.flowMany = async function (shellID, inputUUID, compute
   // console.log(ecsInput.flowstate)
   // console.log(this.liveSEntities[shellID].liveDeviceC.devices)
   // NB  TEMP LIMIT Device to ONE TO HELP DEGUG and TEST  TO BE REMOVED
-  let tempDevices = []
+  /* let tempDevices = []
   for (let deviceLimit of this.liveSEntities[shellID].liveDeviceC.devices) {
     if (deviceLimit.device_mac === 'DA:51:39:7B:C1:87') {
       tempDevices.push(deviceLimit)
     }
-    /* if (deviceLimit.device_mac === 'D3:CE:05:E9:38:74') {
+   if (deviceLimit.device_mac === 'D3:CE:05:E9:38:74') {
       tempDevices.push(deviceLimit)
-    } */
-  }
+    }
+  } */
   // look at compute context flag and set datatypes and time as required
   // let datatypeList = []
   let timeList = []
@@ -398,9 +398,10 @@ EntitiesManager.prototype.flowMany = async function (shellID, inputUUID, compute
   // console.log(this.liveSEntities[shellID].liveDatatypeC.datatypesLive)
   // console.log(this.liveSEntities[shellID].liveTimeC.timerange)
   // is a range of devices, datatype or time ranges and single or multi display?
+  console.log(ecsInput.flowState)
   if (ecsInput.flowstate.devicerange === true && ecsInput.flowstate.datatyperange === true && ecsInput.flowstate.timerange === true) {
     // console.log('passed logic for loop')
-    for (let device of tempDevices) { // {this.liveSEntities[shellID].liveDeviceC.devices) {  this.liveSEntities[shellID].liveDeviceC.devices) {
+    for (let device of this.liveSEntities[shellID].liveDeviceC.devices) { // tempDevices) {
       // reset expect count (incase something didnt clear)
       if (computeFlag === false) {
         this.liveSEntities[shellID].liveVisualC.clearDeviceCount(device)
