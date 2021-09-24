@@ -43,6 +43,7 @@ ChartOptions.prototype.prepareChartOptions = function (title, scale) {
     {
       labels: {
         // This more specific font property overrides the global property
+        display: true,
         fontColor: 'black',
         fontSize: 16
       }

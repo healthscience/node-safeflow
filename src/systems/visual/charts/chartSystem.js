@@ -92,27 +92,121 @@ ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, res
 * @method structureMulitChartData
 *
 */
-ChartSystem.prototype.structureMulitChartData = function (dataSet) {
+ChartSystem.prototype.structureMulitChartData = function (dataPrint, dataSet, sourceData, dataPrints) {
   let singleMulti = {}
-  let aggDatasets = []
-  let aggLabels = []
-  // build new x-axis dataset i.e. timeseries order
-  for (let cda of dataSet) {
-    aggLabels.push(cda.data.chartPackage.labels)
-    aggDatasets.push(cda.data.chartPackage.datasets)
+  // need to analysis datatype numbers and time to decide if overlay of seperate datatypes over time is needed?
+  let extractContext = []
+  for (let dps of dataPrints) {
+    extractContext.push(dps.triplet)
   }
-  // add to y-axis list of datasets
-  let newTSLabel = this.prepareTimeseriesLabels(aggLabels)
-  let newDataset = this.prepareDatasetData(aggDatasets)
-  // allocate a new color for the dataset
-  // let setColourUpdate = this.setColourDataset(dataSet.data.chartPackage.data.chartPackage.datasets[0])
-  // update chartOptions ie. title, legends, scale if needed etc.
-  let newOptions = this.updateOptions(dataSet)
-  singleMulti.chartOptions = newOptions
-  singleMulti.chartPackage = {}
-  singleMulti.chartPackage.labels = newTSLabel
-  singleMulti.chartPackage.datasets = newDataset
+  let extractDT = []
+  for (let dt of dataPrints) {
+    extractDT.push(dt.triplet.datatype)
+  }
+  let uniqueDT = [...new Set(extractDT)]
+  let timeLogicLength = true
+  let dtLogicLength = true
+  // pull together logics and build dataset for visualisation
+  if (timeLogicLength === true) {
+    console.log('more than day to prepare')
+    if (dtLogicLength === true) {
+      console.log('longer time and longer dt than one')
+      let timeseriesDatasetHolder = []
+      let timeseriesLabelHolder = []
+      let timeseriesHolder = []
+      // release dataset for each time period and then aggregate to gether to return
+      for (let dti of uniqueDT) {
+        let dtDataset = this.extractDTDataset(dti, dataSet, sourceData)
+        timeseriesDatasetHolder.push(dtDataset)
+      }
+      // aggregate and prepare all the label data
+      let allLabels = []
+      for (let labext of timeseriesDatasetHolder) {
+        for (let dspair of labext.sourceData) {
+          for (let eleTime of dspair.data)
+          allLabels.push(eleTime['d6432e905c50764b93b5e685c182b23ff5352a07'])
+        }
+      }
+      console.log('alltime labls')
+      console.log(allLabels)
+      console.log('unqiue labls')
+      let unqiueTimeLabel = [...new Set(allLabels)]
+      console.log(unqiueTimeLabel.length)
+      console.log(unqiueTimeLabel)
+      // with both time label merged proceed to datasets
+      let dtcount = 0
+      let prepardTSdatasets = []
+      for (let dttts of timeseriesDatasetHolder) {
+        let datatype = uniqueDT[dtcount]
+        dataPrint.triplet.datatype = datatype
+        prepardTSdatasets.push(this.structureTimeOverlayDataset(dataPrint, unqiueTimeLabel, dttts, dataPrints))
+        dtcount++
+      }
+      // console.log('time series datsets parepared')
+      // Wconsole.log(prepardTSdatasets)
+      let dataSetList = []
+      for (let dsbundle of prepardTSdatasets) {
+        dataSetList.push(dsbundle.datasets)
+      }
+      let newOptions = this.updateChartOptions(timeseriesDatasetHolder[0].datasets)
+      singleMulti.chartOptions = newOptions
+      singleMulti.chartPackage = {}
+      singleMulti.chartPackage.labels = unqiueTimeLabel
+      singleMulti.chartPackage.datasets = this.prepareColourTSList(dataSetList)
+    } else {
+      console.log('single time and datatype')
+    }
+  } else {
+    console.log('single day')
+    if (dtLogicLength === true) {
+      console.log('single data but many data types')
+    } else {
+      console.log('single time and single datatype')
+    }
+  }
   return singleMulti
+}
+
+/**
+*
+* @method extract the dataset for this time
+*
+*/
+ChartSystem.prototype.extractTimeDataset = function (timeR, dataSet) {
+  let datasetHolder = []
+  for (let ds of dataSet) {
+    if (ds.context.triplet.timeout === timeR) {
+      datasetHolder.push(ds)
+    }
+  }
+  return datasetHolder
+}
+
+/**
+* datatype per time period of datasets
+* @method extractDTDataset
+*
+*/
+ChartSystem.prototype.extractDTDataset = function (dtR, dataSet, sourceData) {
+  let dataHolder = {}
+  let datasetHolder = []
+  let sourceHolder = []
+  for (let ds of dataSet) {
+    let dataSource = {}
+    if (ds.context.triplet.datatype === dtR) {
+      datasetHolder.push(ds)
+    }
+  }
+  // match source data
+  for (let ds of sourceData) {
+    let dataSource = {}
+    if (ds.context.triplet.datatype === dtR) {
+      sourceHolder.push(ds)
+    }
+  }
+  dataHolder.datasets = datasetHolder
+  dataHolder.sourceData = sourceHolder
+  return dataHolder
 }
 
 /**
@@ -120,12 +214,11 @@ ChartSystem.prototype.structureMulitChartData = function (dataSet) {
 * @method prepareTimeseriesLabels
 *
 */
-ChartSystem.prototype.prepareTimeseriesLabels = function (labelsIN) {
+ChartSystem.prototype.prepareTimeseriesLabels = function (existingLabel, labelsIN) {
   let uniqueXaxis = []
   for (let lab of labelsIN) {
     let flatten = [...lab, ...uniqueXaxis]
     uniqueXaxis = flatten
-    // uniqueXaxis.sort((a,b) => a-b)
   }
   let timeNumber = []
   for (let tm of uniqueXaxis) {
@@ -138,9 +231,52 @@ ChartSystem.prototype.prepareTimeseriesLabels = function (labelsIN) {
   // format for time language
   let newSortedTime = []
   newSortedTime = this.prepareLabelchart(timeNumber)
+  console.log('dt time label new')
+  console.log(newSortedTime.length)
+  console.log('exsing')
+  console.log(existingLabel.length)
+  //  merge the two data sets and keep uniques
+  let meragePrevious = [...existingLabel, ...newSortedTime]
+  let newUniqueLabel = [...new Set(meragePrevious)]
+  return newUniqueLabel
+}
+
+/**
+* array of timer order past to present
+* @method prepareLabelList
+*
+*/
+ChartSystem.prototype.prepareLabelList = function (labelsIN) {
+  let uniqueLabel = [...new Set(labelsIN)]
+  let timeNumber = []
+  for (let tm of uniqueLabel) {
+    let numDate = new Date(tm)
+    let tnum = moment(numDate).valueOf()
+    timeNumber.push(tnum)
+  }
+  // sort order
+  timeNumber.sort((a,b) => a-b)
+  // format for time language
+  let newSortedTime = []
+  newSortedTime = this.prepareLabelchart(timeNumber)
   return newSortedTime
 }
 
+/**
+*
+* @method prepareColourTSList
+*
+*/
+ChartSystem.prototype.prepareColourTSList = function (datasetsIN) {
+  let colorsUpdated = []
+  let count = 0
+  for (let ds of datasetsIN) {
+    ds.borderColor = this.colourList(ds.borderColor, count)
+    colorsUpdated.push(ds)
+    count++
+  }
+  return colorsUpdated
+}
 /**
 *  merge list of datasets
 * @method prepareDatasetData
@@ -162,17 +298,67 @@ ChartSystem.prototype.prepareDatasetData = function (dataSetsIN) {
 
 /**
 *  update title and legends and other options for muilt data set
-* @method updateOptions
+* @method updateChartOptions
 *
 */
-ChartSystem.prototype.updateOptions = function (dataIN) {
+ChartSystem.prototype.updateChartOptions = function (dataIN) {
   let updateOptions = {}
   for (let dopt of dataIN) {
     updateOptions = dopt.data.chartOptions
   }
   let oldTitle = updateOptions.title.text
-  updateOptions.title.text = oldTitle + ' overlay'
+  updateOptions.title.text = oldTitle + ' time series'
   return updateOptions
+}
+
+/**
+* pairs of datatype per same time period
+* @method structureTimeOverlayDataset
+*
+*/
+ChartSystem.prototype.structureTimeOverlayDataset = function (dataPrint, timeLabels, dataSets, dataPrints) {
+  console.log('TSOveralyDS')
+  let aggDatasource = []
+  let newDataset = []
+  // build new x-axis dataset i.e. timeseries order
+  for (let cda of dataSets.sourceData) {
+    aggDatasource.push(cda.data)
+  }
+  console.log('data but need to kep in time oereredferecer')
+  // console.log(aggDatasource)
+  let mergeSource = []
+  /* for (let join of aggDatasource) {
+    console.log(join.length)
+    mergeSource = [...mergeSource, ...join]
+  } */
+  mergeSource = aggDatasource.flat()
+  // console.log(mergeSource.pop())
+  // ensure time integrity
+  /* let timeSorted = mergeSource.sort((a,b) => {
+    return a['d6432e905c50764b93b5e685c182b23ff5352a07'] - b['d6432e905c50764b93b5e685c182b23ff5352a07']})
+  console.log('timesorted')
+  console.log(timeSorted.length) */
+  // package pairs
+  newDataset = this.prepareTimeseriesDatasetData(dataPrint, timeLabels, dataSets.datasets, mergeSource)
+  let dataPairs = {}
+  dataPairs.labels = newDataset.labels
+  dataPairs.datasets = newDataset
+  return dataPairs
+}
+
+/**
+*  time series pairing of time and datasets into vis arrays
+* @method prepareTimeseriesDatasetData
+*
+*/
+ChartSystem.prototype.prepareTimeseriesDatasetData = function (dataPrint, timeLabels, aggDatasets, sourceDataIN) {
+  let newDataset = {}
+  let datasetStructure = aggDatasets[0].data.chartPackage.datasets[0]
+  let normalisedTSMatch = this.timestampMatcherTS(dataPrint, timeLabels, sourceDataIN)
+  // now pad out for x axis ie time labels
+  datasetStructure.data = normalisedTSMatch
+  newDataset = datasetStructure
+  return newDataset
 }
 
 /**
@@ -193,7 +379,7 @@ ChartSystem.prototype.structureOverlayChartData = function (dataPrint, dataSets,
   let newOLlabels = this.prepareOverlayLabels(aggLabels)
   let newDataset = this.prepareOverlayDatasetData(dataPrint, newOLlabels, aggDatasets, sourceData, dataPrints)
   // update chartOptions ie. title, legends, scale if needed etc.
-  let newOptions = this.updateOptions(dataSets)
+  let newOptions = this.updateChartOptions(dataSets)
   overlayDataset.chartOptions = newOptions
   overlayDataset.chartPackage = {}
   overlayDataset.chartPackage.labels = newOLlabels
@@ -209,7 +395,7 @@ ChartSystem.prototype.structureOverlayChartData = function (dataPrint, dataSets,
 ChartSystem.prototype.prepareOverlayLabels = function (labelsIN) {
   let numberTimeHolder = []
   for (let label of labelsIN) {
-    let numtime = this.textDatetoNumberFormat(label) // this.prepareLabelchart(label)
+    let numtime = this.textDatetoNumberFormat(label)
     numberTimeHolder.push(numtime)
   }
   let normaliseLabel = []
@@ -253,7 +439,7 @@ ChartSystem.prototype.prepareOverlayDatasetData = function (dataPrint, labels, d
     let chartBundle = dsc[0]
     chartBundle.data = newDatasets[countDS] // need to match to right dataset
     // chartBundle.fillColor = this.colourList(chartBundle.fillColor)
-     chartBundle.borderColor = this.colourList(chartBundle.borderColor)
+     chartBundle.borderColor = this.colourList(chartBundle.borderColor, countDS)
     newChartDataset.push(chartBundle)
     countDS++
   }
@@ -306,7 +492,7 @@ ChartSystem.prototype.mergeLabelData = function (baseLabel, newLabel) {
 *
 */
 ChartSystem.prototype.timestampMatcher = function (dataPrint, mergedLabel, dataIN) {
-  // padd out each exising dataset y
+  // pad out each exising dataset y
   // check if dataset of right length if not padd the dataset
   let matchList = []
   let dataTimeText = this.textDatetoNumberFormatDataset(dataIN)
@@ -321,6 +507,34 @@ ChartSystem.prototype.timestampMatcher = function (dataPrint, mergedLabel, dataI
       matchList.push(null)
     }
   }
+  return matchList
+}
+
+/**
+*  timestamp padding to unify array data with nulls
+* @method timestampMatcherTS
+*
+*/
+ChartSystem.prototype.timestampMatcherTS = function (dataPrint, timeLabels, dataIN) {
+  // pad out each exising dataset y
+  // check if dataset of right length if not padd the dataset
+  let matchList = []
+  let count = 0
+  // check per existing datasets
+  for (let timePoint of timeLabels) {
+    let matchLogic = dataIN.find(elem => elem['d6432e905c50764b93b5e685c182b23ff5352a07'] === timePoint)
+    if (matchLogic) {
+      matchList.push(matchLogic[dataPrint.triplet.datatype])
+    } else {
+      matchList.push(null)
+    }
+    count++
+  }
+  // let dataTimeText = this.textDatetoNumberFormatDatasetTS(dataIN)
+  /* console.log('time now in number format')
+  console.log(dataTimeText.length)
+  console.log(dataTimeText[0])
+  console.log(dataTimeText[(dataTimeText.length-1)]) */
   return matchList
 }
 
@@ -357,28 +571,34 @@ ChartSystem.prototype.setColourDataset = function (dataSet) {
 * @method colourList
 *
 */
-ChartSystem.prototype.colourList = function (colorIN) {
+ChartSystem.prototype.colourList = function (colorIN, position) {
   // let colourRGB = ['rgb(255, 99, 132)', 'rgb(37, 56, 70)', 'rgb(45, 119, 175)', 'rgb(0, 100, 0)', 'rgb(41, 20, 80)', 'rgb(46, 143, 22)', 'rgb(38,15,187)', 'rgb(255, 20, 147)']
-  let baseColours = ['rgb(255, 0, 0)', 'rgb(255, 20, 147)', 'rgb(255, 140, 0)', 'rgb(255, 215, 0)', 'rgb(0, 128, 0)', 'rgb(0, 0, 255)', 'rgb(128, 0, 128)', 'rgb(128, 128, 128)', 'rgb(0, 0, 0)']
-  let max = 9
-  let min = 0
-  let colorNumber = Math.floor(Math.random() * (max - min + 1)) + min
-  let selectColour = baseColours[colorNumber]
-  // check color has not been used before
+  let baseColours = ['rgb(211, 4, 4)', 'rgb(13, 28, 104)', 'rgb(255, 0, 0)', 'rgb(255, 20, 147)', 'rgb(255, 140, 0)', 'rgb(255, 215, 0)', 'rgb(0, 128, 0)', 'rgb(0, 0, 255)', 'rgb(128, 0, 128)', 'rgb(128, 128, 128)', 'rgb(0, 0, 0)']
   let passedCheck = ''
-  if (selectColour !== colorIN) {
-    passedCheck = selectColour
+  if (position === 0) {
+    passedCheck = baseColours[0]
+  } else if (position === 1) {
+    passedCheck = baseColours[1]
   } else {
-    // select another color
+    let max = 9
+    let min = 0
     let colorNumber = Math.floor(Math.random() * (max - min + 1)) + min
     let selectColour = baseColours[colorNumber]
-    passedCheck = selectColour
+    // check color has not been used before
+    if (selectColour !== colorIN) {
+      passedCheck = selectColour
+    } else {
+      // select another color
+      let colorNumber = Math.floor(Math.random() * (max - min + 1)) + min
+      let selectColour = baseColours[colorNumber]
+      passedCheck = selectColour
+    }
   }
-  let r = 10
+  /* let r = 10
   let g = 80
   let b = 200
   const rgb = (r, g, b) => `rgb(${Math.floor(r)},${Math.floor(g)},${Math.floor(b)})`
-  let rcolor = rgb(r, g, b)
+  let rcolor = rgb(r, g, b) */
   return passedCheck
 }
 
@@ -395,18 +615,6 @@ ChartSystem.prototype.mergeLabelDataOLD = function (longLabel, liveData, newData
   uniqueXaxis.push(flatten.filter((v, i, a) => a.indexOf(v) === i))
   // }
   return uniqueXaxis
-}
-
-/**
-*  prepar x axis multi chart same units
-* @method normaliseLabels
-*
-*/
-ChartSystem.prototype.normaliseLabels = function (labelList) {
-  let normaliseList = []
-  for (let ll of labelList) {
-  }
-  return normaliseList
 }
 
 /**
@@ -479,6 +687,27 @@ ChartSystem.prototype.textDatetoNumberFormatDataset = function (labelIN) {
 }
 
 /**
+* convert time text to number
+* @method textDatetoNumberFormat
+*
+*/
+ChartSystem.prototype.textDatetoNumberFormatDatasetTS = function (labelIN) {
+  let timePrep = []
+  for (let li of labelIN) {
+    let fullTime = li['d6432e905c50764b93b5e685c182b23ff5352a07'] * 1000
+    // let numDate = new Date(fullTime)
+    //let timeFormat = moment(numDate).valueOf() // format('YYYY-MM-DD HH:mm').valueOf()  // .format('YYYY-MM-DD hh:mm')
+    timePrep.push(fullTime)
+  }
+  // ensure time order entegrity
+  /* timePrep.sort((a,b) => a-b)
+  console.log('time prep')
+  console.log(timePrep[0])
+  console.log(timePrep[(timePrep.length - 1)]) */
+  return timePrep
+}
+
+/**
 * prepare the x axis data array
 * @method prepareLabelchart
 *
@@ -535,34 +764,6 @@ ChartSystem.prototype.chartColors = function (datatypeItem) {
     colorHolder.datatype = 'temperature'
     colorHolder.backgroundColor = '#ed7d7d'
     colorHolder.borderColor = '#ea1212'
-  }
-  return colorHolder
-}
-
-/**
-* prepare average chart colors
-* @method StatschartColors
-*
-*/
-ChartSystem.prototype.StatschartColors = function (datatypeItem) {
-  let colorHolder = {}
-  // LOOP over datatypeList and prepare chart colors
-  if (datatypeItem.cnrl === 'cnrl-8856388724') {
-    colorHolder.datatype = 'cnrl-8856388724'
-    colorHolder.backgroundColor = '#203487'
-    colorHolder.borderColor = '#050d2d'
-  } else if (datatypeItem.cnrl === 'cnrl-8856388322') {
-    colorHolder.datatype = 'cnrl-8856388322'
-    colorHolder.backgroundColor = '#ed7d7d'
-    colorHolder.borderColor = '#ea1212'
-  } else if (datatypeItem.cnrl === 'cnrl-8856388924') {
-    colorHolder.datatype = 'cnrl-8856388924'
-    colorHolder.backgroundColor = '#203487'
-    colorHolder.borderColor = '#203487'
-  } else if (datatypeItem.cnrl === 'cnrl-8856389322') {
-    colorHolder.datatype = 'cnrl-8856389322'
-    colorHolder.backgroundColor = '#444b57'
-    colorHolder.borderColor = '#444b57'
   }
   return colorHolder
 }
