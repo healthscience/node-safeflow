@@ -108,9 +108,7 @@ ChartSystem.prototype.structureMulitChartData = function (dataPrint, dataSet, so
   let dtLogicLength = true
   // pull together logics and build dataset for visualisation
   if (timeLogicLength === true) {
-    console.log('more than day to prepare')
     if (dtLogicLength === true) {
-      console.log('longer time and longer dt than one')
       let timeseriesDatasetHolder = []
       let timeseriesLabelHolder = []
       let timeseriesHolder = []
@@ -124,34 +122,28 @@ ChartSystem.prototype.structureMulitChartData = function (dataPrint, dataSet, so
       for (let labext of timeseriesDatasetHolder) {
         for (let dspair of labext.sourceData) {
           for (let eleTime of dspair.data)
-          allLabels.push(eleTime['d6432e905c50764b93b5e685c182b23ff5352a07'])
+          allLabels.push(eleTime['2d11318841f43034df41de9b38ab5e77b6b01bcf'])
         }
       }
-      console.log('alltime labls')
-      console.log(allLabels)
-      console.log('unqiue labls')
-      let unqiueTimeLabel = [...new Set(allLabels)]
-      console.log(unqiueTimeLabel.length)
-      console.log(unqiueTimeLabel)
-      // with both time label merged proceed to datasets
+      let uniqueTimeLabel = [...new Set(allLabels)]
+      // ensure time integrity
+      uniqueTimeLabel.sort((a,b) => a-b)
       let dtcount = 0
       let prepardTSdatasets = []
       for (let dttts of timeseriesDatasetHolder) {
         let datatype = uniqueDT[dtcount]
         dataPrint.triplet.datatype = datatype
-        prepardTSdatasets.push(this.structureTimeOverlayDataset(dataPrint, unqiueTimeLabel, dttts, dataPrints))
+        prepardTSdatasets.push(this.structureTimeOverlayDataset(dataPrint, uniqueTimeLabel, dttts, dataPrints))
         dtcount++
       }
-      // console.log('time series datsets parepared')
-      // Wconsole.log(prepardTSdatasets)
       let dataSetList = []
       for (let dsbundle of prepardTSdatasets) {
         dataSetList.push(dsbundle.datasets)
       }
-      let newOptions = this.updateChartOptions(timeseriesDatasetHolder[0].datasets)
+      let newOptions = this.updateChartOptions(timeseriesDatasetHolder[0].datasets, 'time series')
       singleMulti.chartOptions = newOptions
       singleMulti.chartPackage = {}
-      singleMulti.chartPackage.labels = unqiueTimeLabel
+      singleMulti.chartPackage.labels = prepardTSdatasets[0].labels
       singleMulti.chartPackage.datasets = this.prepareColourTSList(dataSetList)
     } else {
       console.log('single time and datatype')
@@ -231,10 +223,6 @@ ChartSystem.prototype.prepareTimeseriesLabels = function (existingLabel, labelsI
   // format for time language
   let newSortedTime = []
   newSortedTime = this.prepareLabelchart(timeNumber)
-  console.log('dt time label new')
-  console.log(newSortedTime.length)
-  console.log('exsing')
-  console.log(existingLabel.length)
   //  merge the two data sets and keep uniques
   let meragePrevious = [...existingLabel, ...newSortedTime]
   let newUniqueLabel = [...new Set(meragePrevious)]
@@ -301,13 +289,13 @@ ChartSystem.prototype.prepareDatasetData = function (dataSetsIN) {
 * @method updateChartOptions
 *
 */
-ChartSystem.prototype.updateChartOptions = function (dataIN) {
+ChartSystem.prototype.updateChartOptions = function (dataIN, type) {
   let updateOptions = {}
   for (let dopt of dataIN) {
     updateOptions = dopt.data.chartOptions
   }
   let oldTitle = updateOptions.title.text
-  updateOptions.title.text = oldTitle + ' time series'
+  updateOptions.title.text = oldTitle + ' ' + type
   return updateOptions
 }
 
@@ -317,31 +305,20 @@ ChartSystem.prototype.updateChartOptions = function (dataIN) {
 *
 */
 ChartSystem.prototype.structureTimeOverlayDataset = function (dataPrint, timeLabels, dataSets, dataPrints) {
-  console.log('TSOveralyDS')
   let aggDatasource = []
   let newDataset = []
   // build new x-axis dataset i.e. timeseries order
   for (let cda of dataSets.sourceData) {
     aggDatasource.push(cda.data)
   }
-  console.log('data but need to kep in time oereredferecer')
-  // console.log(aggDatasource)
   let mergeSource = []
-  /* for (let join of aggDatasource) {
-    console.log(join.length)
-    mergeSource = [...mergeSource, ...join]
-  } */
   mergeSource = aggDatasource.flat()
-  // console.log(mergeSource.pop())
-  // ensure time integrity
-  /* let timeSorted = mergeSource.sort((a,b) => {
-    return a['d6432e905c50764b93b5e685c182b23ff5352a07'] - b['d6432e905c50764b93b5e685c182b23ff5352a07']})
-  console.log('timesorted')
-  console.log(timeSorted.length) */
   // package pairs
   newDataset = this.prepareTimeseriesDatasetData(dataPrint, timeLabels, dataSets.datasets, mergeSource)
+  // time converted to text
+  let updateTimeList = this.prepareLabelchartTS(timeLabels)
   let dataPairs = {}
-  dataPairs.labels = newDataset.labels
+  dataPairs.labels = updateTimeList
   dataPairs.datasets = newDataset
   return dataPairs
 }
@@ -379,7 +356,7 @@ ChartSystem.prototype.structureOverlayChartData = function (dataPrint, dataSets,
   let newOLlabels = this.prepareOverlayLabels(aggLabels)
   let newDataset = this.prepareOverlayDatasetData(dataPrint, newOLlabels, aggDatasets, sourceData, dataPrints)
   // update chartOptions ie. title, legends, scale if needed etc.
-  let newOptions = this.updateChartOptions(dataSets)
+  let newOptions = this.updateChartOptions(dataSets, 'overlay')
   overlayDataset.chartOptions = newOptions
   overlayDataset.chartPackage = {}
   overlayDataset.chartPackage.labels = newOLlabels
@@ -453,7 +430,7 @@ ChartSystem.prototype.prepareOverlayDatasetData = function (dataPrint, labels, d
 */
 ChartSystem.prototype.structureChartData = function (rule, cData, dtConvert) {
   let dataPrep = {}
-  let splitDatax = cData.map(n => (n['d6432e905c50764b93b5e685c182b23ff5352a07'] * 1000))
+  let splitDatax = cData.map(n => (n['2d11318841f43034df41de9b38ab5e77b6b01bcf'] * 1000))
   let splitDatay = cData.map(n => n[rule])
   dataPrep.xaxis = splitDatax
   dataPrep.yaxis = splitDatay
@@ -522,7 +499,7 @@ ChartSystem.prototype.timestampMatcherTS = function (dataPrint, timeLabels, data
   let count = 0
   // check per existing datasets
   for (let timePoint of timeLabels) {
-    let matchLogic = dataIN.find(elem => elem['d6432e905c50764b93b5e685c182b23ff5352a07'] === timePoint)
+    let matchLogic = dataIN.find(elem => elem['2d11318841f43034df41de9b38ab5e77b6b01bcf'] === timePoint)
     if (matchLogic) {
       matchList.push(matchLogic[dataPrint.triplet.datatype])
     } else {
@@ -530,11 +507,6 @@ ChartSystem.prototype.timestampMatcherTS = function (dataPrint, timeLabels, data
     }
     count++
   }
-  // let dataTimeText = this.textDatetoNumberFormatDatasetTS(dataIN)
-  /* console.log('time now in number format')
-  console.log(dataTimeText.length)
-  console.log(dataTimeText[0])
-  console.log(dataTimeText[(dataTimeText.length-1)]) */
   return matchList
 }
 
@@ -678,7 +650,7 @@ ChartSystem.prototype.textDatetoNumberFormat = function (labelIN) {
 ChartSystem.prototype.textDatetoNumberFormatDataset = function (labelIN) {
   let timePrep = []
   for (let li of labelIN) {
-    let fullTime = li['d6432e905c50764b93b5e685c182b23ff5352a07'] * 1000
+    let fullTime = li['2d11318841f43034df41de9b38ab5e77b6b01bcf'] * 1000
     let numDate = new Date(fullTime)
     let timeFormat = moment(numDate).format('HH:mm').valueOf()  // .format('YYYY-MM-DD hh:mm')
     timePrep.push(timeFormat)
@@ -694,16 +666,11 @@ ChartSystem.prototype.textDatetoNumberFormatDataset = function (labelIN) {
 ChartSystem.prototype.textDatetoNumberFormatDatasetTS = function (labelIN) {
   let timePrep = []
   for (let li of labelIN) {
-    let fullTime = li['d6432e905c50764b93b5e685c182b23ff5352a07'] * 1000
+    let fullTime = li['2d11318841f43034df41de9b38ab5e77b6b01bcf'] * 1000
     // let numDate = new Date(fullTime)
     //let timeFormat = moment(numDate).valueOf() // format('YYYY-MM-DD HH:mm').valueOf()  // .format('YYYY-MM-DD hh:mm')
     timePrep.push(fullTime)
   }
-  // ensure time order entegrity
-  /* timePrep.sort((a,b) => a-b)
-  console.log('time prep')
-  console.log(timePrep[0])
-  console.log(timePrep[(timePrep.length - 1)]) */
   return timePrep
 }
 
@@ -718,6 +685,23 @@ ChartSystem.prototype.prepareLabelchart = function (labelIN) {
   for (let li of labelIN) {
     let timeFormat = moment(li).toDate()  // .format('YYYY-MM-DD hh:mm')
     let tsimp = moment(timeFormat).format('llll')
+    timePrep.push(tsimp)
+  }
+  return timePrep
+}
+
+/**
+* prepare the x axis data array
+* @method prepareLabelchart
+*
+*/
+ChartSystem.prototype.prepareLabelchartTS = function (labelIN) {
+  let timePrep = []
+  let count = 1
+  for (let li of labelIN) {
+    let unixtime = li * 1000
+    let timeFormat = moment(unixtime).toDate()  // .format('YYYY-MM-DD hh:mm')
+    let tsimp = moment(timeFormat).format('MM-DD kk:mm')
     timePrep.push(tsimp)
   }
   return timePrep

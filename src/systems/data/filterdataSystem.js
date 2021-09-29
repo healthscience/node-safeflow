@@ -44,7 +44,7 @@ FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData
     for (let di of tidyData) {
       let dataPair = {}
       let timestamp = di['timestamp']
-      dataPair['d6432e905c50764b93b5e685c182b23ff5352a07'] = timestamp
+      dataPair['2d11318841f43034df41de9b38ab5e77b6b01bcf'] = timestamp
       let valueC = 0
       if (di[datatype] === null) {
         valueC = null

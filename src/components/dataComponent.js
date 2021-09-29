@@ -61,9 +61,12 @@ DataComponent.prototype.sourceData = async function (source, dataAPI, contract, 
 *
 */
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, dataPrint) {
+  console.log('datacontroflow')
+  // console.log(dataPrint)
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
-  console.log('databackRAW------------')
+  console.log('DATACOMP----databackRAW------------')
   console.log(dataRback.length)
+  // console.log(dataPrint)
   // form unique dataPrint for dataUUID
   let dataID = {}
   dataID.device = dataPrint.triplet.device
@@ -75,7 +78,7 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
   // is there data?
   if (dataRback.length > 0) {
     // is there a categories filter to apply?
-    if (contract.value.info.settings.category !== 'none') {
+    if (contract.value.info.settings.category[0] !== 'none') {
       this.CategoriseData(source, dataAPI.category, contract, datauuid, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
       catFlag = true
     } else {
@@ -84,7 +87,7 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
     }
     // is there any data tidying required
     if (source.tidydt.status !== 'none') {
-      this.TidyData(source, contract, datauuid, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
+      this.TidyDataPrep(source, contract, datauuid, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
     } else {
       if (catFlag === true) {
         // was category data but no tidy
@@ -117,11 +120,11 @@ DataComponent.prototype.CategoriseData = function (apiINFO, catInfo, contract, d
 }
 
 /**
-*
-* @method TidyData
+*  apply rules in api design
+* @method TidyDataPrep
 *
 */
-DataComponent.prototype.TidyData = function (source, contract, datauuid, device, datatype, time) {
+DataComponent.prototype.TidyDataPrep = function (source, contract, datauuid, device, datatype, time) {
   let tidyDataG = {}
   let tidyKeys = Object.keys(source.tidydt)
   if (tidyKeys.length > 0) {

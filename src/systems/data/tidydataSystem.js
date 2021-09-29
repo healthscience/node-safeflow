@@ -42,16 +42,19 @@ TidyDataSystem.prototype.tidyRawData = function (source, contract, device, datat
 TidyDataSystem.prototype.tidyFilterRemove = function (tidyRules, datatype, apiDTinfo, dataRaw) {
   let tidyHolderF = {}
   const manFilter = (e, datatype, rule) => {
-    let filterMat = null
-    for (var i = 0; i < rule.length; i++) {
+    let keepTidy = null
+    let filterMat = []
+    for (var i = 0; i < 1; i++) {
       let convertIntCRule = parseInt(rule[i].tidycode, 10)
       if (e[datatype] !== convertIntCRule) {
-        filterMat = true
+        filterMat.push(false)
       } else {
-        filterMat = false
+        filterMat.push(true)
       }
+      // if includes a false then needs removing
+      keepTidy = filterMat.includes(false)
     }
-    return filterMat
+    return keepTidy
   }
   const newfullData = dataRaw.filter(n => manFilter(n, apiDTinfo.column, tidyRules))
   return newfullData
