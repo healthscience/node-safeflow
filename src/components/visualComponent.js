@@ -113,8 +113,6 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
       }
     }
   }
-  // console.log('deviceDataPrint Count')
-  // console.log(this.deviceCount)
   console.log('expected v live')
   console.log(deviceDataPrintCount.length)
   console.log(this.deviceCount[dataPrint.triplet.device])
@@ -157,11 +155,16 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     let datasetMulti = this.buildMultiDataset(deviceDataPrintCount, timeFormat, inputHash, dataPrint)
     // clear the input tracking this.deviceCount
     this.deviceCount[dataPrint.triplet.device] = 0
-    console.log(this.deviceCount)
-    console.log(this.datasetsOutpattern)
-    console.log(this.liveInputlist)
-    delete this.datasetsOutpattern[inputHash]
-    delete this.liveInputlist[inputHash]
+    // just remove device element unless none left, delete input hash holder
+    console.log(this.datasetsOutpattern[inputHash])
+    this.datasetsOutpattern[inputHash].filter(item => item !== dataPrint.triplet.device)
+    if (this.datasetsOutpattern[inputHash].length === 0 ) {
+      delete this.datasetsOutpattern[inputHash]
+    }
+    delete this.liveInputlist[inputHash][dataPrint.triplet.device]
+    if (this.liveInputlist[inputHash].length === 0) {
+      delete this.liveInputlist[inputHash]
+    }
     this.liveVislist = []
     this.emit('dataout', inputHash)
   } else {
@@ -170,8 +173,11 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     let resultPrint = dataPrint.hash
     // clear the input tracking
     this.deviceCount[dataPrint.triplet.device] = 0
-    // this.datasetsOutpattern[inputHash] = []
-    delete this.datasetsOutpattern[inputHash]
+    // just remove device element unless none left, delete input hash holder
+    this.datasetsOutpattern[inputHash].filter(item => item !== dataPrint.triplet.device)
+    if (this.datasetsOutpattern[inputHash].length === 0 ) {
+      delete this.datasetsOutpattern[inputHash]
+    }
     delete this.liveInputlist[inputHash][dataPrint.triplet.device]
     if (this.liveInputlist[inputHash].length === 0) {
       delete this.liveInputlist[inputHash]
@@ -188,10 +194,10 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
 *
 */
 VisualComponent.prototype.extractVisExpected = function (inputUUID, device) {
-  // console.log('visCOMP--expected extract')
-  // console.log(inputUUID)
-  // console.log(device)
-  // console.log(this.liveInputlist)
+  console.log('visCOMP--expected extract')
+  console.log(inputUUID)
+  console.log(device)
+  console.log(this.liveInputlist)
   // check any inputlist available?
   let inputIndex = Object.keys(this.liveInputlist)
   let matchDataList = []
@@ -256,6 +262,7 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
     // decide to return or go to next vis data to process
     if (deviceDataPrintCount.length !== this.deviceCount[dataPrint.triplet.device]) {
       // not yet keep hold of data to batch
+      console.log('NO--logic 1')
       if (this.datasetHolder[inputHash] === undefined) {
         this.datasetHolder[inputHash] = []
         this.dataPrintHolder[inputHash] = []
@@ -265,32 +272,49 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
       this.dataPrintHolder[inputHash].push(dataPrint)
     } else if (deviceDataPrintCount.length === this.deviceCount[dataPrint.triplet.device] && this.deviceCount[dataPrint.triplet.device] > 1) {
       // bundle of greater than one length ready for dataSet preparation
+      console.log('NO--logic 2')
       let datasetMulti = this.buildMultiDataset(deviceDataPrintCount, timeFormat, inputHash, dataPrint)
       // if batch then create resUUID for the batch
-      this.emit('dataout', inputHash[0], this.liveInputlist)
-      // clear the input tracking this.deviceCount
-      this.deviceCount[dataPrint.triplet.device] = []
-      this.datasetsOutpattern[inputHash] = []
+      this.deviceCount[dataPrint.triplet.device] = 0
+      // just remove device element unless none left, delete input hash holder
+      this.datasetsOutpattern[inputHash].filter(item => item !== dataPrint.triplet.device)
+      if (this.datasetsOutpattern[inputHash].length === 0 ) {
+        delete this.datasetsOutpattern[inputHash]
+      }
+      delete this.liveInputlist[inputHash][dataPrint.triplet.device]
+      if (this.liveInputlist[inputHash].length === 0) {
+        delete this.liveInputlist[inputHash]
+      }
       this.liveVislist = []
+      this.emit('dataout', inputHash[0])
     } else {
+      console.log('NO--logic 3')
       // if batch then create resUUID for the batch
       let resultPrint = dataPrint.hash
-      this.emit('dataout', resultPrint, this.liveInputlist)
       // clear the input tracking
-      this.deviceCount[dataPrint.triplet.device] = []
-      this.datasetsOutpattern[inputHash] = []
-      // this.liveInputlist[inputHash] = {}
-      delete this.liveInputlist[inputHash]
+      this.deviceCount[dataPrint.triplet.device] = 0
       this.liveVislist = []
+      // just remove device element unless none left, delete input hash holder
+      this.datasetsOutpattern[inputHash].filter(item => item !== dataPrint.triplet.device)
+      if (this.datasetsOutpattern[inputHash].length === 0 ) {
+        delete this.datasetsOutpattern[inputHash]
+      }
+      delete this.liveInputlist[inputHash][dataPrint.triplet.device]
+      if (this.liveInputlist[inputHash].length === 0) {
+        delete this.liveInputlist[inputHash]
+      }
+      this.emit('dataout', resultPrint)
     }
   } else {
     // still prepare visual object but flag 'none' data
+    console.log('NOvis--- none bypass logic')
     let visData = {}
     visData.data = 'none'
     visData.context = dataPrint
     visData.list = this.liveVislist
     // hold the data in the entity component
     this.visualData[dataPrint.hash] = visData
+    this.emit('dataout', 'empty')
   }
 }
 
