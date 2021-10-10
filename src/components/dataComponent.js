@@ -61,8 +61,6 @@ DataComponent.prototype.sourceData = async function (source, dataAPI, contract, 
 *
 */
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, dataPrint) {
-  console.log('datacontroflow')
-  // console.log(dataPrint)
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
   console.log('DATACOMP----databackRAW------------')
   console.log(dataRback.length)
@@ -74,16 +72,17 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
   dataID.time = dataPrint.triplet.timeout
   let datauuid = hashObject(dataID)
   this.dataRaw[datauuid] = dataRback
+  dataRback = []
   let catFlag = false
   // is there data?
-  if (dataRback.length > 0) {
+  if (this.dataRaw[datauuid].length > 0) {
     // is there a categories filter to apply?
     if (contract.value.info.settings.category[0] !== 'none') {
       this.CategoriseData(source, dataAPI.category, contract, datauuid, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
       catFlag = true
     } else {
       catFlag = false
-      this.categoryData[datauuid] = dataRback
+      this.categoryData[datauuid] = this.dataRaw[datauuid]
     }
     // is there any data tidying required
     if (source.tidydt.status !== 'none') {
@@ -94,7 +93,7 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
         this.tidyData[datauuid] = this.categoryData[datauuid]
       } else {
         // no category or tidy data
-        this.tidyData[datauuid] = dataRback
+        this.tidyData[datauuid] = this.dataRaw[datauuid]
       }
     }
     let dataMatch = this.FilterDownDT(source, contract, datauuid, dataPrint)
@@ -103,7 +102,6 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
     this.dataRaw[datauuid] = []
     this.liveData[datauuid] = []
   }
-  dataRback = []
   return true
 }
 
@@ -181,6 +179,7 @@ DataComponent.prototype.assessDataStatus = function (time) {
 DataComponent.prototype.directResults = async function (type, api, sourceHash) {
   let resultData = await this.liveDataSystem.datatypeQueryMapping('REST', api, sourceHash)
   this.liveData = resultData
+  resultData = []
 }
 
 /**

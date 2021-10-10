@@ -5,7 +5,7 @@
 *
 * @class dataHolder
 * @package    HealthScience.network
-* @copyright  Copyright (c) 2018 James Littlejohn
+* @copyright  Copyright (c) 2021 James Littlejohn
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */

@@ -36,6 +36,8 @@ ChartSystem.prototype.chartjsControl = function (visModule, contract, dataPrint,
   let dataPrep = this.prepareVueChartJS(visModule, dataPrint.triplet.datatype, dataPrint.triplet.device, structureRules, dtConvert)
   chartData.chartPackage = dataPrep
   chartData.chartOptions = this.liveChartOptions.prepareChartOptions(dataPrint.triplet.device)
+  structureRules = {}
+  dataPrep = {}
   return chartData
 }
 
@@ -145,6 +147,8 @@ ChartSystem.prototype.structureMulitChartData = function (dataPrint, dataSet, so
       singleMulti.chartPackage = {}
       singleMulti.chartPackage.labels = prepardTSdatasets[0].labels
       singleMulti.chartPackage.datasets = this.prepareColourTSList(dataSetList)
+      timeseriesDatasetHolder = []
+      prepardTSdatasets = []
     } else {
       console.log('single time and datatype')
     }
@@ -156,6 +160,7 @@ ChartSystem.prototype.structureMulitChartData = function (dataPrint, dataSet, so
       console.log('single time and single datatype')
     }
   }
+  sourceData = []
   return singleMulti
 }
 
@@ -198,6 +203,8 @@ ChartSystem.prototype.extractDTDataset = function (dtR, dataSet, sourceData) {
   }
   dataHolder.datasets = datasetHolder
   dataHolder.sourceData = sourceHolder
+  datasetHolder = []
+  sourceHolder = []
   return dataHolder
 }
 
@@ -247,6 +254,7 @@ ChartSystem.prototype.prepareLabelList = function (labelsIN) {
   // format for time language
   let newSortedTime = []
   newSortedTime = this.prepareLabelchart(timeNumber)
+  timeNumber = []
   return newSortedTime
 }
 
@@ -281,6 +289,7 @@ ChartSystem.prototype.prepareDatasetData = function (dataSetsIN) {
   let flattenDataList = updateDatasetList
   datasetStructure.data = flattenDataList
   newDataset.push(datasetStructure)
+  flattenDataList = []
   return newDataset
 }
 
@@ -320,6 +329,9 @@ ChartSystem.prototype.structureTimeOverlayDataset = function (dataPrint, timeLab
   let dataPairs = {}
   dataPairs.labels = updateTimeList
   dataPairs.datasets = newDataset
+  updateTimeList = []
+  aggDatasource = []
+  newDataset = []
   return dataPairs
 }
 
@@ -335,6 +347,7 @@ ChartSystem.prototype.prepareTimeseriesDatasetData = function (dataPrint, timeLa
   // now pad out for x axis ie time labels
   datasetStructure.data = normalisedTSMatch
   newDataset = datasetStructure
+  normalisedTSMatch = []
   return newDataset
 }
 
@@ -361,6 +374,8 @@ ChartSystem.prototype.structureOverlayChartData = function (dataPrint, dataSets,
   overlayDataset.chartPackage = {}
   overlayDataset.chartPackage.labels = newOLlabels
   overlayDataset.chartPackage.datasets = newDataset
+  aggDatasets = []
+  aggLabels = []
   return overlayDataset
 }
 
@@ -386,6 +401,7 @@ ChartSystem.prototype.prepareOverlayLabels = function (labelsIN) {
     let mergeBack = this.mergeLabelData(baseLabel, lab)
     normaliseLabel = mergeBack
   }
+  numberTimeHolder = []
   // normalise to timeperiod for overlay
   return normaliseLabel
 }
@@ -420,6 +436,8 @@ ChartSystem.prototype.prepareOverlayDatasetData = function (dataPrint, labels, d
     newChartDataset.push(chartBundle)
     countDS++
   }
+  normalisedMatch = []
+  newDatasets = []
   return newChartDataset
 }
 
@@ -460,6 +478,9 @@ ChartSystem.prototype.mergeLabelData = function (baseLabel, newLabel) {
   for (let ts of sortTimeMinsDay) {
     textTimeSorted.push(ts.time)
   }
+  uniqueXaxis = []
+  flatten = []
+  textTimeSorted = []
   return textTimeSorted
 }
 

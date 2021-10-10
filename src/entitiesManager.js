@@ -5,7 +5,7 @@
 *
 * @class EntitiesManager
 * @package    safeFlow
-* @copyright  Copyright (c) 2019 James Littlejohn
+* @copyright  Copyright (c) 2021 James Littlejohn
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */

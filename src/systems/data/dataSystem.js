@@ -11,8 +11,8 @@
 */
 // import SAFEnetwork from './dataprotocols/'
 import TestStorageAPI from './dataprotocols/teststorage/testStorage.js'
+import SQLiteAPI from './dataprotocols/sqlite/index.js'
 import LiveSimulatedDataSystem from './simulateddataSystem.js'
-import FilterDataSystem from './filterdataSystem.js'
 
 import util from 'util'
 import events from 'events'
@@ -22,7 +22,7 @@ var DataSystem = function (setIN) {
   events.EventEmitter.call(this)
   // this.liveSAFEnetwork = new SAFEnetwork(setSAFE)
   this.liveTestStorage = new TestStorageAPI(setIN)
-  this.liveFilterData = new FilterDataSystem(setIN)
+  this.liveSQLiteStorage = new SQLiteAPI()
   this.devicePairs = []
 }
 
@@ -43,6 +43,9 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
   } else if (type === 'REST') {
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
     rawHolder = await this.liveTestStorage.RESTbuilder(api, hash).catch(e => console.log('Error: ', e.message))
+  } else if (type === 'SQLITE') {
+    // pass on to either safe API builder, REST API builder or IPSF builder etc.
+    rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo, device).catch(e => console.log('Error: ', e.message))
   } else if (type === 'COMPUTE') {
     let extractURL = {}
     extractURL.namespace = sourceInfo.sourceapiquery.namespace
@@ -52,6 +55,9 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
       rawHolder = await this.liveTestStorage.COMPUTEbuilder(extractURL, device, time).catch(e => console.log('Error: ', e.message))
     } else if (extractURL.path === '/luftdatenGet/') {
       rawHolder = await this.liveTestStorage.COMPUTEbuilderLuft(extractURL, device, time).catch(e => console.log('Error: ', e.message))
+    } else if (extractURL.path === '/sqliteGadgetbridge/') {
+    // pass on to either safe API builder, REST API builder or IPSF builder etc.
+      rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo, device, time)
     }
   }
   return rawHolder

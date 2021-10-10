@@ -11,12 +11,14 @@
 */
 
 import TestStorageAPI from './dataprotocols/teststorage/testStorage.js'
+import SQLiteAPI from './dataprotocols/sqlite/index.js'
 import util from 'util'
 import events from 'events'
 
 var DatadeviceSystem = function (setIN) {
   events.EventEmitter.call(this)
   this.liveTestStorage = new TestStorageAPI(setIN)
+  this.liveSQLiteStorage = new SQLiteAPI()
   this.devicePairs = []
   this.dataRaw = []
 }
@@ -49,13 +51,43 @@ DatadeviceSystem.prototype.getLiveDevices = function (devicesIN) {
 */
 DatadeviceSystem.prototype.storedDevices = async function (dapi) {
   // MAP api to REST library functions for the API
+  console.log('store devices')
+  console.log(dapi)
+  const localthis = this
   let currentDevices = []
-  let result = await this.liveTestStorage.deviceRESTbuilder(dapi)
-  if (dapi.apipath === '/computedata/') {
-    currentDevices = this.sortLiveDevices(result)
+  let result = []
+  if (dapi.api === 'sqlite') {
+    // sqlite
+    if (dapi.apipath === '/sqliteGadgetbridge/') {
+      console.log('sqlite Device path')
+      // call back function
+      function dataSQL (err, rows) {
+        let data = []
+        if (err) {
+          throw err
+        }
+        rows.forEach((row) => {
+          data.push(row)
+        })
+        // console.log('devices/////////////')
+        // console.log(data)
+        // localthis.convertStandardKeyNames(data)
+        return data
+      }
+      let beforeConvertKeyNames = await this.liveSQLiteStorage.SQLiteDeviceBuilder(dataSQL)
+      let promiseDevice = await this.liveSQLiteStorage.SQLiteDevicePromise()
+      currentDevices = this.convertStandardKeyNames(promiseDevice)
+    }
   } else {
-    currentDevices = result
+    result = await this.liveTestStorage.deviceRESTbuilder(dapi)
+    if (dapi.apipath === '/computedata/') {
+      currentDevices = this.sortLiveDevices(result)
+    } else {
+      currentDevices = result
+    }
   }
+  console.log('curent devices')
+  console.log(currentDevices)
   return currentDevices
 }
 
@@ -93,6 +125,26 @@ DatadeviceSystem.prototype.sortLiveDevices = function (result) {
     }
   }
   return currentDevices
+}
+
+/**
+* convert sql naming to device stanards
+* @method convertStandardKeyNames
+*
+*/
+DatadeviceSystem.prototype.convertStandardKeyNames = function (devicesRaw) {
+  let devices = []
+  for (let device of devicesRaw) {
+    let renameKeys = {}
+    renameKeys.id = device.IDENTIFIER
+    renameKeys.device_name = device.NAME
+    renameKeys.device_manufacturer = device.MANUFACTURER
+    renameKeys.device_mac = device._id.toString()
+    renameKeys.device_type = device.TYPE
+    renameKeys.device_model = device.MODEL
+    devices.push(renameKeys)
+  }
+  return devices
 }
 
 export default DatadeviceSystem
