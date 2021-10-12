@@ -480,7 +480,6 @@ ChartSystem.prototype.mergeLabelData = function (baseLabel, newLabel) {
   }
   uniqueXaxis = []
   flatten = []
-  textTimeSorted = []
   return textTimeSorted
 }
 

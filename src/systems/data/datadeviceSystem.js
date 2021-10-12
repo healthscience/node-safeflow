@@ -51,15 +51,12 @@ DatadeviceSystem.prototype.getLiveDevices = function (devicesIN) {
 */
 DatadeviceSystem.prototype.storedDevices = async function (dapi) {
   // MAP api to REST library functions for the API
-  console.log('store devices')
-  console.log(dapi)
   const localthis = this
   let currentDevices = []
   let result = []
   if (dapi.api === 'sqlite') {
     // sqlite
     if (dapi.apipath === '/sqliteGadgetbridge/') {
-      console.log('sqlite Device path')
       // call back function
       function dataSQL (err, rows) {
         let data = []
@@ -69,9 +66,6 @@ DatadeviceSystem.prototype.storedDevices = async function (dapi) {
         rows.forEach((row) => {
           data.push(row)
         })
-        // console.log('devices/////////////')
-        // console.log(data)
-        // localthis.convertStandardKeyNames(data)
         return data
       }
       let beforeConvertKeyNames = await this.liveSQLiteStorage.SQLiteDeviceBuilder(dataSQL)
@@ -86,8 +80,6 @@ DatadeviceSystem.prototype.storedDevices = async function (dapi) {
       currentDevices = result
     }
   }
-  console.log('curent devices')
-  console.log(currentDevices)
   return currentDevices
 }
 
