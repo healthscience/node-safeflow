@@ -12,7 +12,7 @@
 import util from 'util'
 import events from 'events'
 
-var DTSystem = function (setIN) {
+var DTSystem = function () {
   events.EventEmitter.call(this)
 }
 

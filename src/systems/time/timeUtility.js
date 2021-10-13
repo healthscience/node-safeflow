@@ -16,7 +16,7 @@ const moment = extendMoment(Moment)
 import util from 'util'
 import events from 'events'
 
-var TimeUtilities = function (setUP) {
+var TimeUtilities = function () {
   events.EventEmitter.call(this)
   this.liveStarttime = ''
   this.liveLasttime = ''

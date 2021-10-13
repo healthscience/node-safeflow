@@ -18,7 +18,6 @@ var safeFlow = function () {
   // start error even listener
   this.eventErrorListen()
   this.defaultStorage = 'http://165.227.244.213:8882' // for test network only will be removed
-  this.settings = {}
   this.liveEManager = new EntitiesManager()
   this.resultCount = 0
 }
@@ -49,18 +48,20 @@ safeFlow.prototype.eventErrorListen = function (refCont) {
 * @method networkAuthorisation
 *
 */
-safeFlow.prototype.networkAuthorisation = function (apiCNRL, auth) {
+safeFlow.prototype.networkAuthorisation = function (auth) {
   // need library to check token or verify key ownership TODO:
   // TEMP testnetwork defaults
-  auth.namespace = this.defaultStorage
-  this.settings = auth
+  let peerAuth = {}
+  peerAuth.settings = auth
+  peerAuth.namespace = this.defaultStorage
   let authState = {}
   let verify = false
-  // check cloud
-  verify = true
+  // check release is compatible and untampered
+  verify = this.verifyRelease()
+  console.log(verify)
   // verify keys
   if (verify === true ) {
-    this.liveEManager = new EntitiesManager(apiCNRL, auth)
+    this.liveEManager = new EntitiesManager(peerAuth)
     // this.flowListen()
     // set listener for ECS data back peer
     this.entityGetter()
@@ -71,6 +72,39 @@ safeFlow.prototype.networkAuthorisation = function (apiCNRL, auth) {
   return authState
 }
 
+/**
+* datastore authorisation
+* @method datastoreAuthorisation
+*
+*/
+safeFlow.prototype.datastoreAuthorisation = function (authDS) {
+  // TEMP testnetwork defaults
+  authDS.namespace = this.defaultStorage
+  let authDatastoreState = {}
+  let verify = false
+  // check release is compatible and untampered
+  verify = this.verifyRelease()
+  console.log(verify)
+  // verify keys
+  if (verify === true ) {
+    this.liveEManager.addDatastore(authDS)
+    // return datastore info to peer
+    authDatastoreState.safeflow = true
+    authDatastoreState.type = 'datastore'
+    authDatastoreState.auth = true
+  }
+  return authDatastoreState
+}
+
+/**
+* check the release of safeFLOW is compatible
+* @method verifyRelease
+*
+*/
+safeFlow.prototype.verifyRelease = function (refContract) {
+  // TODO  checksum software
+  return true
+}
 /**
 * Start FLOW
 * @method startFlow

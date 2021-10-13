@@ -30,6 +30,15 @@ var DeviceComponent = function (setIN) {
 util.inherits(DeviceComponent, events.EventEmitter)
 
 /**
+*  set authorisation for datastore
+* @method setAuthToken
+*
+*/
+DeviceComponent.prototype.setAuthToken = async function (authDS) {
+  console.log('auth datastore')
+}
+
+/**
 *  set the datatype asked for
 * @method setDevice
 *

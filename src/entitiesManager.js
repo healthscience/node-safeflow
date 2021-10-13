@@ -10,24 +10,20 @@
 * @version    $Id$
 */
 import AutomationManager from './automationManager.js'
-// import LibComposer from 'refcontractcomposer'
 import CNRLUtility from './kbl-cnrl/cnrlUtility.js'
-// import KBLedger from './kbl-cnrl/kbledger.js'
 import CryptoUtility from './kbl-cnrl/cryptoUtility.js'
 import Entity from './scienceEntities.js'
 import util from 'util'
 import events from 'events'
 // import pollingtoevent from 'polling-to-event'
 
-var EntitiesManager = function (apiCNRL, auth) {
+var EntitiesManager = function (auth) {
   events.EventEmitter.call(this)
   // start error even listener
   this.eventErrorListen()
   this.auth = auth
   this.liveAutomation = new AutomationManager()
-  // this.liveLibrary = new LibComposer()
   this.liveCNRLUtility = new CNRLUtility(auth)
-  // this.KBLlive = new KBLedger(apiCNRL, auth)
   this.liveCrypto = new CryptoUtility()
   this.liveSEntities = {}
   this.automationReview()
@@ -172,6 +168,17 @@ EntitiesManager.prototype.addHSentity = async function (ecsIN, inputUUID) {
   entitySet.shellID = shellID
   entitySet.modules = modules
   return entitySet
+}
+
+/**
+*  add authorisation / token to access a datastore
+* @method
+*
+*/
+EntitiesManager.prototype.addDatastore = function (authDS) {
+  // need to set entity with datastore info.
+  this.auth = authDS
+  // this.liveSEntities[shellID].setDataStore(authDS)
 }
 
 /**

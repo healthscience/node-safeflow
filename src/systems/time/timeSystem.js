@@ -16,7 +16,7 @@ const moment = extendMoment(Moment)
 import util from 'util'
 import events from 'events'
 
-var TimeSystem = function (setIN) {
+var TimeSystem = function () {
   events.EventEmitter.call(this)
 }
 

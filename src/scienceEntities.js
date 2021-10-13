@@ -22,8 +22,8 @@ import events from 'events'
 var ScienceEntities = function (dAccess) {
   events.EventEmitter.call(this)
   this.liveDeviceC = new DeviceComponent(dAccess)
-  this.liveTimeC = new TimeComponent(dAccess)
-  this.liveDatatypeC = new DatatypeComponent(dAccess)
+  this.liveTimeC = new TimeComponent()
+  this.liveDatatypeC = new DatatypeComponent()
   this.liveDataC = new DataComponent(dAccess)
   this.liveComputeC = new ComputeComponent(dAccess)
   this.liveVisualC = new VisualComponent()
@@ -39,4 +39,13 @@ var ScienceEntities = function (dAccess) {
 */
 util.inherits(ScienceEntities, events.EventEmitter)
 
+/**
+*
+* @method setDataStore
+*/
+DeviceComponent.prototype.setDataStore = async function (authDataStore) {
+  this.liveDeviceC.setAuthToken(authDataStore)
+  this.liveDataC.setAuthToken(authDataStore)
+  this.liveComputeC.setAuthToken(authDataStore)
+}
 export default ScienceEntities

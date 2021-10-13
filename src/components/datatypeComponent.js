@@ -13,9 +13,9 @@ import DTsystem from '../systems/data/dtSystem.js'
 import util from 'util'
 import events from 'events'
 
-var DatatypeComponent = function (setIN) {
+var DatatypeComponent = function () {
   events.EventEmitter.call(this)
-  this.liveDTsystem = new DTsystem(setIN)
+  this.liveDTsystem = new DTsystem()
   this.datatypeInfoLive = []
   this.datatypesLive = []
   this.sourceDatatypes = []

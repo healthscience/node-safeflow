@@ -15,9 +15,9 @@ import util from 'util'
 import events from 'events'
 import moment from 'moment'
 
-var TimeComponent = function (setIN) {
+var TimeComponent = function () {
   this.liveTimeUtil = new TimeUtilities()
-  this.liveTimeSystem = new TimeSystem(setIN)
+  this.liveTimeSystem = new TimeSystem()
   this.time = {} // holds all time info. per cnrl module???
   this.livedate = 0
   this.timeseg = {}
