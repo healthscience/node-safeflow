@@ -13,10 +13,19 @@ import util from 'util'
 import events from 'events'
 import sqlite3 from 'sqlite3'
 import os from 'os'
+import fs from 'fs'
 
 var SQLiteAPI = function (setUP) {
   events.EventEmitter.call(this)
-  this.db = new sqlite3.Database(os.homedir() + '/peerlink/sqlite/Gadgetbridge')
+  // check if any database files?
+  let dbSQLitedir = os.homedir() + '/peerlink/sqlite/'
+  let dbList = []
+  fs.readdirSync(dbSQLitedir).forEach(file => {
+    dbList.push(file)
+  })
+  if (dbList.length > 0) {
+    this.db = new sqlite3.Database(os.homedir() + '/peerlink/sqlite/Gadgetbridge')
+  }
 }
 
 /**
