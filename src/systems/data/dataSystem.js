@@ -12,6 +12,7 @@
 // import SAFEnetwork from './dataprotocols/'
 import TestStorageAPI from './dataprotocols/teststorage/testStorage.js'
 import SQLiteAPI from './dataprotocols/sqlite/index.js'
+import JSONfileAPI from './dataprotocols/json/index.js'
 import LiveSimulatedDataSystem from './simulateddataSystem.js'
 
 import util from 'util'
@@ -23,6 +24,7 @@ var DataSystem = function (setIN) {
   // this.liveSAFEnetwork = new SAFEnetwork(setSAFE)
   this.liveTestStorage = new TestStorageAPI(setIN)
   this.liveSQLiteStorage = new SQLiteAPI()
+  this.liveJSONStorage = new JSONfileAPI()
   this.devicePairs = []
 }
 
@@ -46,10 +48,14 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
   } else if (type === 'SQLITE') {
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
     rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo, device).catch(e => console.log('Error: ', e.message))
+  } else if (type === 'JSON') {
+    // pass on to either safe API builder, REST API builder or IPSF builder etc.
+    rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device).catch(e => console.log('Error: ', e.message))
   } else if (type === 'COMPUTE') {
     let extractURL = {}
     extractURL.namespace = sourceInfo.sourceapiquery.namespace
     extractURL.path = sourceInfo.sourceapiquery.apipath
+    extractURL.file = 'jsonfile'
     // temp before smart rest extractor is built
     if (extractURL.path === '/computedata/') {
       rawHolder = await this.liveTestStorage.COMPUTEbuilder(extractURL, device, time).catch(e => console.log('Error: ', e.message))
@@ -58,8 +64,13 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     } else if (extractURL.path === '/sqliteGadgetbridge/') {
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
       rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo, device, time)
+    } else if (extractURL.file === 'jsonfile') {
+      // pass on to either safe API builder, REST API builder or IPSF builder etc.
+      rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device, time).catch(e => console.log('Error: ', e.message))
     }
   }
+  console.log('rawholder')
+  console.log(rawHolder.length)
   return rawHolder
 }
 

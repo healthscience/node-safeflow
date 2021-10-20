@@ -388,6 +388,8 @@ EntitiesManager.prototype.flowMany = async function (shellID, inputUUID, compute
     console.log('flowMANY---flag FALSE---------------------------------------------')
     timeList = this.liveSEntities[shellID].liveTimeC.timerange
   }
+  console.log('flow state')
+  console.log(ecsInput.flowstate)
   // is a range of devices, datatype or time ranges and single or multi display?
   if (ecsInput.flowstate.devicerange === true && ecsInput.flowstate.datatyperange === true && ecsInput.flowstate.timerange === true) {
     console.log('passed logic for loop')
@@ -800,7 +802,7 @@ EntitiesManager.prototype.dataoutListener = function (shellID) {
       entityOut.context = context
       entityOut.data = 'none'
       entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
-      // console.log('viack back EMIT--4-EMIT--dataout NONE')
+      console.log('viack back EMIT--4-EMIT--dataout NONE')
       this.emit('visualFirstRange', entityOut)
     }
   })

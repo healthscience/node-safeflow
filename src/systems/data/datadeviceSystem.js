@@ -51,6 +51,8 @@ DatadeviceSystem.prototype.getLiveDevices = function (devicesIN) {
 */
 DatadeviceSystem.prototype.storedDevices = async function (dapi) {
   // MAP api to REST library functions for the API
+  console.log('store Devices')
+  console.log(dapi)
   const localthis = this
   let currentDevices = []
   let result = []
@@ -72,6 +74,16 @@ DatadeviceSystem.prototype.storedDevices = async function (dapi) {
       let promiseDevice = await this.liveSQLiteStorage.SQLiteDevicePromise()
       currentDevices = this.convertStandardKeyNames(promiseDevice)
     }
+  } else if (dapi.api === 'json') {
+    console.log('JSON device path')
+    let renameKeys = {}
+    renameKeys.id = 'device'
+    renameKeys.device_name = 'sensor'
+    renameKeys.device_manufacturer = 'unknown'
+    renameKeys.device_mac = 'none'
+    renameKeys.device_type = 'hardware'
+    renameKeys.device_model = 'version'
+    currentDevices.push(renameKeys)
   } else {
     result = await this.liveTestStorage.deviceRESTbuilder(dapi)
     if (dapi.apipath === '/computedata/') {
