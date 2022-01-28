@@ -1,6 +1,6 @@
 {
   "name": "node-safeflow",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "deprecated": false,
   "description": "Node.js wrapper for safeflow protocol",
   "homepage": "https://github.com/healthscience/node-safeflow#readme",
@@ -32,7 +32,7 @@
   "scripts": {
   },
   "dependencies": {
-    "axios": "^0.16.1",
+    "axios": "^0.24.0",
     "bs58": "^4.0.1",
     "csv-parser": "^2.3.1",
     "esm": "^3.2.25",

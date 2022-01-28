@@ -60,7 +60,7 @@ VisualComponent.prototype.clearDeviceCount = function (device) {
 */
 VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrint, resultsData, dtConvert, flag) {
   // console.log(util.inspect(visModule, {showHidden: false, depth: null}))
-  console.log('VISUAL__COMPONENT')
+  // console.log('VISUAL__COMPONENT')
   let timeFormat = ''
   let settingsLive = visModule.value.info.settings
   let timeFormatSet = settingsLive.hasOwnProperty('timeformat')
@@ -113,14 +113,14 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
       }
     }
   }
-  console.log('expected v live')
-  console.log(deviceDataPrintCount.length)
-  console.log(this.deviceCount[dataPrint.triplet.device])
+  // console.log('expected v live')
+  // console.log(deviceDataPrintCount.length)
+  // console.log(this.deviceCount[dataPrint.triplet.device])
   // console.log('memoryPrint Start')
   // console.log(process.memoryUsage())
   // decide to return or go to next vis data to process
   if (deviceDataPrintCount.length !== this.deviceCount[dataPrint.triplet.device]) {
-    console.log('logic 1')
+    // console.log('logic 1')
     // not yet keep hold of data to batch
     if (this.datasetHolder[inputHash] === undefined) {
       this.datasetHolder[inputHash] = []
@@ -135,7 +135,7 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     this.sourcedataHolder[inputHash].push({ context: dataPrint, data: resultsData })
     // remove item from inputList? (only devices if )
   } else if (deviceDataPrintCount.length === this.deviceCount[dataPrint.triplet.device] && this.deviceCount[dataPrint.triplet.device] > 1) {
-    console.log('logic 2')
+    // console.log('logic 2')
     if (this.datasetHolder[inputHash] === undefined) {
       this.datasetHolder[inputHash] = []
       this.dataPrintHolder[inputHash] = []
@@ -156,7 +156,7 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     // clear the input tracking this.deviceCount
     this.deviceCount[dataPrint.triplet.device] = 0
     // just remove device element unless none left, delete input hash holder
-    console.log(this.datasetsOutpattern[inputHash])
+    // console.log(this.datasetsOutpattern[inputHash])
     this.datasetsOutpattern[inputHash].filter(item => item !== dataPrint.triplet.device)
     if (this.datasetsOutpattern[inputHash].length === 0 ) {
       delete this.datasetsOutpattern[inputHash]
@@ -168,7 +168,7 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     this.liveVislist = []
     this.emit('dataout', inputHash)
   } else {
-    console.log('logic 3')
+    // console.log('logic 3')
     // if batch then create resUUID for the batch
     let resultPrint = dataPrint.hash
     // clear the input tracking
@@ -194,10 +194,10 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
 *
 */
 VisualComponent.prototype.extractVisExpected = function (inputUUID, device) {
-  console.log('visCOMP--expected extract')
-  console.log(inputUUID)
-  console.log(device)
-  console.log(this.liveInputlist)
+  // console.log('visCOMP--expected extract')
+  // console.log(inputUUID)
+  // console.log(device)
+  // console.log(this.liveInputlist)
   // check any inputlist available?
   let inputIndex = Object.keys(this.liveInputlist)
   let matchDataList = []
@@ -256,13 +256,13 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
         }
       }
     }
-    console.log('NODATA--expected v live')
-    console.log(this.deviceCount[dataPrint.triplet.device])
-    console.log(deviceDataPrintCount.length)
+    // console.log('NODATA--expected v live')
+    // console.log(this.deviceCount[dataPrint.triplet.device])
+    // console.log(deviceDataPrintCount.length)
     // decide to return or go to next vis data to process
     if (deviceDataPrintCount.length !== this.deviceCount[dataPrint.triplet.device]) {
       // not yet keep hold of data to batch
-      console.log('NO--logic 1')
+      // console.log('NO--logic 1')
       if (this.datasetHolder[inputHash] === undefined) {
         this.datasetHolder[inputHash] = []
         this.dataPrintHolder[inputHash] = []
@@ -272,7 +272,7 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
       this.dataPrintHolder[inputHash].push(dataPrint)
     } else if (deviceDataPrintCount.length === this.deviceCount[dataPrint.triplet.device] && this.deviceCount[dataPrint.triplet.device] > 1) {
       // bundle of greater than one length ready for dataSet preparation
-      console.log('NO--logic 2')
+      // console.log('NO--logic 2')
       let datasetMulti = this.buildMultiDataset(deviceDataPrintCount, timeFormat, inputHash, dataPrint)
       // if batch then create resUUID for the batch
       this.deviceCount[dataPrint.triplet.device] = 0
@@ -288,7 +288,7 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
       this.liveVislist = []
       this.emit('dataout', inputHash[0])
     } else {
-      console.log('NO--logic 3')
+      // console.log('NO--logic 3')
       // if batch then create resUUID for the batch
       let resultPrint = dataPrint.hash
       // clear the input tracking
@@ -307,7 +307,7 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
     }
   } else {
     // still prepare visual object but flag 'none' data
-    console.log('NOvis--- none bypass logic')
+    // console.log('NOvis--- none bypass logic')
     let visData = {}
     visData.data = 'none'
     visData.context = dataPrint
@@ -355,7 +355,7 @@ VisualComponent.prototype.buildMultiDataset = function (dataList, type, inputHas
     this.datasetHolder[inputHash] = []
     this.dataPrintHolder[inputHash] = []
   } else {
-    console.log('no data for this deivce group')
+    // console.log('no data for this deivce group')
     let visData = {}
     visData.data = 'none'
     visData.context = dataPrint

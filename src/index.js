@@ -62,7 +62,6 @@ safeFlow.prototype.networkAuthorisation = function (auth) {
   // verify keys
   if (verify === true ) {
     this.liveEManager = new EntitiesManager(peerAuth)
-    // this.flowListen()
     // set listener for ECS data back peer
     this.entityGetter()
     authState.safeflow = true
@@ -172,17 +171,6 @@ safeFlow.prototype.entityGetter = function (shellID) {
   })
   this.liveEManager.on("error", (error) => {
       console.error(`Gracefully handling our error: ${error}`);
-  })
-}
-
-/**
-* start the ECS flow with a new input
-* @method flowListen
-*
-*/
-safeFlow.prototype.flowListen = function () {
-  this.liveEManager.on('startflow', (data, data2) => {
-    this.liveEManager.entityFlow(data, data2)
   })
 }
 

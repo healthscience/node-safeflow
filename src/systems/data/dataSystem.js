@@ -52,6 +52,7 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
     rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device).catch(e => console.log('Error: ', e.message))
   } else if (type === 'COMPUTE') {
+    console.log('what type of compute?????????????????')
     let extractURL = {}
     extractURL.namespace = sourceInfo.sourceapiquery.namespace
     extractURL.path = sourceInfo.sourceapiquery.apipath

@@ -14,6 +14,7 @@ import TestStorageAPI from './dataprotocols/teststorage/testStorage.js'
 import SQLiteAPI from './dataprotocols/sqlite/index.js'
 import util from 'util'
 import events from 'events'
+import crypto from 'crypto'
 
 var DatadeviceSystem = function (setIN) {
   events.EventEmitter.call(this)
@@ -51,8 +52,6 @@ DatadeviceSystem.prototype.getLiveDevices = function (devicesIN) {
 */
 DatadeviceSystem.prototype.storedDevices = async function (dapi) {
   // MAP api to REST library functions for the API
-  console.log('store Devices')
-  console.log(dapi)
   const localthis = this
   let currentDevices = []
   let result = []
@@ -75,12 +74,15 @@ DatadeviceSystem.prototype.storedDevices = async function (dapi) {
       currentDevices = this.convertStandardKeyNames(promiseDevice)
     }
   } else if (dapi.api === 'json') {
-    console.log('JSON device path')
+    let tempMAC = crypto
+    .createHash('sha256')
+    .update(dapi.name, 'utf8')
+    .digest('hex')
     let renameKeys = {}
-    renameKeys.id = 'device'
+    renameKeys.id = tempMAC
     renameKeys.device_name = 'sensor'
     renameKeys.device_manufacturer = 'unknown'
-    renameKeys.device_mac = 'none'
+    renameKeys.device_mac = tempMAC
     renameKeys.device_type = 'hardware'
     renameKeys.device_model = 'version'
     currentDevices.push(renameKeys)
