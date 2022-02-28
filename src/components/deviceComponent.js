@@ -44,8 +44,6 @@ DeviceComponent.prototype.setAuthToken = async function (authDS) {
 *
 */
 DeviceComponent.prototype.setDevice = async function (apiD) {
-  console.log('device setup first')
-  console.log(apiD)
   this.apiData = apiD
   let deviceDetail = await this.liveDeviceSystem.storedDevices(this.apiData)
   this.alldevices = deviceDetail
@@ -59,8 +57,6 @@ DeviceComponent.prototype.setDevice = async function (apiD) {
 *
 */
 DeviceComponent.prototype.updateDevice = function (devices) {
-  console.log('devices update')
-  console.log(devices)
   let updateDevices = []
   for (let dev of this.alldevices) {
     // match and keep those on new list

@@ -69,7 +69,7 @@ DatadeviceSystem.prototype.storedDevices = async function (dapi) {
         })
         return data
       }
-      let beforeConvertKeyNames = await this.liveSQLiteStorage.SQLiteDeviceBuilder(dataSQL)
+      // let beforeConvertKeyNames = await this.liveSQLiteStorage.SQLiteDeviceBuilder(dataSQL)
       let promiseDevice = await this.liveSQLiteStorage.SQLiteDevicePromise()
       currentDevices = this.convertStandardKeyNames(promiseDevice)
     }

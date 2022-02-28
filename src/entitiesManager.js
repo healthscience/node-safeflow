@@ -30,6 +30,7 @@ var EntitiesManager = function (auth) {
   this.resultListener()
   this.resultcount = 0
   this.computeFlag = false
+  this.ecscounter = 0
 }
 
 /**
@@ -95,6 +96,8 @@ EntitiesManager.prototype.peerKBLstart = async function (refCont) {
 EntitiesManager.prototype.peerInput = async function (input) {
   // validate input data structure e.g. not empty etc.
   console.log('ECS--input+++++++++++++++START++++++++++++++++++')
+  this.ecscounter++
+  console.log(this.ecscounter)
   console.log(input)
   // console.log(util.inspect(input, {showHidden: false, depth: null}))
   let inputValid = this.validateInput(input)
@@ -105,7 +108,6 @@ EntitiesManager.prototype.peerInput = async function (input) {
     return entityData
   } else {
     let entitySet = {}
-    entitySet.type = 'ecssummary'
     entitySet.shellID = 'error'
     entitySet.modules = []
     return entitySet
@@ -200,10 +202,13 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, inputUUID
   // first assess what first flow and create waiting list (if any)
   let autoCheck = this.liveAutomation.updateAutomation(moduleOrder.compute.value.info)
   if (ECSinput.input === 'refUpdate') {
+    console.log('refupdate')
     // update device list per peer input
     this.deviceUpdateDataflow(shellID, moduleOrder.compute)
+    console.log('deivce udpate over')
     // update flow state for new input
     flowState = await this.flowPrepare(shellID, ECSinput, inputUUID, moduleOrder)
+    console.log('afer flow update')
     // set data science flow inputs
     this.setDataScienceInputs(shellID, inputUUID, ECSinput, moduleOrder, flowState, 'update')
     this.flowMany(shellID, inputUUID, false)
@@ -373,29 +378,17 @@ EntitiesManager.prototype.trackDataUUIDS = function (shellID, inputUUID, uuid, d
 */
 EntitiesManager.prototype.flowMany = async function (shellID, inputUUID, computeFlag, dataPrint) {
   let ecsInput = this.liveSEntities[shellID].datascience
-  // console.log('flowMANY--=============START================SSSSSSS======')
   // look at compute context flag and set datatypes and time as required
   let timeList = []
   if (computeFlag === true) {
-    // console.log('flowMANY---compute flag true=================================')
     timeList = this.liveSEntities[shellID].liveTimeC.sourceTime
     // clear the list of source times for next time empty
     this.liveSEntities[shellID].liveTimeC.sourceTime = []
   } else {
-    // console.log('flowMANY---flag FALSE---------------------------------------------')
     timeList = this.liveSEntities[shellID].liveTimeC.timerange
   }
-  // console.log('flow state')
-  // console.log(ecsInput.flowstate)
   // is a range of devices, datatype or time ranges and single or multi display?
   if (ecsInput.flowstate.devicerange === true && ecsInput.flowstate.datatyperange === true && ecsInput.flowstate.timerange === true) {
-    console.log('passed logic for loop')
-    console.log(this.liveSEntities[shellID].liveDeviceC.devices)
-    console.log(this.liveSEntities[shellID].liveDatatypeC.datatypesLive)
-    console.log(timeList)
-    // limit one device
-    // this.liveSEntities[shellID].liveDeviceC.devices.pop()
-    // this.liveSEntities[shellID].liveDeviceC.devices.pop()
     for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
       // reset expect count (incase something didnt clear)
       if (computeFlag === false) {
@@ -403,17 +396,11 @@ EntitiesManager.prototype.flowMany = async function (shellID, inputUUID, compute
       }
       for (let datatype of this.liveSEntities[shellID].liveDatatypeC.datatypesLive) {
         for (let time of timeList) {
-          // console.log('flowMANY---loopcontext')
-          // console.log(device.device_mac)
-          // console.log(datatype)
-          // console.log(time)
-          // form dataID
           // hash the context device, datatype and time
           let datauuid = this.resultsUUIDbuilder(device.device_mac, datatype, time)
           this.trackDataUUIDS(shellID, inputUUID, datauuid, device.device_mac, datatype, time, computeFlag, dataPrint)
           let entityLivedata = this.entityResultsReady(shellID, ecsInput.input, datauuid, computeFlag)
           let resultCheckState = false
-          // console.log('flowMANY---complete loop==============================')
         }
       }
     }
@@ -425,7 +412,6 @@ EntitiesManager.prototype.flowMany = async function (shellID, inputUUID, compute
     entityOut.context = context
     entityOut.data = 'none'
     entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
-    // console.log('viack back EMIT--4-EMIT--dataout NONE')
     this.emit('visualFirstRange', entityOut)
   }
 }
@@ -456,7 +442,6 @@ EntitiesManager.prototype.entityResultsReady = async function (shellID, ecsIN, r
   // does the data exist in Memory for this input request?
   let checkDataExist = this.checkForResultsMemory(shellID, rDUUID)
   if (checkDataExist === true && computeFlag === false) {
-    // console.log('MEMOERYCHECK---yes in memeory')
     let liveContext = this.liveSEntities[shellID].datascience
     // pass to short flow cycle, just return vis data again
     let dataPrint = this.liveSEntities[shellID].datauuid[rDUUID]
@@ -464,7 +449,6 @@ EntitiesManager.prototype.entityResultsReady = async function (shellID, ecsIN, r
     let resultExist = true
     return resultExist
   } else {
-    // console.log('MEMOERYCHECK---not in memory')
     let resultExist = this.checkResults(shellID, rDUUID, computeFlag)
     return resultExist
   }
@@ -491,7 +475,6 @@ EntitiesManager.prototype.checkResults = function (shellID, uuidRData, computeFl
 */
 EntitiesManager.prototype.resultListener = function () {
   this.on('resultsCheckback', async (checkData) => {
-    // console.log('listener for resutls===============================')
     let computeFlag = checkData.entity.computeflag
     let liveContext = this.liveSEntities[checkData.entity.shell].datascience
     if (checkData.data === false) {
@@ -508,30 +491,19 @@ EntitiesManager.prototype.resultListener = function () {
 *
 */
 EntitiesManager.prototype.subFlowFull = async function (entityData, entityContext, computeFlag) {
-  console.log('subFLOW---FULL===============================================')
-  // console.log(entityData)
-  // console.log(entityContext)
-  // console.log(this.resultcount)
   if (this.resultcount >= 0) {
     this.resultcount++
     let rDUUID = entityData.entity.resultuuid
     let dataPrint = this.liveSEntities[entityData.entity.shell].datauuid[rDUUID]
-    // console.log('dataPrint asked or source?')
-    // console.log(dataPrint)
     entityContext.dataprint = dataPrint
-    // console.log('FULL--no data PtoP STORE but source EXIST?')
     if (this.liveSEntities[entityData.entity.shell].liveDatatypeC.sourceDatatypes.length === 0 && computeFlag === false) {
       await this.computeFlow(entityData.entity.shell, entityContext.flowstate.updateModContract, dataPrint, '', '')
       // prepare visualisation datasets
       await this.visualFlow(entityData.entity.shell, entityContext.moduleorder.visualise, entityContext.flowstate, dataPrint, false)
     } else {
-      // console.log('FULL--COMPUTE require SOURCE data')
       if (this.liveSEntities[entityData.entity.shell].liveDatatypeC.sourceDatatypes.length > 0 && computeFlag === false) {
-        // console.log('FULL--yes, source datatype')
-        // form data ids for source datatypes
         let inputUUID = this.liveSEntities[entityData.entity.shell].datascience.inputuuid
         if (computeFlag === false) {
-          // console.log('FULL--go get data for compute 2nd FLOW')
           computeFlag = true
           // this currently is too blunt if range fed in.  Goes and does all source again not just the one that has failed.
           // need to provide context to match compute dataPrint to underlying source dataPrint
@@ -542,10 +514,7 @@ EntitiesManager.prototype.subFlowFull = async function (entityData, entityContex
           // does the source data existing for this computation?
         }
       } else if (this.liveSEntities[entityData.entity.shell].liveDatatypeC.sourceDatatypes.length > 0 && computeFlag === true) {
-        // console.log('FULL--return SOURCE but none in memory or ptpStore')
         await this.computeFlow(entityData.entity.shell, entityContext.flowstate.updateModContract, dataPrint, 'datalive', 'savesource')
-        // console.log('FULL--dataprint before visComponent')
-        // console.log(dataPrint)
         if (dataPrint.couple) {
           await this.visualFlow(entityData.entity.shell, entityContext.moduleorder.visualise, entityContext.flowstate, dataPrint.couple, computeFlag)
         } else {
@@ -554,13 +523,11 @@ EntitiesManager.prototype.subFlowFull = async function (entityData, entityContex
       } else {
         // still need to inform vis component to clear expected list
         // prepare visualisation datasets
-        // console.log('FULL--no other lgoic met')
         await this.visualFlow(entityData.entity.shell, entityContext.moduleorder.visualise, entityContext.flowstate, dataPrint, false)
         let entityNodata = {}
         entityNodata.context = entityContext
         entityNodata.data = this.liveSEntities[entityData.entity.shell].liveVisualC.visualData[entityData.entity.resultuuid]
         entityNodata.devices = this.liveSEntities[entityData.entity.shell].liveDeviceC.devices
-        // console.log('viack back EMIT-2--EMIT--subflow NO data')
         this.emit('visualFirstRange', entityNodata)
       }
     }
@@ -575,11 +542,8 @@ EntitiesManager.prototype.subFlowFull = async function (entityData, entityContex
 *
 */
 EntitiesManager.prototype.subFlowShort = async function (entityData, context, computeFlag) {
-  console.log('subFLOWSHOERT start--------------------------------------------')
   // set dataPrint
   let dataPrint = this.liveSEntities[entityData.entity.shell].datauuid[entityData.entity.resultuuid]
-  // console.log('dataPriont March')
-  // console.log(dataPrint)
   if (computeFlag === false) {
     // datatype table structure needs setting for visualisation
     this.liveSEntities[entityData.entity.shell].liveDatatypeC.datatypeInfoLive = {}
@@ -621,11 +585,6 @@ EntitiesManager.prototype.subFlowShort = async function (entityData, context, co
 *
 */
 EntitiesManager.prototype.computeFlow = async function (shellID, updateModContract, dataPrint, datastatus, sourceStatus) {
-  console.log('COMPUTE___FLOW')
-  // console.log(dataPrint)
-  // console.log(datastatus)
-  // console.log(sourceStatus)
-  // console.log(dataPrint)
   let modContractUpdate = updateModContract
   // else go through creating new KBID entry
   // set the new updated time settings for the new contract
@@ -635,19 +594,14 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
   // need to save per compute else keep dataPrint as is
   if (datastatus === 'datalive' && sourceStatus === 'savesource') {
     // save data Peer Store
-    // console.log('COMPF--dataPrint BOTH datalive savesource')
-    // console.log(dataPrint)
     if (engineReturn === true) {
       // console.log('COMPF--data to save')
       let saveStatus = this.saveResultsProtocol(shellID, dataPrint.couple.hash)
       let saveStatusTwo = this.saveResultsProtocol(shellID, dataPrint.hash)
     } else {
-      // console.log('COMPF-no data to save')
     }
   } else {
     // save data Peer Stor
-    // console.log('COMPF--sourceSAVE--dataPrint before save')
-    // console.log(dataPrint)
     let saveStatus = this.saveResultsProtocol(shellID, dataPrint.hash)
   }
   // new version of Ref Contracts of Compute Modules info
@@ -673,9 +627,6 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
 *
 */
 EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modUpdateContract, dataPrint, datastatus, sourceStatus) {
-  // console.log('COMPUTEENGINE--start++++++++++++++++++++++++++++++++++++++++++++')
-  // console.log(datastatus)
-  // console.log(sourceStatus)
   let dataCheck = false
   this.liveSEntities[shellID].liveTimeC.setMasterClock(dataPrint.triplet.timeout)
   // proof of evidence
@@ -687,44 +638,33 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
   this.liveSEntities[shellID].evidenceChain.push(evProof1)
   // data live in entity or source query required?
   if (datastatus !== 'datalive') {
-    console.log('COMPENG--first data asked for')
     await this.liveSEntities[shellID].liveDataC.DataControlFlow(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDeviceC.apiData, modUpdateContract, 'empty', dataPrint)
     // proof of evidence
     let evProof2 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.dataRaw)
     this.liveSEntities[shellID].evidenceChain.push(evProof2)
   } else if (datastatus === 'datalive' && sourceStatus === 'savesource') {
-    // console.log('COMPENG--dataPrint when first time source get before compute e.g avg')
-    // console.log(dataPrint)
     await this.liveSEntities[shellID].liveDataC.DataControlFlow(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDeviceC.apiData, modUpdateContract, 'empty', dataPrint)
     // proof of evidence
     let evProof2 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.dataRaw)
     this.liveSEntities[shellID].evidenceChain.push(evProof2)
   } else {
-    // console.log('COMPENG--data already in entity')
   }
   // check data in component
   if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined) {
     if(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].length === 0 ) {
-      console.log('no raw or tidy data. exit')
       dataCheck = false
     } else {
-      console.log('YES data')
       dataCheck = true
     }
   }
   if (dataCheck === true) {
-    // console.log('COMPENG--yes compute')
     this.computeStatus = this.liveSEntities[shellID].liveComputeC.filterCompute(modUpdateContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
-    // console.log('COMPENG--data RETURNED COMPUTE')
-    // console.log(this.computeStatus)
     // need to set the compute data per compute dataPrint
     if (datastatus !== 'datalive') {
       // console.log('COMPENG--datalive NOT')
       let evProof3 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
       this.liveSEntities[shellID].evidenceChain.push(evProof3)
     } else {
-      // console.log('COMPENG--last else')
-      // this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] = this.computeStatus
       let computeDatauuid = dataPrint.couple.hash
       this.liveSEntities[shellID].liveDataC.liveData[computeDatauuid] = this.computeStatus
       // proof of evidence
@@ -733,7 +673,6 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
       return true
     }
   } else {
-    console.log('COMPENG--no compute')
     return false
   }
 }
@@ -744,9 +683,6 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
 *
 */
 EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowState, dataPrint, flag) {
-  console.log('VISFLOW--start')
-  // console.log(dataPrint)
-  // console.log(Object.keys(this.liveSEntities[shellID].liveDataC.liveData))
   let visContract = visModule.value.info.visualise
   if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined && this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].length > 0) {
     // yes data to visualise
@@ -756,7 +692,6 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowS
     this.liveSEntities[shellID].evidenceChain.push(evProof)
   } else {
     // no data to process
-    console.log('nodata path for visusation count')
     this.liveSEntities[shellID].liveVisualC.nodataInfo(dataPrint, visModule)
   }
   return true
@@ -776,7 +711,6 @@ EntitiesManager.prototype.dataoutListener = function (shellID) {
       entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID]
       entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
       // required back instant or update resutls store or both
-      // console.log('viack back EMIT-3--EMIT--dataoutlistener bundle')
       this.emit('visualFirstRange', entityOut)
     } else {
       let entityOut = {}
@@ -794,10 +728,6 @@ EntitiesManager.prototype.dataoutListener = function (shellID) {
 *
 */
 EntitiesManager.prototype.saveResultsProtocol = function (shellID, dataID) {
-  // console.log('save PROTOCOL ptop store')
-  // console.log(dataID)
-  // console.log(this.liveSEntities[shellID].liveDataC.liveData)
-  // console.log(this.liveSEntities[shellID].liveDataC.liveData[dataID])
   let localthis = this
   // first save results crypto storage
   // prepare save structure
@@ -810,8 +740,6 @@ EntitiesManager.prototype.saveResultsProtocol = function (shellID, dataID) {
     // form the save Object
     saveObject.hash = dataID
     saveObject.data = dataPair
-    // console.log('object to store')
-    // console.log(saveObject)
     localthis.emit('storePeerResults', saveObject)
   } else {
     console.log('no data to save')
@@ -835,9 +763,6 @@ EntitiesManager.prototype.visSingleVis = function (shellID) {
 *
 */
 EntitiesManager.prototype.deviceDataflow = async function (shellID, apiData) {
-  console.log('device data flow')
-  console.log(shellID)
-  console.log(apiData)
   let statusD = false
   // set the device in module
   statusD = await this.liveSEntities[shellID].liveDeviceC.setDevice(apiData.concept)
@@ -1011,31 +936,6 @@ EntitiesManager.prototype.saveKBIDProtocol = async function (modContract, saveOb
     // let indexKBID = await this.KBLlive.kbidINDEXsave(newIndex)
   }
   return true
-}
-
-/**
-*  start polling function
-* @method startPolling
-*
-*/
-EntitiesManager.prototype.startPolling = function (entID) {
-  // var url = "http://localhost/nodebook/polling/node-polling-to-event/example/json/birdList.json";
-  const localthis = this
-  let emitter = pollingtoevent(function(done) {
-    let data = 'james' // localthis.liveSEntities[entID].liveVisualC
-    let err = 'no data'
-    done(err, data)
-  }, {
-    longpolling: true
-  })
-
-  emitter.on("longpoll", function(data) {
-    console.log("longpoll emitted at %s, with data %j", Date.now(), data)
-  })
-
-  emitter.on("error", function(err) {
-    console.log("Emitter errored: %s. with", err)
-  })
 }
 
 export default EntitiesManager
