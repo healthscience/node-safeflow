@@ -95,10 +95,7 @@ EntitiesManager.prototype.peerKBLstart = async function (refCont) {
 */
 EntitiesManager.prototype.peerInput = async function (input) {
   // validate input data structure e.g. not empty etc.
-  console.log('ECS--input+++++++++++++++START++++++++++++++++++')
-  this.ecscounter++
-  console.log(this.ecscounter)
-  console.log(input)
+  // console.log('ECS--input+++++++++++++++START++++++++++++++++++')
   // console.log(util.inspect(input, {showHidden: false, depth: null}))
   let inputValid = this.validateInput(input)
   if (inputValid === true) {
@@ -202,19 +199,16 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, inputUUID
   // first assess what first flow and create waiting list (if any)
   let autoCheck = this.liveAutomation.updateAutomation(moduleOrder.compute.value.info)
   if (ECSinput.input === 'refUpdate') {
-    console.log('refupdate')
     // update device list per peer input
     this.deviceUpdateDataflow(shellID, moduleOrder.compute)
-    console.log('deivce udpate over')
     // update flow state for new input
     flowState = await this.flowPrepare(shellID, ECSinput, inputUUID, moduleOrder)
-    console.log('afer flow update')
     // set data science flow inputs
     this.setDataScienceInputs(shellID, inputUUID, ECSinput, moduleOrder, flowState, 'update')
     this.flowMany(shellID, inputUUID, false)
     let State = false
   } else {
-    // new ENTITY prepare COMPUTE
+    // new ENTITY prepare
     deviceInfo = moduleOrder.data.value.info.data.value
     let apiData = await this.deviceDataflow(shellID, deviceInfo)
     // 2 Compute - feed into ECS -KBID processor
@@ -595,7 +589,6 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
   if (datastatus === 'datalive' && sourceStatus === 'savesource') {
     // save data Peer Store
     if (engineReturn === true) {
-      // console.log('COMPF--data to save')
       let saveStatus = this.saveResultsProtocol(shellID, dataPrint.couple.hash)
       let saveStatusTwo = this.saveResultsProtocol(shellID, dataPrint.hash)
     } else {
@@ -661,7 +654,6 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
     this.computeStatus = this.liveSEntities[shellID].liveComputeC.filterCompute(modUpdateContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
     // need to set the compute data per compute dataPrint
     if (datastatus !== 'datalive') {
-      // console.log('COMPENG--datalive NOT')
       let evProof3 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
       this.liveSEntities[shellID].evidenceChain.push(evProof3)
     } else {
@@ -703,6 +695,7 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowS
 *
 */
 EntitiesManager.prototype.dataoutListener = function (shellID) {
+  let listcount = 0
   this.liveSEntities[shellID].liveVisualC.on('dataout', (resultUUID) => {
     let context = this.liveSEntities[shellID].datascience
     if (this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] !== undefined) {
@@ -720,6 +713,22 @@ EntitiesManager.prototype.dataoutListener = function (shellID) {
       this.emit('visualFirstRange', entityOut)
     }
   })
+}
+
+/**
+*  empty listner
+* @method emptyListerOUT
+*
+*/
+EntitiesManager.prototype.emptyListerOUT = function (shellID) {
+  let entityLive = Object.keys(this.liveSEntities)
+  // this.liveEManager.
+  function outMessage () {
+    console.log('listener dataout close')
+  }
+  for (let et of entityLive) {
+    this.liveSEntities[et].liveVisualC.removeAllListeners('dataout', outMessage)
+  }
 }
 
 /**

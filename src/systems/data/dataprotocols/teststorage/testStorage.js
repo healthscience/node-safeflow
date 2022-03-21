@@ -57,6 +57,7 @@ TestStorageAPI.prototype.COMPUTEbuilder = async function (dapi, device, time) {
 *
 */
 TestStorageAPI.prototype.COMPUTEbuilderLuft = async function (dapi, device, time) {
+  dapi.path = '/luftdatenGet/'
   let apitime = time / 1000
   let apitime2 = apitime + 86400
   let jsondata = await axios.get(dapi.namespace + dapi.path + this.tempPubkey + '/' + this.tempToken + '/' + device + '/' + apitime + '/' + apitime2)
@@ -72,8 +73,8 @@ TestStorageAPI.prototype.deviceRESTbuilder = async function (dapi) {
   let jsondata = []
   if (dapi.apipath === '/computedata/' ) {
    jsondata = await axios.get(dapi.apibase + '/contextdata/' + this.tempPubkey + '/' + this.tempToken)
-  } else if (dapi.apipath === '/luftdatenGet/') {
-   jsondata = await axios.get(dapi.apibase + '/luftdatendevice/' + this.tempPubkey + '/' + this.tempToken)
+  } else if (dapi.apipath === '/luftdatendevice/') {
+    jsondata = await axios.get(dapi.apibase + '/luftdatendevice/' + this.tempPubkey + '/' + this.tempToken)
   }
   return jsondata.data
 }

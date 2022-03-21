@@ -52,7 +52,6 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
     rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device).catch(e => console.log('Error: ', e.message))
   } else if (type === 'COMPUTE') {
-    console.log('what type of compute?????????????????')
     let extractURL = {}
     extractURL.namespace = sourceInfo.sourceapiquery.namespace
     extractURL.path = sourceInfo.sourceapiquery.apipath
@@ -60,7 +59,7 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     // temp before smart rest extractor is built
     if (extractURL.path === '/computedata/') {
       rawHolder = await this.liveTestStorage.COMPUTEbuilder(extractURL, device, time).catch(e => console.log('Error: ', e.message))
-    } else if (extractURL.path === '/luftdatenGet/') {
+    } else if (extractURL.path === '/luftdatendevice/') {
       rawHolder = await this.liveTestStorage.COMPUTEbuilderLuft(extractURL, device, time).catch(e => console.log('Error: ', e.message))
     } else if (extractURL.path === '/sqliteGadgetbridge/') {
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
@@ -70,8 +69,6 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
       rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device, time).catch(e => console.log('Error: ', e.message))
     }
   }
-  console.log('rawholder')
-  console.log(rawHolder.length)
   return rawHolder
 }
 

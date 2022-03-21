@@ -174,4 +174,26 @@ safeFlow.prototype.entityGetter = function (shellID) {
   })
 }
 
+/**
+* clear the vis listener
+* @method emptyListeners
+*
+*/
+safeFlow.prototype.emptyListeners = function (shellID) {
+  console.log('empty listenersSAFELOSW')
+  console.log(shellID)
+  // console.log(this.liveEManager)
+  /* console.log(Object.keys(this.liveEManager.liveSEntities))
+  let entityLive = Object.keys(this.liveEManager.liveSEntities)
+  // this.liveEManager.
+  function outMessage () {
+    console.log('listener dataout close')
+  }
+  for (let et of entityLive) {
+    this.liveEManager.liveSEntities[et].liveVisualC.removeAllListeners('dataout', outMessage)
+  } */
+  // this.liveEManager.emptyListerOUT('close')
+  return true
+}
+
 export default safeFlow
