@@ -73,7 +73,7 @@ TestStorageAPI.prototype.deviceRESTbuilder = async function (dapi) {
   let jsondata = []
   if (dapi.apipath === '/computedata/' ) {
    jsondata = await axios.get(dapi.apibase + '/contextdata/' + this.tempPubkey + '/' + this.tempToken)
-  } else if (dapi.apipath === '/luftdatendevice/') {
+  } else if (dapi.device.query === '/luftdatendevice/') {
     jsondata = await axios.get(dapi.apibase + '/luftdatendevice/' + this.tempPubkey + '/' + this.tempToken)
   }
   return jsondata.data

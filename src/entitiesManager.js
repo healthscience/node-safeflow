@@ -13,6 +13,7 @@ import AutomationManager from './automationManager.js'
 import CNRLUtility from './kbl-cnrl/cnrlUtility.js'
 import CryptoUtility from './kbl-cnrl/cryptoUtility.js'
 import Entity from './scienceEntities.js'
+import throttledQueue from 'throttled-queue'
 import util from 'util'
 import events from 'events'
 // import pollingtoevent from 'polling-to-event'
@@ -31,6 +32,7 @@ var EntitiesManager = function (auth) {
   this.resultcount = 0
   this.computeFlag = false
   this.ecscounter = 0
+  this.throttle = throttledQueue(1, 100)
 }
 
 /**
@@ -383,6 +385,9 @@ EntitiesManager.prototype.flowMany = async function (shellID, inputUUID, compute
   }
   // is a range of devices, datatype or time ranges and single or multi display?
   if (ecsInput.flowstate.devicerange === true && ecsInput.flowstate.datatyperange === true && ecsInput.flowstate.timerange === true) {
+    // console.log(this.liveSEntities[shellID].liveDeviceC.devices)
+    // console.log(this.liveSEntities[shellID].liveDatatypeC.datatypesLive)
+    // console.log(timeList)
     for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
       // reset expect count (incase something didnt clear)
       if (computeFlag === false) {
@@ -390,11 +395,13 @@ EntitiesManager.prototype.flowMany = async function (shellID, inputUUID, compute
       }
       for (let datatype of this.liveSEntities[shellID].liveDatatypeC.datatypesLive) {
         for (let time of timeList) {
-          // hash the context device, datatype and time
-          let datauuid = this.resultsUUIDbuilder(device.device_mac, datatype, time)
-          this.trackDataUUIDS(shellID, inputUUID, datauuid, device.device_mac, datatype, time, computeFlag, dataPrint)
-          let entityLivedata = this.entityResultsReady(shellID, ecsInput.input, datauuid, computeFlag)
-          let resultCheckState = false
+          this.throttle(() => {
+            // hash the context device, datatype and time
+            let datauuid = this.resultsUUIDbuilder(device.device_mac, datatype, time)
+            this.trackDataUUIDS(shellID, inputUUID, datauuid, device.device_mac, datatype, time, computeFlag, dataPrint)
+            this.entityResultsReady(shellID, ecsInput.input, datauuid, computeFlag)
+            // let resultCheckState = false
+          })
         }
       }
     }
@@ -592,6 +599,7 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
       let saveStatus = this.saveResultsProtocol(shellID, dataPrint.couple.hash)
       let saveStatusTwo = this.saveResultsProtocol(shellID, dataPrint.hash)
     } else {
+      console.log('s2')
     }
   } else {
     // save data Peer Stor
@@ -633,7 +641,7 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
   if (datastatus !== 'datalive') {
     await this.liveSEntities[shellID].liveDataC.DataControlFlow(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDeviceC.apiData, modUpdateContract, 'empty', dataPrint)
     // proof of evidence
-    let evProof2 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.dataRaw)
+    let evProof2 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.dataRaw[dataPrint.hash].length)
     this.liveSEntities[shellID].evidenceChain.push(evProof2)
   } else if (datastatus === 'datalive' && sourceStatus === 'savesource') {
     await this.liveSEntities[shellID].liveDataC.DataControlFlow(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDeviceC.apiData, modUpdateContract, 'empty', dataPrint)
@@ -654,7 +662,7 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
     this.computeStatus = this.liveSEntities[shellID].liveComputeC.filterCompute(modUpdateContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
     // need to set the compute data per compute dataPrint
     if (datastatus !== 'datalive') {
-      let evProof3 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
+      let evProof3 =  this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
       this.liveSEntities[shellID].evidenceChain.push(evProof3)
     } else {
       let computeDatauuid = dataPrint.couple.hash

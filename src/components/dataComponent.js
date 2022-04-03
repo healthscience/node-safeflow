@@ -49,11 +49,12 @@ DataComponent.prototype.setDevicesLive = async function () {
 *  source data from device sensor
 * @method RawData
 *
-*/
+
 DataComponent.prototype.sourceData = async function (source, dataAPI, contract, hash, device, datatype, time) {
   await this.DataControlFlow(source, dataAPI, contract, hash, device, datatype, time)
   return true
 }
+*/
 
 /**
 *
@@ -95,7 +96,6 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
     }
     let dataMatch = this.FilterDownDT(source, contract, datauuid, dataPrint)
   } else {
-    console.log('DATACOMP--no SOURCE data')
     this.dataRaw[datauuid] = []
     this.liveData[datauuid] = []
   }

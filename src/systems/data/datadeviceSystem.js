@@ -46,53 +46,70 @@ DatadeviceSystem.prototype.getLiveDevices = function (devicesIN) {
 }
 
 /**
-* get the inital context for data required
+* get the inital device(s) for data required
 * @method storedDevices
 *
 */
 DatadeviceSystem.prototype.storedDevices = async function (dapi) {
-  // MAP api to REST library functions for the API
+  // MAP devices to reference contract devices info or use query path to retrieve
   const localthis = this
   let currentDevices = []
   let result = []
   if (dapi.api === 'sqlite') {
-    // sqlite
-    if (dapi.apipath === '/sqliteGadgetbridge/') {
-      // call back function
-      function dataSQL (err, rows) {
-        let data = []
-        if (err) {
-          throw err
+    if (dapi.device?.query.length === 0) {
+      currentDevices.push(dapi.device)
+    } else {
+      if (dapi.device.query === '/sqliteGadgetbridge/') {
+        // call back function
+        function dataSQL (err, rows) {
+          let data = []
+          if (err) {
+            throw err
+          }
+          rows.forEach((row) => {
+            data.push(row)
+          })
+          return data
         }
-        rows.forEach((row) => {
-          data.push(row)
-        })
-        return data
+        let promiseDevice = await this.liveSQLiteStorage.SQLiteDevicePromise()
+        currentDevices = this.convertStandardKeyNames(promiseDevice)
       }
-      // let beforeConvertKeyNames = await this.liveSQLiteStorage.SQLiteDeviceBuilder(dataSQL)
-      let promiseDevice = await this.liveSQLiteStorage.SQLiteDevicePromise()
-      currentDevices = this.convertStandardKeyNames(promiseDevice)
     }
   } else if (dapi.api === 'json') {
-    let tempMAC = crypto
-    .createHash('sha256')
-    .update(dapi.name, 'utf8')
-    .digest('hex')
-    let renameKeys = {}
-    renameKeys.id = tempMAC
-    renameKeys.device_name = 'sensor'
-    renameKeys.device_manufacturer = 'unknown'
-    renameKeys.device_mac = tempMAC
-    renameKeys.device_type = 'hardware'
-    renameKeys.device_model = 'version'
-    currentDevices.push(renameKeys)
-  } else {
-    result = await this.liveTestStorage.deviceRESTbuilder(dapi)
-    if (dapi.apipath === '/computedata/') {
-      currentDevices = this.sortLiveDevices(result)
+    if (dapi.device?.query.length === 0) {
+      currentDevices.push(dapi.device)
     } else {
-      currentDevices = result
+      let tempMAC = crypto
+      .createHash('sha256')
+      .update(dapi.name, 'utf8')
+      .digest('hex')
+      let renameKeys = {}
+      renameKeys.id = tempMAC
+      renameKeys.device_name = 'sensor'
+      renameKeys.device_manufacturer = 'unknown'
+      renameKeys.device_mac = tempMAC
+      renameKeys.device_type = 'hardware'
+      renameKeys.device_model = 'version'
+      currentDevices.push(renameKeys)
     }
+  } else if (dapi.api === 'rest') {
+      if (dapi.device?.query.length === 0) {
+        currentDevices.push(dapi.device)
+      } else {
+        result = await this.liveTestStorage.deviceRESTbuilder(dapi)
+        if (dapi.apipath === '/computedata/') {
+          currentDevices = this.sortLiveDevices(result)
+        } else {
+          currentDevices = result
+        }
+      }
+  } else if (dapi.api === 'csv') {
+    if (dapi.device?.query.length === 0) {
+      currentDevices.push(dapi.device)
+    } else {
+    }
+  } else {
+    currentDevices = []
   }
   return currentDevices
 }

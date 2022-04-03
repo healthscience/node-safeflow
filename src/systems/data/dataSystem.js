@@ -59,9 +59,9 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     // temp before smart rest extractor is built
     if (extractURL.path === '/computedata/') {
       rawHolder = await this.liveTestStorage.COMPUTEbuilder(extractURL, device, time).catch(e => console.log('Error: ', e.message))
-    } else if (extractURL.path === '/luftdatendevice/') {
+    } else if (extractURL.path === '/luftdatenGet/') {
       rawHolder = await this.liveTestStorage.COMPUTEbuilderLuft(extractURL, device, time).catch(e => console.log('Error: ', e.message))
-    } else if (extractURL.path === '/sqliteGadgetbridge/') {
+    } else if (extractURL.path === '/sqlite/Gadgetbridge.db') {
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
       rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo, device, time)
     } else if (extractURL.file === 'jsonfile') {
