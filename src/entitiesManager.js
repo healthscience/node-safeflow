@@ -599,7 +599,6 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
       let saveStatus = this.saveResultsProtocol(shellID, dataPrint.couple.hash)
       let saveStatusTwo = this.saveResultsProtocol(shellID, dataPrint.hash)
     } else {
-      console.log('s2')
     }
   } else {
     // save data Peer Stor
