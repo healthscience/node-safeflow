@@ -32,7 +32,7 @@ var ComputeSystem = function (setIN) {
 util.inherits(ComputeSystem, events.EventEmitter)
 
 /**
-* computation gateway
+* computation gateway  // need function to call library to get list of active compoute contacts??? TODO
 * @method computationSystem
 *
 */

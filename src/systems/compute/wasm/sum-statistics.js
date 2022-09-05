@@ -10,7 +10,7 @@
 * @version    $Id$
 */
 import TimeUtilities from '../../time/timeUtility.js'
-import TestStorageAPI from '../../data/dataprotocols/teststorage/testStorage.js'
+import TestStorageAPI from '../../data/dataprotocols/rest/index.js'
 import util from 'util'
 import events from 'events'
 

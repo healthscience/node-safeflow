@@ -61,8 +61,9 @@ DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
       let packAPImatch = {}
       packAPImatch.cnrl = dtt.refcontract
       packAPImatch.column = dtt.column
-      packAPImatch.apipath = sourceAPI.apipath
-      packAPImatch.namespace = sourceAPI.apibase
+      packAPImatch.apipath = sourceAPI.api
+      packAPImatch.namespace = sourceAPI.filename
+      packAPImatch.tablesqlite = sourceAPI.sqlitetablename
       apiMatch = packAPImatch
     }
   }

@@ -38,7 +38,7 @@ util.inherits(JSONfileAPI, events.EventEmitter)
 JSONfileAPI.prototype.jsonFilebuilder = async function (dapi, device, time) {
   let timeColumn = ''
   for (let tr of dapi.data.tablestructure) {
-    if (tr.refcontract === '2d11318841f43034df41de9b38ab5e77b6b01bcf')
+    if (tr.refcontract === 'f3d388ebd946007626ee1d6ce0642710d550eb6d')
     timeColumn = tr.column
   }
   let fileLocation = '/' + dapi.data.apibase + dapi.data.apipath

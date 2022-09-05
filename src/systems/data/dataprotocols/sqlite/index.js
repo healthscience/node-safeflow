@@ -5,7 +5,7 @@
 *
 * @class SQLiteAPI
 * @package    testStorage API
-* @copyright  Copyright (c) 2019 James Littlejohn
+* @copyright  Copyright (c) 2022 James Littlejohn
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
@@ -15,17 +15,18 @@ import sqlite3 from 'sqlite3'
 import os from 'os'
 import fs from 'fs'
 
-var SQLiteAPI = function (setUP) {
+var SQLiteAPI = function (dataAPI) {
   events.EventEmitter.call(this)
+  this.liveDataAPI = dataAPI
   // check if any database files?
-  let dbSQLitedir = os.homedir() + '/peerlink/sqlite/'
+  /* let dbSQLitedir = os.homedir() + '/peerlink/sqlite/'
   let dbList = []
   fs.readdirSync(dbSQLitedir).forEach(file => {
     dbList.push(file)
   })
   if (dbList.length > 0) {
     this.db = new sqlite3.Database(os.homedir() + '/peerlink/sqlite/Gadgetbridge')
-  }
+  } */
 }
 
 /**
@@ -33,6 +34,57 @@ var SQLiteAPI = function (setUP) {
 * @method inherits
 */
 util.inherits(SQLiteAPI, events.EventEmitter)
+
+/**
+*  set file path, read and make sqlite3 connect db
+* @method SQLitebuilder
+*
+*/
+SQLiteAPI.prototype.SQLiteSetup = async function (dapi, device, time) {
+  let dbFile = await this.liveDataAPI.dataAPI.hyperdriveLocalfile('sqlite/' + dapi)
+  this.db = new sqlite3.Database(dbFile)
+}
+
+/**
+*  from SQL query to extract data Promise version
+* @method SQLitebuilderPromise
+*
+*/
+SQLiteAPI.prototype.SQLitebuilderPromise = async function (table, dapi, device, time) {
+  // first setup the db MI_BAND_ACTIVITY_SAMPLE
+  await this.SQLiteSetup(dapi)
+  let apiTime1 = time / 1000
+  let apitime2 = apiTime1 + 86400
+  const res = await new Promise((resolve, reject) => {
+    let sql = 'SELECT * FROM ' + table + ' WHERE DEVICE_ID = ' + device + ' AND TIMESTAMP BETWEEN ' + apiTime1 + ' AND ' + apitime2 + ' '
+    this.db.all(sql, [], (err, rows) => {
+      if (err)
+        reject(err)
+        resolve(rows)
+    })
+  })
+  return res
+}
+
+/*
+*  from SQL query to extract data with promise
+* @method SQLiteDevicePromise
+*
+*/
+SQLiteAPI.prototype.SQLiteDevicePromise = async function (table, filename) {
+  // need to connect to the db requested
+  // first setup the db
+  await this.SQLiteSetup(filename)
+  const res = await new Promise((resolve, reject) => {
+    let sql = `SELECT * FROM ` + table  // DEVICE`
+    this.db.all(sql, [], (err, rows) => {
+      if (err)
+        reject(err)
+        resolve(rows)
+    })
+  })
+  return res
+}
 
 /**
 *  from SQL query to extract data
@@ -55,25 +107,6 @@ SQLiteAPI.prototype.SQLitebuilder = function (dapi, device, time) {
 }
 
 /**
-*  from SQL query to extract data Promise version
-* @method SQLitebuilderPromise
-*
-*/
-SQLiteAPI.prototype.SQLitebuilderPromise = async function (dapi, device, time) {
-  let apiTime1 = time / 1000
-  let apitime2 = apiTime1 + 86400
-  const res = await new Promise((resolve, reject) => {
-    let sql = 'SELECT * FROM MI_BAND_ACTIVITY_SAMPLE WHERE DEVICE_ID = ' + device + ' AND TIMESTAMP BETWEEN ' + apiTime1 + ' AND ' + apitime2 + ' '
-    this.db.all(sql, [], (err, rows) => {
-      if (err)
-        reject(err)
-        resolve(rows)
-    })
-  })
-  return res
-}
-
-/**
 *  from SQL query to extract data
 * @method SQLiteDeviceBuilder
 *
@@ -93,22 +126,6 @@ SQLiteAPI.prototype.SQLiteDeviceBuilder =  function (callback) {
     return data
   }) */
   return true
-}
-/*
-*  from SQL query to extract data with promise
-* @method SQLiteDevicePromise
-*
-*/
-SQLiteAPI.prototype.SQLiteDevicePromise = async function () {
-  const res = await new Promise((resolve, reject) => {
-    let sql = `SELECT * FROM DEVICE`
-    this.db.all(sql, [], (err, rows) => {
-      if (err)
-        reject(err)
-        resolve(rows)
-    })
-  })
-  return res
 }
 
 export default SQLiteAPI

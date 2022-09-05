@@ -5,12 +5,12 @@
 *
 * @class DatadeviceSystem
 * @package    safeFlow
-* @copyright  Copyright (c) 2019 James Littlejohn
+* @copyright  Copyright (c) 2022 James Littlejohn
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
 
-import TestStorageAPI from './dataprotocols/teststorage/testStorage.js'
+import TestStorageAPI from './dataprotocols/rest/index.js'
 import SQLiteAPI from './dataprotocols/sqlite/index.js'
 import util from 'util'
 import events from 'events'
@@ -18,8 +18,8 @@ import crypto from 'crypto'
 
 var DatadeviceSystem = function (setIN) {
   events.EventEmitter.call(this)
-  this.liveTestStorage = new TestStorageAPI(setIN)
-  this.liveSQLiteStorage = new SQLiteAPI()
+  this.liveRESTStorage = new TestStorageAPI(setIN)
+  this.liveSQLiteStorage = new SQLiteAPI(setIN)
   this.devicePairs = []
   this.dataRaw = []
 }
@@ -59,21 +59,8 @@ DatadeviceSystem.prototype.storedDevices = async function (dapi) {
     if (dapi.device?.query.length === 0) {
       currentDevices.push(dapi.device)
     } else {
-      if (dapi.device.query === '/sqliteGadgetbridge/') {
-        // call back function
-        function dataSQL (err, rows) {
-          let data = []
-          if (err) {
-            throw err
-          }
-          rows.forEach((row) => {
-            data.push(row)
-          })
-          return data
-        }
-        let promiseDevice = await this.liveSQLiteStorage.SQLiteDevicePromise()
-        currentDevices = this.convertStandardKeyNames(promiseDevice)
-      }
+      let promiseDevice = await this.liveSQLiteStorage.SQLiteDevicePromise(dapi.device.query, dapi.filename)
+      currentDevices = this.convertStandardKeyNames(promiseDevice)
     }
   } else if (dapi.api === 'json') {
     if (dapi.device?.query.length === 0) {
@@ -96,7 +83,7 @@ DatadeviceSystem.prototype.storedDevices = async function (dapi) {
       if (dapi.device?.query.length === 0) {
         currentDevices.push(dapi.device)
       } else {
-        result = await this.liveTestStorage.deviceRESTbuilder(dapi)
+        result = await this.liveRESTStorage.deviceRESTbuilder(dapi)
         if (dapi.apipath === '/computedata/') {
           currentDevices = this.sortLiveDevices(result)
         } else {

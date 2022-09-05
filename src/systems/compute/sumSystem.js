@@ -9,7 +9,7 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-import TestStorageAPI from '../data/dataprotocols/teststorage/testStorage.js'
+import TestStorageAPI from '../data/dataprotocols/rest/index.js'
 import StatisticsSystem from './wasm/sum-statistics.js'
 import DataSystem from '../data/dataSystem.js'
 import TidyDataSystem from '../data/tidydataSystem.js'

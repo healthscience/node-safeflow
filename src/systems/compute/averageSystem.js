@@ -55,7 +55,7 @@ AverageSystem.prototype.averageSystemStart = function (contract, dataPrint, data
     // time in seconds not milliseconds
     let saveTime = dataPrint.couple.triplet.timeout / 1000
     let formData = {}
-    formData['2d11318841f43034df41de9b38ab5e77b6b01bcf'] = saveTime
+    formData['f3d388ebd946007626ee1d6ce0642710d550eb6d'] = saveTime
     formData[dataPrint.couple.triplet.datatype] = saveReady.average
     saveJSON.push(formData)
   } else {

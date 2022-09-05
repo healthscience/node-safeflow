@@ -50,6 +50,7 @@ DatatypeComponent.prototype.setDataTypeLive = function (liveDTs) {
     let hyponDTs = dtl.includes('-')
     if (hyponDTs === false) {
       this.datatypesLive.push(dtl)
+      // this.sourceDatatypes.push(dtl)
     } else {
       // split the dt into parts
       let splitDT = dtl.split('-')

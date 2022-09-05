@@ -10,7 +10,7 @@
 * @version    $Id$
 */
 
-import TestStorageAPI from './dataprotocols/teststorage/testStorage.js'
+import TestStorageAPI from './dataprotocols/rest/index.js'
 import util from 'util'
 import events from 'events'
 

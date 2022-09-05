@@ -18,13 +18,13 @@ import util from 'util'
 import events from 'events'
 // import pollingtoevent from 'polling-to-event'
 
-var EntitiesManager = function (auth) {
+var EntitiesManager = function (dataAPI) {
   events.EventEmitter.call(this)
   // start error even listener
   this.eventErrorListen()
-  this.auth = auth
+  this.auth = dataAPI
   this.liveAutomation = new AutomationManager()
-  this.liveCNRLUtility = new CNRLUtility(auth)
+  this.liveCNRLUtility = new CNRLUtility(this.auth)
   this.liveCrypto = new CryptoUtility()
   this.liveSEntities = {}
   this.automationReview()
@@ -85,6 +85,7 @@ EntitiesManager.prototype.automationReview = function (refCont) {
 */
 EntitiesManager.prototype.peerKBLstart = async function (refCont) {
   // read peer kbledger
+  console.log('within entity manager')
   let NXPexpanded = refCont // assume incoming NXP is expanded format, need to check
   let dataSummary = this.peerInput(NXPexpanded)
   return dataSummary
@@ -374,6 +375,7 @@ EntitiesManager.prototype.trackDataUUIDS = function (shellID, inputUUID, uuid, d
 */
 EntitiesManager.prototype.flowMany = async function (shellID, inputUUID, computeFlag, dataPrint) {
   let ecsInput = this.liveSEntities[shellID].datascience
+  // console.log(ecsInput)
   // look at compute context flag and set datatypes and time as required
   let timeList = []
   if (computeFlag === true) {
@@ -385,6 +387,7 @@ EntitiesManager.prototype.flowMany = async function (shellID, inputUUID, compute
   }
   // is a range of devices, datatype or time ranges and single or multi display?
   if (ecsInput.flowstate.devicerange === true && ecsInput.flowstate.datatyperange === true && ecsInput.flowstate.timerange === true) {
+    // console.log('flow combos')
     // console.log(this.liveSEntities[shellID].liveDeviceC.devices)
     // console.log(this.liveSEntities[shellID].liveDatatypeC.datatypesLive)
     // console.log(timeList)
@@ -511,8 +514,8 @@ EntitiesManager.prototype.subFlowFull = async function (entityData, entityContex
           this.liveSEntities[entityData.entity.shell].liveDatatypeC.switchSourceDatatypes()
           // set the time for just this entry
           this.liveSEntities[entityData.entity.shell].liveTimeC.setSourceTime(dataPrint.triplet.timeout)
+          // go back to flow and get source so COMPUTE can get source data ie not results data
           this.flowMany(entityData.entity.shell, inputUUID, computeFlag, dataPrint)
-          // does the source data existing for this computation?
         }
       } else if (this.liveSEntities[entityData.entity.shell].liveDatatypeC.sourceDatatypes.length > 0 && computeFlag === true) {
         await this.computeFlow(entityData.entity.shell, entityContext.flowstate.updateModContract, dataPrint, 'datalive', 'savesource')

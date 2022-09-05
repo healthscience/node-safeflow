@@ -58,11 +58,10 @@ DataComponent.prototype.sourceData = async function (source, dataAPI, contract, 
 
 /**
 *
-* @method DataControlFlow
 *
 */
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, dataPrint) {
-  let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
+  let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, contract)
   // form unique dataPrint for dataUUID
   // console.log('databack')
   // console.log(dataRback[0])

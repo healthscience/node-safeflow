@@ -13,12 +13,12 @@ import EntitiesManager from './entitiesManager.js'
 import util from 'util'
 import events from 'events'
 
-var safeFlow = function () {
+var safeFlow = function (dataAPI) {
   events.EventEmitter.call(this)
+  this.dataAPIlive = dataAPI
   // start error even listener
   this.eventErrorListen()
-  this.defaultStorage = 'http://165.227.244.213:8882' // for test network only will be removed
-  this.liveEManager = new EntitiesManager()
+  this.liveEManager = new EntitiesManager(this.dataAPIlive)
   this.resultCount = 0
 }
 
@@ -53,7 +53,8 @@ safeFlow.prototype.networkAuthorisation = function (auth) {
   // TEMP testnetwork defaults
   let peerAuth = {}
   peerAuth.settings = auth
-  peerAuth.namespace = this.defaultStorage
+  peerAuth.dataAPI = this.dataAPIlive 
+  peerAuth.storageAuth = this.defaultStorage
   let authState = {}
   let verify = false
   // check release is compatible and untampered
@@ -110,6 +111,7 @@ safeFlow.prototype.verifyRelease = function (refContract) {
 *
 */
 safeFlow.prototype.startFlow = async function (refContract) {
+  console.log('start flow HOP ')
   let startData = await this.liveEManager.peerKBLstart(refContract)
   return startData
 }
