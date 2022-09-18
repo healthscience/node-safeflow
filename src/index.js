@@ -66,7 +66,7 @@ safeFlow.prototype.networkAuthorisation = function (auth) {
     // set listener for ECS data back peer
     this.entityGetter()
     authState.safeflow = true
-    authState.type = 'auth'
+    authState.type = 'auth-hop'
     authState.auth = true
   }
   return authState
