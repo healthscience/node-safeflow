@@ -44,17 +44,23 @@ TidyDataSystem.prototype.tidyFilterRemove = function (tidyRules, datatype, apiDT
   const manFilter = (e, datatype, rule) => {
     let keepTidy = null
     let filterMat = []
-    for (var i = 0; i < 1; i++) {
+    for (var i = 0; i < rule.length; i++) {
       let convertIntCRule = parseInt(rule[i].tidycode, 10)
-      if (e[datatype] !== convertIntCRule) {
+      let dataNum = parseInt(e[datatype], 10)
+      if (dataNum === convertIntCRule) {
         filterMat.push(false)
       } else {
         filterMat.push(true)
       }
-      // if includes a false then needs removing
-      keepTidy = filterMat.includes(false)
+      console.log(filterMat)
     }
-    return keepTidy
+    // if includes a false then needs removing
+    keepTidy = filterMat.includes(false)
+    let tidyValue = true
+    if (keepTidy === true) {
+      tidyValue = false
+    }
+    return tidyValue
   }
   const newfullData = dataRaw.filter(n => manFilter(n, apiDTinfo.column, tidyRules))
   return newfullData
