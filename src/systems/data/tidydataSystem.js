@@ -52,7 +52,6 @@ TidyDataSystem.prototype.tidyFilterRemove = function (tidyRules, datatype, apiDT
       } else {
         filterMat.push(true)
       }
-      console.log(filterMat)
     }
     // if includes a false then needs removing
     keepTidy = filterMat.includes(false)
