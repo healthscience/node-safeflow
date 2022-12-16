@@ -22,7 +22,7 @@ var EntitiesManager = function (dataAPI) {
   events.EventEmitter.call(this)
   // start error even listener
   this.eventErrorListen()
-  this.auth = dataAPI
+  this.auth = dataAPI.dataAPI
   this.liveAutomation = new AutomationManager()
   this.liveCNRLUtility = new CNRLUtility(this.auth)
   this.liveCrypto = new CryptoUtility()

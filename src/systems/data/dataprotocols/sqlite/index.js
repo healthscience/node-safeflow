@@ -41,7 +41,7 @@ util.inherits(SQLiteAPI, events.EventEmitter)
 *
 */
 SQLiteAPI.prototype.SQLiteSetup = async function (dapi, device, time) {
-  let dbFile = await this.liveDataAPI.dataAPI.hyperdriveLocalfile('sqlite/' + dapi)
+  let dbFile = await this.liveDataAPI.hyperdriveLocalfile('sqlite/' + dapi)
   this.db = new sqlite3.Database(dbFile)
 }
 
