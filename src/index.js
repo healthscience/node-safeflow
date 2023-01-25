@@ -14,6 +14,8 @@ import util from 'util'
 import events from 'events'
 
 var safeFlow = function (dataAPI) {
+  console.log('SafeFlow-ECS begin')
+  // console.log(dataAPI)
   events.EventEmitter.call(this)
   this.dataAPIlive = dataAPI
   // start error even listener
@@ -59,7 +61,6 @@ safeFlow.prototype.networkAuthorisation = function (auth) {
   let verify = false
   // check release is compatible and untampered
   verify = this.verifyRelease()
-  console.log(verify)
   // verify keys
   if (verify === true ) {
     this.liveEManager = new EntitiesManager(peerAuth)
@@ -84,7 +85,6 @@ safeFlow.prototype.datastoreAuthorisation = function (authDS) {
   let verify = false
   // check release is compatible and untampered
   verify = this.verifyRelease()
-  console.log(verify)
   // verify keys
   if (verify === true ) {
     this.liveEManager.addDatastore(authDS)
@@ -111,7 +111,6 @@ safeFlow.prototype.verifyRelease = function (refContract) {
 *
 */
 safeFlow.prototype.startFlow = async function (refContract) {
-  console.log('start flow HOP ')
   let startData = await this.liveEManager.peerKBLstart(refContract)
   return startData
 }
@@ -146,8 +145,9 @@ safeFlow.prototype.entityGetter = function (shellID) {
     this.emit('displayEntity', data)
   })
   this.liveEManager.on('visualFirstRange', (data) => {
+
     this.resultCount++
-    if (this.resultCount < 32) {
+    if (this.resultCount > 0) {
       this.emit('displayEntityRange', data)
       // console.log('memoryPrint Start')
       // console.log(process.memoryUsage())
@@ -182,8 +182,6 @@ safeFlow.prototype.entityGetter = function (shellID) {
 *
 */
 safeFlow.prototype.emptyListeners = function (shellID) {
-  console.log('empty listenersSAFELOSW')
-  console.log(shellID)
   // console.log(this.liveEManager)
   /* console.log(Object.keys(this.liveEManager.liveSEntities))
   let entityLive = Object.keys(this.liveEManager.liveSEntities)

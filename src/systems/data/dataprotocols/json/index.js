@@ -37,7 +37,6 @@ util.inherits(JSONfileAPI, events.EventEmitter)
 *
 */
 JSONfileAPI.prototype.fileSetup = async function (dapi, device, time) {
-  console.log(dapi.data.jsonpath)
   let dbFile = await this.liveDataAPI.dataAPI.hyperdriveLocalfile(dapi.data.jsonpath) // ('json/' + dapi)
   return dbFile
 }
@@ -48,14 +47,10 @@ JSONfileAPI.prototype.fileSetup = async function (dapi, device, time) {
 *
 */
 JSONfileAPI.prototype.jsonFilebuilder = async function (dapi, device, time) {
-  console.log('start json builder of source data')
-  console.log(dapi)
   let fileLocal = await this.fileSetup(dapi)
-  console.log('localfile db')
-  console.log(fileLocal)
   let timeColumn = ''
   for (let tr of dapi.data.tablestructure) {
-    if (tr.refcontract === 'f3d388ebd946007626ee1d6ce0642710d550eb6d')
+    if (tr.refcontract === 'd76d9c3db7f2212335373873805b54dd1f903a06')
     timeColumn = tr.column
   }
   // let fileLocation = '/' + dapi.data.apibase + dapi.data.apipath
@@ -92,8 +87,6 @@ JSONfileAPI.prototype.jsonFilebuilder = async function (dapi, device, time) {
 
   let extractJSON = jsonParser(timeColumn).then(dataJ =>
   {
-    console.log('data')
-    console.log(dataJ)
     return dataJ
   })
   return extractJSON

@@ -41,7 +41,9 @@ util.inherits(SQLiteAPI, events.EventEmitter)
 *
 */
 SQLiteAPI.prototype.SQLiteSetup = async function (dapi, device, time) {
-  let dbFile = await this.liveDataAPI.hyperdriveLocalfile('sqlite/' + dapi)
+  // console.log('list files')
+  // const stream = this.liveDataAPI.DriveFiles.listFilesFolder('sqlite/')
+  let dbFile = await this.liveDataAPI.DriveFiles.hyperdriveLocalfile('sqlite/' + dapi)
   this.db = new sqlite3.Database(dbFile)
 }
 
@@ -52,11 +54,13 @@ SQLiteAPI.prototype.SQLiteSetup = async function (dapi, device, time) {
 */
 SQLiteAPI.prototype.SQLitebuilderPromise = async function (table, dapi, device, time) {
   // first setup the db MI_BAND_ACTIVITY_SAMPLE
+  // console.log('slqite query')
+  table = 'MI_BAND_ACTIVITY_SAMPLE'
   await this.SQLiteSetup(dapi)
   let apiTime1 = time / 1000
-  let apitime2 = apiTime1 + 86400
+  let apiTime2 = apiTime1 + 86400
   const res = await new Promise((resolve, reject) => {
-    let sql = 'SELECT * FROM ' + table + ' WHERE DEVICE_ID = ' + device + ' AND TIMESTAMP BETWEEN ' + apiTime1 + ' AND ' + apitime2 + ' '
+    let sql = 'SELECT * FROM ' + table + ' WHERE DEVICE_ID = ' + device + ' AND TIMESTAMP BETWEEN ' + apiTime1 + ' AND ' + apiTime2 + ' '
     this.db.all(sql, [], (err, rows) => {
       if (err)
         reject(err)

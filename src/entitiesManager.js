@@ -19,6 +19,8 @@ import events from 'events'
 // import pollingtoevent from 'polling-to-event'
 
 var EntitiesManager = function (dataAPI) {
+  console.log('entity manager start')
+  // console.log(dataAPI)
   events.EventEmitter.call(this)
   // start error even listener
   this.eventErrorListen()
@@ -85,7 +87,6 @@ EntitiesManager.prototype.automationReview = function (refCont) {
 */
 EntitiesManager.prototype.peerKBLstart = async function (refCont) {
   // read peer kbledger
-  console.log('within entity manager')
   let NXPexpanded = refCont // assume incoming NXP is expanded format, need to check
   let dataSummary = this.peerInput(NXPexpanded)
   return dataSummary

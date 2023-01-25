@@ -124,7 +124,7 @@ ChartSystem.prototype.structureMulitChartData = function (dataPrint, dataSet, so
       for (let labext of timeseriesDatasetHolder) {
         for (let dspair of labext.sourceData) {
           for (let eleTime of dspair.data)
-          allLabels.push(eleTime['f3d388ebd946007626ee1d6ce0642710d550eb6d'])
+          allLabels.push(eleTime['d76d9c3db7f2212335373873805b54dd1f903a06'])
         }
       }
       let uniqueTimeLabel = [...new Set(allLabels)]
@@ -448,7 +448,7 @@ ChartSystem.prototype.prepareOverlayDatasetData = function (dataPrint, labels, d
 */
 ChartSystem.prototype.structureChartData = function (rule, cData, dtConvert) {
   let dataPrep = {}
-  let splitDatax = cData.map(n => (n['f3d388ebd946007626ee1d6ce0642710d550eb6d'] * 1000))
+  let splitDatax = cData.map(n => (n['d76d9c3db7f2212335373873805b54dd1f903a06'] * 1000))
   let splitDatay = cData.map(n => n[rule])
   dataPrep.xaxis = splitDatax
   dataPrep.yaxis = splitDatay
@@ -519,7 +519,7 @@ ChartSystem.prototype.timestampMatcherTS = function (dataPrint, timeLabels, data
   let count = 0
   // check per existing datasets
   for (let timePoint of timeLabels) {
-    let matchLogic = dataIN.find(elem => elem['f3d388ebd946007626ee1d6ce0642710d550eb6d'] === timePoint)
+    let matchLogic = dataIN.find(elem => elem['d76d9c3db7f2212335373873805b54dd1f903a06'] === timePoint)
     if (matchLogic) {
       matchList.push(matchLogic[dataPrint.triplet.datatype])
     } else {
@@ -670,7 +670,7 @@ ChartSystem.prototype.textDatetoNumberFormat = function (labelIN) {
 ChartSystem.prototype.textDatetoNumberFormatDataset = function (labelIN) {
   let timePrep = []
   for (let li of labelIN) {
-    let fullTime = li['f3d388ebd946007626ee1d6ce0642710d550eb6d'] * 1000
+    let fullTime = li['d76d9c3db7f2212335373873805b54dd1f903a06'] * 1000
     let numDate = new Date(fullTime)
     let timeFormat = moment(numDate).format('HH:mm').valueOf()  // .format('YYYY-MM-DD hh:mm')
     timePrep.push(timeFormat)
@@ -686,7 +686,7 @@ ChartSystem.prototype.textDatetoNumberFormatDataset = function (labelIN) {
 ChartSystem.prototype.textDatetoNumberFormatDatasetTS = function (labelIN) {
   let timePrep = []
   for (let li of labelIN) {
-    let fullTime = li['f3d388ebd946007626ee1d6ce0642710d550eb6d'] * 1000
+    let fullTime = li['d76d9c3db7f2212335373873805b54dd1f903a06'] * 1000
     // let numDate = new Date(fullTime)
     //let timeFormat = moment(numDate).valueOf() // format('YYYY-MM-DD HH:mm').valueOf()  // .format('YYYY-MM-DD hh:mm')
     timePrep.push(fullTime)

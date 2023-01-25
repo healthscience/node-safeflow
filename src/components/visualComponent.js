@@ -194,10 +194,10 @@ VisualComponent.prototype.extractVisExpected = function (inputUUID, device) {
     if (matchDindex.length > 0 && matchDataList[device] !== undefined) {
       dataPlusmatch = matchDataList[device]
     } else {
-      console.log('VISCOMP--EXTRACT-- no data for this device')
+      console.log('VISCOMP--EXTRACT-- no data for this device1')
     }
   } else {
-    console.log('VISCOMP--EXTRACT--no INDEX for this device')
+    console.log('VISCOMP--EXTRACT--no INDEX for this device2')
   }
   return dataPlusmatch
 }
