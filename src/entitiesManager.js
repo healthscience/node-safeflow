@@ -203,6 +203,7 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, inputUUID
   // first assess what first flow and create waiting list (if any)
   let autoCheck = this.liveAutomation.updateAutomation(moduleOrder.compute.value.info)
   if (ECSinput.input === 'refUpdate') {
+    console.log('update-flow')
     // update device list per peer input
     this.deviceUpdateDataflow(shellID, moduleOrder.compute)
     // update flow state for new input
@@ -305,13 +306,81 @@ EntitiesManager.prototype.setDataScienceInputs = function (shellID, inputUUID, e
   entityInput.inputuuid = inputUUID
   entityInput.moduleorder = moduleOrder
   entityInput.flowstate = flowState
+  entityInput.waitingdataprint = []
   this.liveSEntities[shellID].datascience = entityInput
   // set the number of visualisations to be prepared?
   this.trackINPUTvisUUIDS(shellID, inputUUID, ecsIN, moduleOrder, flowState, status)
 }
 
 /**
-* prepare what visualisations are expected
+* data science context set per entity
+* @method setNewCompuateModule
+*
+*/
+EntitiesManager.prototype.setNewCompuateModule = function (shellID, tempComputeMod, dataPrint) {
+  this.liveSEntities[shellID].datascience.tempComputeMod = tempComputeMod
+  this.liveSEntities[shellID].datascience.waitingdataprint.push(dataPrint)
+}
+
+/**
+* remove the waiting property
+* @method removeDataSciencewaiting
+*
+*/
+EntitiesManager.prototype.removeDataSciencewaiting = function (shellID, dataPrint) {
+  let afterClearedWait = []
+  for (let dpr of this.liveSEntities[shellID].datascience.waitingdataprint) {
+    if (dpr.hash !== dataPrint) {
+      afterClearedWait.push(dpr)
+    }
+  }
+  this.liveSEntities[shellID].datascience.waitingdataprint = afterClearedWait
+}
+
+/**
+* update the compute module link contract 
+* @method updateDataScienceInputs
+*
+*/
+EntitiesManager.prototype.updateDataScienceInputs = function (shellID, computeModLink) {
+  let datascienceInputs = this.liveSEntities[shellID].datascience
+  datascienceInputs.moduleorder.compute = computeModLink
+  this.liveSEntities[shellID].datascience = datascienceInputs
+  console.log('AFTERT---compute contrac updated')
+  console.log(this.liveSEntities[shellID].datascience)
+  // check if waiting list items dataprint match if yes, return data to HOP
+  for (let dpr of this.liveSEntities[shellID].datascience.waitingdataprint ) {
+    if (datascienceInputs.dataprint.hash === dpr.hash) {
+      console.log('yes, data waiing for compuete contract')
+      let resultUUID = this.liveSEntities[shellID].datascience.waitingdataprint
+      if (this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] !== undefined) {
+        let entityOut = {}
+        entityOut.context = datascienceInputs
+        entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID]
+        entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+        // required back instant or update resutls store or both
+        this.emit('visualFirstRange', entityOut)
+      } else {
+        let entityOut = {}
+        entityOut.context = datascienceInputs
+        entityOut.data = 'none'
+        entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+        this.emit('visualFirstRange', entityOut)
+      }
+      // remove waiting entry from datascience
+      this.removeDataSciencewaiting(shellID, dpr.hash)
+    } else {
+      console.log('NO data for HOP after update compute wait')
+    }
+  }
+  // entityInput.moduleorder.compute = computeModLink
+   // set the number of visualisations to be prepared?
+  // this.trackINPUTvisUUIDS(shellID, inputUUID, ecsIN, moduleOrder, flowState, status)
+  return true
+}
+
+/**
+* prepare what visualisations that are expected
 * @method trackINPUTvisUUIDS
 *
 */
@@ -483,8 +552,10 @@ EntitiesManager.prototype.resultListener = function () {
     let computeFlag = checkData.entity.computeflag
     let liveContext = this.liveSEntities[checkData.entity.shell].datascience
     if (checkData.data === false) {
+      console.log('full-------------')
       await this.subFlowFull(checkData, liveContext, computeFlag)
     } else {
+      console.log('short-------------')
       await this.subFlowShort(checkData, liveContext, computeFlag)
     }
   })
@@ -559,6 +630,7 @@ EntitiesManager.prototype.subFlowShort = async function (entityData, context, co
     // preprae visualisation datasets
     await this.visualFlow(entityData.entity.shell, context.moduleorder.visualise, context.flowstate, dataPrint, false)
   } else {
+    // compute source required
     let rDUUID = entityData.entity.resultuuid
     let dataPrint = this.liveSEntities[entityData.entity.shell].datauuid[rDUUID]
     context.dataprint = dataPrint
@@ -614,15 +686,40 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
   updateModule.type = 'library'
   updateModule.reftype = 'update'
   updateModule.info = modContractUpdate
-  this.emit('updateModule', updateModule)
+  // add to list to check before return data to HOP
+  this.setNewCompuateModule(shellID, updateModule, dataPrint)
+  this.emit('updateModule', updateModule, shellID, dataPrint)
   // send message to PeerLink to make library ledger KBID entry
   // gather proof of evidence chain and hash and send KBLedger store
-  let hashofProofs = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].evidenceChain)
+  /* let hashofProofs = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].evidenceChain)
   let proofChain = {} // hash of all hashes through ECS plus hash of results?
   proofChain.hash = hashofProofs
   proofChain.data = dataPrint.hash
   this.emit('kbledgerEntry', proofChain)
+  this.liveSEntities[shellID].evidenceChain = [] */
+  return true
+}
+
+/**
+* prepare proof and make KBledger entry
+* @method prepareKBLedger
+*
+*/
+EntitiesManager.prototype.prepareKBLedger = function (uniqueCompute, shellID, dataPrint) {
+  console.log('update compute contract back form saving-------Form ledger and ALRT return of data to HOP')
+  // update the datascience holder
+  this.updateDataScienceInputs(shellID, uniqueCompute)
+  // gather proof of evidence chain and hash and send KBLedger store
+  let hashofProofs = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].evidenceChain)
+  // need to update 
+  let proofChain = {} // hash of all hashes through ECS plus hash of results?
+  proofChain.hash = hashofProofs
+  // currently dataprint but should make hash of unique compute contract key?
+  // proofChain.data = uniqueCompute.key
+  proofChain.data = dataPrint.hash
+  this.emit('kbledgerEntry', proofChain)
   this.liveSEntities[shellID].evidenceChain = []
+  return true
 }
 
 /**
@@ -708,20 +805,28 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowS
 EntitiesManager.prototype.dataoutListener = function (shellID) {
   let listcount = 0
   this.liveSEntities[shellID].liveVisualC.on('dataout', (resultUUID) => {
+    console.log('data event OUT SafeFlow+++++++++++++++++')
     let context = this.liveSEntities[shellID].datascience
-    if (this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] !== undefined) {
-      let entityOut = {}
-      entityOut.context = context
-      entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID]
-      entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
-      // required back instant or update resutls store or both
-      this.emit('visualFirstRange', entityOut)
+    console.log('CONTEXT--------update out modules')
+    console.log(context)
+    // has the update Compute Contract arrived?
+    if (context.tempComputeMod) {
+      console.log('update compuet ID awaiging')
     } else {
-      let entityOut = {}
-      entityOut.context = context
-      entityOut.data = 'none'
-      entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
-      this.emit('visualFirstRange', entityOut)
+      if (this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] !== undefined) {
+        let entityOut = {}
+        entityOut.context = context
+        entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID]
+        entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+        // required back instant or update resutls store or both
+        this.emit('visualFirstRange', entityOut)
+      } else {
+        let entityOut = {}
+        entityOut.context = context
+        entityOut.data = 'none'
+        entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+        this.emit('visualFirstRange', entityOut)
+      }
     }
   })
 }

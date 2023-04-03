@@ -16,6 +16,7 @@ import events from 'events'
 var safeFlow = function (dataAPI) {
   console.log('SafeFlow-ECS begin')
   // console.log(dataAPI)
+  console.log('bentotemplate-safeflowECS')
   events.EventEmitter.call(this)
   this.dataAPIlive = dataAPI
   // start error even listener
@@ -159,8 +160,12 @@ safeFlow.prototype.entityGetter = function (shellID) {
   this.liveEManager.on('visualUpdateRange', (data) => {
     this.emit('displayUpdateEntityRange', data)
   })
-  this.liveEManager.on('updateModule', (data) => {
-    this.emit('updateModule', data)
+  this.liveEManager.on('updateModule', (data, shellID, dataPrint) => {
+    this.emit('updateModule', data, shellID, dataPrint)
+  })
+  // update compute modules
+  this.on('updatesaved-compute', (updatesaveModule, shellID, dataPrint) => {
+    this.liveEManager.prepareKBLedger(updatesaveModule, shellID, dataPrint)
   })
   this.liveEManager.on('storePeerResults', (data) => {
     this.emit('storePeerResults', data)
