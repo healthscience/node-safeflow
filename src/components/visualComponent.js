@@ -292,7 +292,7 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
     visData.list = this.liveVislist
     // hold the data in the entity component
     this.visualData[dataPrint.hash] = visData
-    this.emit('dataout', 'empty')
+    this.emit('dataout', dataPrint.hash)
   }
 }
 

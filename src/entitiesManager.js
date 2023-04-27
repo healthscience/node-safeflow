@@ -192,6 +192,7 @@ EntitiesManager.prototype.addDatastore = function (authDS) {
 *
 */
 EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, inputUUID, modules) {
+  console.log(ECSinput)
   // ALL FLOWS MADE IMMUMATABLE via  FORTH like scripting TODO
   let automation = true
   // convert modules to array to order flow
@@ -215,7 +216,7 @@ EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, inputUUID
   } else {
     // new ENTITY prepare
     deviceInfo = moduleOrder.data.value.info.data.value
-    let apiData = await this.deviceDataflow(shellID, deviceInfo)
+    await this.deviceDataflow(shellID, deviceInfo)
     // 2 Compute - feed into ECS -KBID processor
     flowState = await this.flowPrepare(shellID, ECSinput, inputUUID, moduleOrder)
     // set data science flow inputs
@@ -343,15 +344,17 @@ EntitiesManager.prototype.removeDataSciencewaiting = function (shellID, dataPrin
 *
 */
 EntitiesManager.prototype.updateDataScienceInputs = function (shellID, computeModLink) {
+  console.log('update compute contract')
+  console.log(computeModLink)
   let datascienceInputs = this.liveSEntities[shellID].datascience
   datascienceInputs.moduleorder.compute = computeModLink
   this.liveSEntities[shellID].datascience = datascienceInputs
-  console.log('AFTERT---compute contrac updated')
-  console.log(this.liveSEntities[shellID].datascience)
+  // console.log('AFTERT---compute contrac updated')
+  // console.log(this.liveSEntities[shellID].datascience)
   // check if waiting list items dataprint match if yes, return data to HOP
   for (let dpr of this.liveSEntities[shellID].datascience.waitingdataprint ) {
     if (datascienceInputs.dataprint.hash === dpr.hash) {
-      console.log('yes, data waiing for compuete contract')
+      // console.log('yes, data waiing for compuete contract')
       let resultUUID = this.liveSEntities[shellID].datascience.waitingdataprint
       if (this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] !== undefined) {
         let entityOut = {}
@@ -359,12 +362,19 @@ EntitiesManager.prototype.updateDataScienceInputs = function (shellID, computeMo
         entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID]
         entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
         // required back instant or update resutls store or both
+        console.log('out6')
         this.emit('visualFirstRange', entityOut)
       } else {
         let entityOut = {}
         entityOut.context = datascienceInputs
-        entityOut.data = 'none'
+        // give context of none data
+        let visData = {}
+        visData.data = 'none'
+        visData.context = datascienceInputs.dataprint
+        visData.list = this.liveSEntities[shellID].liveDeviceC.devices
+        entityOut.data = visData
         entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+        console.log('out7')
         this.emit('visualFirstRange', entityOut)
       }
       // remove waiting entry from datascience
@@ -484,8 +494,9 @@ EntitiesManager.prototype.flowMany = async function (shellID, inputUUID, compute
     let context = this.liveSEntities[shellID].datascience
     let entityOut = {}
     entityOut.context = context
-    entityOut.data = 'none'
+    entityOut.data = 'none-start'
     entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+    console.log('out3')
     this.emit('visualFirstRange', entityOut)
   }
 }
@@ -552,10 +563,10 @@ EntitiesManager.prototype.resultListener = function () {
     let computeFlag = checkData.entity.computeflag
     let liveContext = this.liveSEntities[checkData.entity.shell].datascience
     if (checkData.data === false) {
-      console.log('full-------------')
+      // console.log('full-------------')
       await this.subFlowFull(checkData, liveContext, computeFlag)
     } else {
-      console.log('short-------------')
+      // console.log('short-------------')
       await this.subFlowShort(checkData, liveContext, computeFlag)
     }
   })
@@ -604,6 +615,7 @@ EntitiesManager.prototype.subFlowFull = async function (entityData, entityContex
         entityNodata.context = entityContext
         entityNodata.data = this.liveSEntities[entityData.entity.shell].liveVisualC.visualData[entityData.entity.resultuuid]
         entityNodata.devices = this.liveSEntities[entityData.entity.shell].liveDeviceC.devices
+        console.log('out4')
         this.emit('visualFirstRange', entityNodata)
       }
     }
@@ -706,7 +718,7 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
 *
 */
 EntitiesManager.prototype.prepareKBLedger = function (uniqueCompute, shellID, dataPrint) {
-  console.log('update compute contract back form saving-------Form ledger and ALRT return of data to HOP')
+  // console.log('update compute contract back form saving-------Form ledger and ALRT return of data to HOP')
   // update the datascience holder
   this.updateDataScienceInputs(shellID, uniqueCompute)
   // gather proof of evidence chain and hash and send KBLedger store
@@ -803,28 +815,28 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowS
 *
 */
 EntitiesManager.prototype.dataoutListener = function (shellID) {
-  let listcount = 0
   this.liveSEntities[shellID].liveVisualC.on('dataout', (resultUUID) => {
-    console.log('data event OUT SafeFlow+++++++++++++++++')
     let context = this.liveSEntities[shellID].datascience
-    console.log('CONTEXT--------update out modules')
-    console.log(context)
     // has the update Compute Contract arrived?
     if (context.tempComputeMod) {
-      console.log('update compuet ID awaiging')
+      // console.log('update compuet ID awaiging')
     } else {
-      if (this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] !== undefined) {
+      if (this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] !== undefined && this.liveSEntities[shellID].liveVisualC.visualData[resultUUID].data !== 'none') {
         let entityOut = {}
         entityOut.context = context
         entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID]
         entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
         // required back instant or update resutls store or both
+        console.log('out1')
         this.emit('visualFirstRange', entityOut)
       } else {
+        this.liveSEntities[shellID].liveVisualC.visualData
         let entityOut = {}
         entityOut.context = context
-        entityOut.data = 'none'
+        // give context of none data
+        entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] // 'none'
         entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+        console.log('out2')
         this.emit('visualFirstRange', entityOut)
       }
     }
@@ -904,6 +916,8 @@ EntitiesManager.prototype.deviceDataflow = async function (shellID, apiData) {
 *
 */
 EntitiesManager.prototype.deviceUpdateDataflow = function (shellID, module) {
+  console.log('deivce update')
+  console.log(module.value.info.controls.device)
   this.liveSEntities[shellID].liveDeviceC.updateDevice(module.value.info.controls.device)
   return true
 }
