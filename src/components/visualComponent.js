@@ -60,6 +60,8 @@ VisualComponent.prototype.clearDeviceCount = function (device) {
 *
 */
 VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrint, resultsData, dtConvert, flag) {
+  console.log('visCOMP--START results in')
+  console.log(resultsData.length)
   let timeFormat = ''
   let settingsLive = visModule.value.info.settings
   let timeFormatSet = settingsLive.hasOwnProperty('timeformat')
@@ -128,6 +130,7 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     this.sourcedataHolder[inputHash].push({ context: dataPrint, data: resultsData })
     // remove item from inputList? (only devices if )
   } else if (deviceDataPrintCount.length === this.deviceCount[dataPrint.triplet.device] && this.deviceCount[dataPrint.triplet.device] > 1) {
+    console.log('VISOCOMP--build range')
     if (this.datasetHolder[inputHash] === undefined) {
       this.datasetHolder[inputHash] = []
       this.dataPrintHolder[inputHash] = []
@@ -144,7 +147,7 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     this.sourcedataHolder[inputHash].push(contextBundle)
     // bundle of greater than one length ready for dataSet preparation
     // need dataPrints if more than one datatype?  Need to check TODO
-    let datasetMulti = this.buildMultiDataset(deviceDataPrintCount, timeFormat, inputHash, dataPrint)
+    this.buildMultiDataset(deviceDataPrintCount, timeFormat, inputHash, dataPrint)
     // clear the input tracking this.deviceCount
     this.deviceCount[dataPrint.triplet.device] = 0
     // just remove device element unless none left, delete input hash holder
@@ -157,8 +160,11 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
       delete this.liveInputlist[inputHash]
     }
     this.liveVislist = []
+    console.log('bundle out1')
+    console.log(inputHash)
     this.emit('dataout', inputHash)
   } else {
+    console.log('VISCOMP--batch ready')
     // if batch then create resUUID for the batch
     let resultPrint = dataPrint.hash
     // clear the input tracking
@@ -173,6 +179,8 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
       delete this.liveInputlist[inputHash]
     }
     this.liveVislist = []
+    console.log('bundle out2')
+    console.log(resultPrint)
     this.emit('dataout', resultPrint)
   }
   return true
@@ -194,7 +202,7 @@ VisualComponent.prototype.extractVisExpected = function (inputUUID, device) {
     if (matchDindex.length > 0 && matchDataList[device] !== undefined) {
       dataPlusmatch = matchDataList[device]
     } else {
-      console.log('VISCOMP--EXTRACT-- no data for this device1')
+      console.log('VISCOMP--fucntion==EXTRACT-- no data for this device1')
     }
   } else {
     console.log('VISCOMP--EXTRACT--no INDEX for this device2')

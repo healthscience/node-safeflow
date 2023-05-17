@@ -344,43 +344,61 @@ EntitiesManager.prototype.removeDataSciencewaiting = function (shellID, dataPrin
 *
 */
 EntitiesManager.prototype.updateDataScienceInputs = function (shellID, computeModLink) {
-  console.log('update compute contract')
+  // is this a single or part of range query?
+  console.log('start new compute contract')
+  console.log(shellID)
   console.log(computeModLink)
-  let datascienceInputs = this.liveSEntities[shellID].datascience
-  datascienceInputs.moduleorder.compute = computeModLink
-  this.liveSEntities[shellID].datascience = datascienceInputs
-  // console.log('AFTERT---compute contrac updated')
-  // console.log(this.liveSEntities[shellID].datascience)
-  // check if waiting list items dataprint match if yes, return data to HOP
-  for (let dpr of this.liveSEntities[shellID].datascience.waitingdataprint ) {
-    if (datascienceInputs.dataprint.hash === dpr.hash) {
-      // console.log('yes, data waiing for compuete contract')
-      let resultUUID = this.liveSEntities[shellID].datascience.waitingdataprint
-      if (this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] !== undefined) {
-        let entityOut = {}
-        entityOut.context = datascienceInputs
-        entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID]
-        entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
-        // required back instant or update resutls store or both
-        console.log('out6')
-        this.emit('visualFirstRange', entityOut)
+  // console.log(this.liveSEntities[shellID].datascience.inputuuid)
+  // console.log(this.liveSEntities[shellID].datascience.dataprint)
+  // console.log( this.liveSEntities[shellID].liveVisualC.liveInputlist[this.liveSEntities[shellID].datascience.inputuuid])
+  // console.log(this.liveSEntities[shellID].liveVisualC.datasetsOutpattern)
+  let rangeActive = this.liveSEntities[shellID].liveVisualC.extractVisExpected(this.liveSEntities[shellID].datascience.inputuuid, this.liveSEntities[shellID].datascience.dataprint.triplet.device)
+  console.log('is active range?')
+  console.log(rangeActive)
+  if (rangeActive.length > 0) {
+    console.log('data range in progress')
+  } else if (rangeActive.length === 0) {
+    console.log('data range complet')
+    // restructure object to use value instead of value
+    let updateComputNaming = {}
+    updateComputNaming.stored = computeModLink.stored
+    updateComputNaming.type = computeModLink.type
+    updateComputNaming.key = computeModLink.key
+    updateComputNaming.value = computeModLink.contract
+    let datascienceInputs = this.liveSEntities[shellID].datascience
+    datascienceInputs.moduleorder.compute = updateComputNaming
+    this.liveSEntities[shellID].datascience = datascienceInputs
+    // console.log('AFTERT---compute contrac updated')
+    // console.log(this.liveSEntities[shellID].datascience)
+    // check if waiting list items dataprint match if yes, return data to HOP
+    for (let dpr of this.liveSEntities[shellID].datascience.waitingdataprint ) {
+      if (datascienceInputs.dataprint.hash === dpr.hash) {
+        if (this.liveSEntities[shellID].liveVisualC.visualData[dpr.hash] !== undefined) {
+          let entityOut = {}
+          entityOut.context = datascienceInputs
+          entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[dpr.hash]
+          entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+          // required back instant or update resutls store or both
+          console.log('out6')
+          // this.emit('visualFirstRange', entityOut)
+        } else {
+          let entityOut = {}
+          entityOut.context = datascienceInputs
+          // give context of none data
+          let visData = {}
+          visData.data = 'none'
+          visData.context = datascienceInputs.dataprint
+          visData.list = this.liveSEntities[shellID].liveDeviceC.devices
+          entityOut.data = visData
+          entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+          console.log('out7')
+          this.emit('visualFirstRange', entityOut)
+        }
+        // remove waiting entry from datascience
+        this.removeDataSciencewaiting(shellID, dpr.hash)
       } else {
-        let entityOut = {}
-        entityOut.context = datascienceInputs
-        // give context of none data
-        let visData = {}
-        visData.data = 'none'
-        visData.context = datascienceInputs.dataprint
-        visData.list = this.liveSEntities[shellID].liveDeviceC.devices
-        entityOut.data = visData
-        entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
-        console.log('out7')
-        this.emit('visualFirstRange', entityOut)
+        console.log('NO data for HOP after update compute wait')
       }
-      // remove waiting entry from datascience
-      this.removeDataSciencewaiting(shellID, dpr.hash)
-    } else {
-      console.log('NO data for HOP after update compute wait')
     }
   }
   // entityInput.moduleorder.compute = computeModLink
@@ -610,6 +628,7 @@ EntitiesManager.prototype.subFlowFull = async function (entityData, entityContex
       } else {
         // still need to inform vis component to clear expected list
         // prepare visualisation datasets
+        console.log('clear expected visComp')
         await this.visualFlow(entityData.entity.shell, entityContext.moduleorder.visualise, entityContext.flowstate, dataPrint, false)
         let entityNodata = {}
         entityNodata.context = entityContext
@@ -683,14 +702,16 @@ EntitiesManager.prototype.computeFlow = async function (shellID, updateModContra
   // need to save per compute else keep dataPrint as is
   if (datastatus === 'datalive' && sourceStatus === 'savesource') {
     // save data Peer Store
+    console.log('save restuls1')
     if (engineReturn === true) {
-      let saveStatus = this.saveResultsProtocol(shellID, dataPrint.couple.hash)
-      let saveStatusTwo = this.saveResultsProtocol(shellID, dataPrint.hash)
+      this.saveResultsProtocol(shellID, dataPrint.couple.hash)
+      this.saveResultsProtocol(shellID, dataPrint.hash)
     } else {
     }
   } else {
-    // save data Peer Stor
-    let saveStatus = this.saveResultsProtocol(shellID, dataPrint.hash)
+    // save data Peer Store
+    console.log('save result 2')
+    this.saveResultsProtocol(shellID, dataPrint.hash)
   }
   // new version of Ref Contracts of Compute Modules info
   // prepare object to send to peerLink
@@ -753,16 +774,21 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
   if (datastatus !== 'datalive') {
     await this.liveSEntities[shellID].liveDataC.DataControlFlow(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDeviceC.apiData, modUpdateContract, 'empty', dataPrint)
     // proof of evidence
+    console.log('source data manager')
+    console.log(this.liveSEntities[shellID].liveDataC.dataRaw[dataPrint.hash].length)
     let evProof2 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.dataRaw[dataPrint.hash].length)
     this.liveSEntities[shellID].evidenceChain.push(evProof2)
   } else if (datastatus === 'datalive' && sourceStatus === 'savesource') {
     await this.liveSEntities[shellID].liveDataC.DataControlFlow(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDeviceC.apiData, modUpdateContract, 'empty', dataPrint)
     // proof of evidence
+    console.log('source data manager2')
+    console.log(this.liveSEntities[shellID].liveDataC.dataRaw[dataPrint.hash].length)
     let evProof2 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.dataRaw)
     this.liveSEntities[shellID].evidenceChain.push(evProof2)
   } else {
   }
   // check data in component
+  console.log(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].length)
   if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined) {
     if(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].length === 0 ) {
       dataCheck = false
@@ -774,9 +800,11 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
     this.computeStatus = this.liveSEntities[shellID].liveComputeC.filterCompute(modUpdateContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
     // need to set the compute data per compute dataPrint
     if (datastatus !== 'datalive') {
+      console.log('c22')
       let evProof3 =  this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
       this.liveSEntities[shellID].evidenceChain.push(evProof3)
     } else {
+      console.log('c23')
       let computeDatauuid = dataPrint.couple.hash
       this.liveSEntities[shellID].liveDataC.liveData[computeDatauuid] = this.computeStatus
       // proof of evidence
@@ -785,6 +813,7 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
       return true
     }
   } else {
+    console.log('data check false')
     return false
   }
 }
@@ -877,6 +906,8 @@ EntitiesManager.prototype.saveResultsProtocol = function (shellID, dataID) {
     // form the save Object
     saveObject.hash = dataID
     saveObject.data = dataPair
+    console.log('saved')
+    console.log(saveObject)
     localthis.emit('storePeerResults', saveObject)
   } else {
     console.log('no data to save')

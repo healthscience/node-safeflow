@@ -32,12 +32,12 @@ var JSONfileAPI = function (dataAPI) {
 util.inherits(JSONfileAPI, events.EventEmitter)
 
 /**
-*  set file path, read and make sqlite3 connect db
-* @method SQLitebuilder
+*  set file path and read data from file
+* @method JSONfileAPI
 *
 */
 JSONfileAPI.prototype.fileSetup = async function (dapi, device, time) {
-  let dbFile = await this.liveDataAPI.dataAPI.hyperdriveLocalfile(dapi.data.jsonpath) // ('json/' + dapi)
+  let dbFile = await this.liveDataAPI.DriveFiles.hyperdriveLocalfile('/json/' + dapi.data.filename + '.json') // ('json/' + dapi)
   return dbFile
 }
 
@@ -85,7 +85,7 @@ JSONfileAPI.prototype.jsonFilebuilder = async function (dapi, device, time) {
    })
   }
 
-  let extractJSON = jsonParser(timeColumn).then(dataJ =>
+  let extractJSON = await jsonParser(timeColumn).then(dataJ =>
   {
     return dataJ
   })

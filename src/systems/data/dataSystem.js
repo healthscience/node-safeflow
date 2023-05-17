@@ -38,13 +38,6 @@ util.inherits(DataSystem, events.EventEmitter)
 */
 DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceInfo, device, datatype, time, contract) {
   let rawHolder = []
-  // console.log('datasystem---mapping')
-  // console.log(type)
-  // console.log(sourceInfo)
-  // console.log(device)
-  // console.log(datatype)
-  // console.log(time)
-  // console.log(contract)
   if (type === 'SAFE') {
     // no api plug in yet
   } else if (type === 'REST') {
@@ -69,7 +62,7 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     } else if (extractURL.path === 'sqlite') { ///Gadgetbridge.db') {
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
       rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo.sourceapiquery.tablesqlite, sourceInfo.sourceapiquery.namespace, device, time)
-    } else if (extractURL.path === 'json' || extractURL.path === 'csv') { // jsonfile') {
+    } else if (extractURL.path === 'json' || extractURL.path === 'csv') {
       // pass on to either safe API builder, REST API builder or IPSF builder etc.
       rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device, time).catch(e => console.log('Error: ', e.message))
     }

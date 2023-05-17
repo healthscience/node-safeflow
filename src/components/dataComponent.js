@@ -46,24 +46,11 @@ DataComponent.prototype.setDevicesLive = async function () {
 }
 
 /**
-*  source data from device sensor
-* @method RawData
-*
-
-DataComponent.prototype.sourceData = async function (source, dataAPI, contract, hash, device, datatype, time) {
-  await this.DataControlFlow(source, dataAPI, contract, hash, device, datatype, time)
-  return true
-}
-*/
-
-/**
 *
 *
 */
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, dataPrint) {
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, contract)
-  // console.log('raw data back from file')
-  // console.log(dataRback)
   // form unique dataPrint for dataUUID
   let dataID = {}
   dataID.device = dataPrint.triplet.device
