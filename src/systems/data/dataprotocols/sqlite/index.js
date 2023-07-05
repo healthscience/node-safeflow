@@ -54,7 +54,11 @@ SQLiteAPI.prototype.SQLiteSetup = async function (dapi, device, time) {
 */
 SQLiteAPI.prototype.SQLitebuilderPromise = async function (table, dapi, device, time) {
   // first setup the db MI_BAND_ACTIVITY_SAMPLE
-  // console.log('slqite query')
+  console.log('slqite query')
+  console.log(table)
+  console.log(dapi)
+  console.log(device)
+  console.log(time)
   table = 'MI_BAND_ACTIVITY_SAMPLE'
   await this.SQLiteSetup(dapi)
   let apiTime1 = time / 1000

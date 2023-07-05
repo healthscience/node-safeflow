@@ -38,12 +38,12 @@ util.inherits(DataSystem, events.EventEmitter)
 */
 DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceInfo, device, datatype, time, contract) {
   let rawHolder = []
-  // console.log('datasystem---mapping')
-  // console.log(type)
+  console.log('datasystem---mapping')
+  console.log(type)
   // console.log(sourceInfo)
-  // console.log(device)
-  // console.log(datatype)
-  // console.log(time)
+  console.log(device)
+  console.log(datatype)
+  console.log(time)
   // console.log(contract)
   if (type === 'SAFE') {
     // no api plug in yet

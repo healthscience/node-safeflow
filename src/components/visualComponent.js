@@ -60,6 +60,7 @@ VisualComponent.prototype.clearDeviceCount = function (device) {
 *
 */
 VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrint, resultsData, dtConvert, flag) {
+  console.log('Vcomp--filervisuall- start')
   let timeFormat = ''
   let settingsLive = visModule.value.info.settings
   let timeFormatSet = settingsLive.hasOwnProperty('timeformat')
@@ -94,6 +95,8 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     let howManyInputUUID = Object.keys(this.liveInputlist)
     inputHash = howManyInputUUID[0]
   }
+  console.log('VComp--input hash')
+  console.log(inputHash)
   // expected vis results  source or compute flag?
   let deviceDataPrintCount = this.extractVisExpected(inputHash, dataPrint.triplet.device)
   // is there a list to bundle together?
@@ -208,11 +211,14 @@ VisualComponent.prototype.extractVisExpected = function (inputUUID, device) {
 *
 */
 VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
+  console.log('Vcomp-nodata -- start')
   if (!this.liveVislist[dataPrint.triplet.device]) {
     this.liveVislist[dataPrint.triplet.device] = []
   }
   this.liveVislist[dataPrint.triplet.device].push(dataPrint.hash)
   let inputHash = Object.keys(this.datasetsOutpattern) // this.datasetsOutpattern[dataPrint.triplet.device]
+  console.log('VComp-nodata-input hash')
+  console.log(inputHash)
   // expected vis results
   let deviceDataPrintCount = this.extractVisExpected(inputHash[0], dataPrint.triplet.device)
   // single or part of expected list
@@ -266,6 +272,7 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
         delete this.liveInputlist[inputHash]
       }
       this.liveVislist = []
+      console.log('mulit data set hash')
       this.emit('dataout', inputHash[0])
     } else {
       // if batch then create resUUID for the batch
@@ -311,6 +318,7 @@ VisualComponent.prototype.restVisDataList = function () {
 *
 */
 VisualComponent.prototype.buildMultiDataset = function (dataList, type, inputHash, dataPrint) {
+  console.log('build mulit datasert start')
   // take live list and merge data for one chart
   // extract the dataPrints and check if data for not?
   let dataPerDevice = []

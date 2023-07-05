@@ -19,7 +19,7 @@ import events from 'events'
 // import pollingtoevent from 'polling-to-event'
 
 var EntitiesManager = function (dataAPI) {
-  console.log('entity manager start')
+  console.log('entity manager start- debug')
   // console.log(dataAPI)
   events.EventEmitter.call(this)
   // start error even listener
@@ -192,6 +192,7 @@ EntitiesManager.prototype.addDatastore = function (authDS) {
 *
 */
 EntitiesManager.prototype.ECSflow = async function (shellID, ECSinput, inputUUID, modules) {
+  console.log('EM-HOP---query=======================')
   console.log(ECSinput)
   // ALL FLOWS MADE IMMUMATABLE via  FORTH like scripting TODO
   let automation = true
@@ -344,43 +345,62 @@ EntitiesManager.prototype.removeDataSciencewaiting = function (shellID, dataPrin
 *
 */
 EntitiesManager.prototype.updateDataScienceInputs = function (shellID, computeModLink) {
-  console.log('update compute contract')
-  console.log(computeModLink)
+  console.log('EM--update compute contract')
   let datascienceInputs = this.liveSEntities[shellID].datascience
   datascienceInputs.moduleorder.compute = computeModLink
   this.liveSEntities[shellID].datascience = datascienceInputs
-  // console.log('AFTERT---compute contrac updated')
-  // console.log(this.liveSEntities[shellID].datascience)
-  // check if waiting list items dataprint match if yes, return data to HOP
   for (let dpr of this.liveSEntities[shellID].datascience.waitingdataprint ) {
     if (datascienceInputs.dataprint.hash === dpr.hash) {
-      // console.log('yes, data waiing for compuete contract')
-      let resultUUID = this.liveSEntities[shellID].datascience.waitingdataprint
-      if (this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] !== undefined) {
-        let entityOut = {}
-        entityOut.context = datascienceInputs
-        entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID]
-        entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
-        // required back instant or update resutls store or both
-        console.log('out6')
-        this.emit('visualFirstRange', entityOut)
-      } else {
-        let entityOut = {}
-        entityOut.context = datascienceInputs
-        // give context of none data
-        let visData = {}
-        visData.data = 'none'
-        visData.context = datascienceInputs.dataprint
-        visData.list = this.liveSEntities[shellID].liveDeviceC.devices
-        entityOut.data = visData
-        entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
-        console.log('out7')
-        this.emit('visualFirstRange', entityOut)
+      let batchMatch = false
+      // loop over live Input list for batched results ready?  If yes, return batch to HOP
+      let batchKeys = Object.keys(this.liveSEntities[shellID].liveVisualC.liveInputlist)
+      for (let batch of batchKeys) {
+        let dataCheck = this.liveSEntities[shellID].liveVisualC.visualData[batch]
+        if (Object.keys(dataCheck).length > 0) {
+          console.log('match, batch data exists***********')
+          batchMatch = true
+          let entityOut = {}
+          entityOut.context = datascienceInputs
+          entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[batch]
+          entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+          // required back instant or update resutls store or both
+          console.log('out11')
+          this.emit('visualFirstRange', entityOut)
+
+        } else {
+          console.log('no match batch')
+        }
+      }
+      if (batchMatch === false) {
+        let resultUUID = this.liveSEntities[shellID].datascience.waitingdataprint
+        for (let rid of resultUUID) {
+          if (this.liveSEntities[shellID].liveVisualC.visualData[rid.hash] !== undefined) {
+            let entityOut = {}
+            entityOut.context = datascienceInputs
+            entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[rid.hash]
+            entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+            // required back instant or update resutls store or both
+            console.log('out6')
+            this.emit('visualFirstRange', entityOut)
+          } else {
+            let entityOut = {}
+            entityOut.context = datascienceInputs
+            // give context of none data
+            let visData = {}
+            visData.data = 'none'
+            visData.context = datascienceInputs.dataprint
+            visData.list = this.liveSEntities[shellID].liveDeviceC.devices
+            entityOut.data = visData
+            entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
+            console.log('out7')
+            this.emit('visualFirstRange', entityOut)
+          }
+        }
       }
       // remove waiting entry from datascience
       this.removeDataSciencewaiting(shellID, dpr.hash)
     } else {
-      console.log('NO data for HOP after update compute wait')
+      console.log('via new compute contract -NO data')
     }
   }
   // entityInput.moduleorder.compute = computeModLink
@@ -585,6 +605,7 @@ EntitiesManager.prototype.subFlowFull = async function (entityData, entityContex
     entityContext.dataprint = dataPrint
     if (this.liveSEntities[entityData.entity.shell].liveDatatypeC.sourceDatatypes.length === 0 && computeFlag === false) {
       await this.computeFlow(entityData.entity.shell, entityContext.flowstate.updateModContract, dataPrint, '', '')
+      console.log('compute flow 1')
       // prepare visualisation datasets
       await this.visualFlow(entityData.entity.shell, entityContext.moduleorder.visualise, entityContext.flowstate, dataPrint, false)
     } else {
@@ -602,6 +623,7 @@ EntitiesManager.prototype.subFlowFull = async function (entityData, entityContex
         }
       } else if (this.liveSEntities[entityData.entity.shell].liveDatatypeC.sourceDatatypes.length > 0 && computeFlag === true) {
         await this.computeFlow(entityData.entity.shell, entityContext.flowstate.updateModContract, dataPrint, 'datalive', 'savesource')
+        console.log('compute flow 2')
         if (dataPrint.couple) {
           await this.visualFlow(entityData.entity.shell, entityContext.moduleorder.visualise, entityContext.flowstate, dataPrint.couple, computeFlag)
         } else {
@@ -654,6 +676,7 @@ EntitiesManager.prototype.subFlowShort = async function (entityData, context, co
     // set data in entity component data
     this.liveSEntities[entityData.entity.shell].liveDataC.setFilterResults(rDUUID, entityData.data.value.tidydata)
     await this.computeFlow(entityData.entity.shell, context.flowstate.updateModContract, dataPrint, 'datalive', 'savesource')
+    console.log('compute flow 3')
     // need to switch back to original compute
     if (this.liveSEntities[entityData.entity.shell].liveDataC.liveData[entityData.entity.resultuuid]) {
       // prepare visualisation datasets
@@ -795,14 +818,18 @@ EntitiesManager.prototype.computeEngine = async function (shellID, apiInfo, modU
 *
 */
 EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowState, dataPrint, flag) {
+  console.log('EM-visflow--start')
+  console.log(dataPrint)
   let visContract = visModule.value.info.visualise
   if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined && this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].length > 0) {
+    console.log('yes data')
     // yes data to visualise
     this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure, flag)
     // proof of evidence
     let evProof = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveVisualC.visualData[dataPrint.hash])
     this.liveSEntities[shellID].evidenceChain.push(evProof)
   } else {
+    console.log('no data')
     // no data to process
     this.liveSEntities[shellID].liveVisualC.nodataInfo(dataPrint, visModule)
   }
@@ -817,6 +844,9 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowS
 EntitiesManager.prototype.dataoutListener = function (shellID) {
   this.liveSEntities[shellID].liveVisualC.on('dataout', (resultUUID) => {
     let context = this.liveSEntities[shellID].datascience
+    console.log('EM-listener---out data is mulit data set?')
+    console.log(context)
+    console.log(resultUUID)
     // has the update Compute Contract arrived?
     if (context.tempComputeMod) {
       // console.log('update compuet ID awaiging')
