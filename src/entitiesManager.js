@@ -844,9 +844,9 @@ EntitiesManager.prototype.visualFlow = async function (shellID, visModule, flowS
 EntitiesManager.prototype.dataoutListener = function (shellID) {
   this.liveSEntities[shellID].liveVisualC.on('dataout', (resultUUID) => {
     let context = this.liveSEntities[shellID].datascience
-    console.log('EM-listener---out data is mulit data set?')
-    console.log(context)
-    console.log(resultUUID)
+    // console.log('EM-listener---out data is mulit data set?')
+    // console.log(context)
+    // console.log(resultUUID)
     // has the update Compute Contract arrived?
     if (context.tempComputeMod) {
       // console.log('update compuet ID awaiging')
