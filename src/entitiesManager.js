@@ -94,7 +94,7 @@ class EntitiesManager extends EventEmitter {
   */
   peerInput = async function (input) {
     // validate input data structure e.g. not empty etc.
-    // console.log('ECS--input+++++++++++++++START++++++++++++++++++')
+    console.log('ECS--input+++++++++++++++START++++++++++++++++++')
     // console.log(util.inspect(input, {showHidden: false, depth: null}))
     let inputValid = this.validateInput(input)
     if (inputValid === true) {
