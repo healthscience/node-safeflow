@@ -5,38 +5,33 @@
 *
 * @class safeFlow
 * @package    LKN health
-* @copyright  Copyright (c) 2018 James Littlejohn
+* @copyright  Copyright (c) 2023 James Littlejohn
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
+import EventEmitter from 'events'
 import EntitiesManager from './entitiesManager.js'
-import util from 'util'
-import events from 'events'
 
-var safeFlow = function (dataAPI) {
-  console.log('SafeFlow-ECS begin')
-  // console.log(dataAPI)
-  console.log('bentotemplate-safeflowECS')
-  events.EventEmitter.call(this)
-  this.dataAPIlive = dataAPI
-  // start error even listener
-  this.eventErrorListen()
-  this.liveEManager = new EntitiesManager(this.dataAPIlive)
-  this.resultCount = 0
-}
+class SafeFlow extends EventEmitter {
 
-/**
-* inherits core emitter class within this class
-* @method inherits
-*/
-util.inherits(safeFlow, events.EventEmitter)
+  constructor(dataAPI) {
+    super()
+    console.log('SafeFlow-ECS begin')
+    // console.log(dataAPI)
+    console.log('bentotemplate-safeflowECS')
+    this.dataAPIlive = dataAPI
+    // start error even listener
+    this.eventErrorListen()
+    this.liveEManager = new EntitiesManager(this.dataAPIlive)
+    this.resultCount = 0
+  }
 
-/**
-* listen for error on event triggered
-* @method eventErrorListen
-*
-*/
-safeFlow.prototype.eventErrorListen = function (refCont) {
+  /**
+  * listen for error on event triggered
+  * @method eventErrorListen
+  *
+  */
+  eventErrorListen = function (refCont) {
   const logger = console
   this.on('error', (err) => {
     logger.error('Unexpected error on emitter', err)
@@ -44,14 +39,14 @@ safeFlow.prototype.eventErrorListen = function (refCont) {
   // test the emitter
   // this.emit('error', new Error('Whoops!'));
   // Unexpected error on emitter Error: Whoops!
-}
+  }
 
-/**
-* Network Authorisation
-* @method networkAuthorisation
-*
-*/
-safeFlow.prototype.networkAuthorisation = function (auth) {
+  /**
+  * Network Authorisation
+  * @method networkAuthorisation
+  *
+  */
+  networkAuthorisation = function (auth) {
   // need library to check token or verify key ownership TODO:
   // TEMP testnetwork defaults
   let peerAuth = {}
@@ -72,14 +67,14 @@ safeFlow.prototype.networkAuthorisation = function (auth) {
     authState.auth = true
   }
   return authState
-}
+  }
 
-/**
-* datastore authorisation
-* @method datastoreAuthorisation
-*
-*/
-safeFlow.prototype.datastoreAuthorisation = function (authDS) {
+  /**
+  * datastore authorisation
+  * @method datastoreAuthorisation
+  *
+  */
+  datastoreAuthorisation = function (authDS) {
   // TEMP testnetwork defaults
   authDS.namespace = this.defaultStorage
   let authDatastoreState = {}
@@ -95,53 +90,53 @@ safeFlow.prototype.datastoreAuthorisation = function (authDS) {
     authDatastoreState.auth = true
   }
   return authDatastoreState
-}
+  }
 
-/**
-* check the release of safeFLOW is compatible
-* @method verifyRelease
-*
-*/
-safeFlow.prototype.verifyRelease = function (refContract) {
+  /**
+  * check the release of safeFLOW is compatible
+  * @method verifyRelease
+  *
+  */
+  verifyRelease = function (refContract) {
   // TODO  checksum software
   return true
-}
-/**
-* Start FLOW
-* @method startFlow
-*
-*/
-safeFlow.prototype.startFlow = async function (refContract) {
+  }
+  /**
+  * Start FLOW
+  * @method startFlow
+  *
+  */
+  startFlow = async function (refContract) {
   let startData = await this.liveEManager.peerKBLstart(refContract)
   return startData
-}
+  }
 
-/**
-* Start FLOW
-* @method startPeerFlow
-*
-*/
-safeFlow.prototype.startPeerFlow = function (apiCNRL, auth) {
+  /**
+  * Start FLOW
+  * @method startPeerFlow
+  *
+  */
+  startPeerFlow = function (apiCNRL, auth) {
   let startData = this.liveEManager.peerKBLPeerstart()
   return startData
-}
+  }
 
-/**
-* takes in new data from main results store
-* @method resultsFlow
-*
-*/
-safeFlow.prototype.resultsFlow = function (results) {
+  /**
+  * takes in new data from main results store
+  * @method resultsFlow
+  *
+  */
+  resultsFlow = function (results) {
   this.liveEManager.emit('resultsCheckback', results)
   return true
-}
+  }
 
-/**
-* build context for Toolkit
-* @method entityGetter
-*
-*/
-safeFlow.prototype.entityGetter = function (shellID) {
+  /**
+  * build context for Toolkit
+  * @method entityGetter
+  *
+  */
+  entityGetter = function (shellID) {
   this.liveEManager.on('visualFirst', (data) => {
     this.emit('displayEntity', data)
   })
@@ -179,14 +174,14 @@ safeFlow.prototype.entityGetter = function (shellID) {
   this.liveEManager.on("error", (error) => {
       console.error(`Gracefully handling our error: ${error}`);
   })
-}
+  }
 
-/**
-* clear the vis listener
-* @method emptyListeners
-*
-*/
-safeFlow.prototype.emptyListeners = function (shellID) {
+  /**
+  * clear the vis listener
+  * @method emptyListeners
+  *
+  */
+  emptyListeners = function (shellID) {
   // console.log(this.liveEManager)
   /* console.log(Object.keys(this.liveEManager.liveSEntities))
   let entityLive = Object.keys(this.liveEManager.liveSEntities)
@@ -199,6 +194,8 @@ safeFlow.prototype.emptyListeners = function (shellID) {
   } */
   // this.liveEManager.emptyListerOUT('close')
   return true
+  }
+
 }
 
-export default safeFlow
+export default SafeFlow
