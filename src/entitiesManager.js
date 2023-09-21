@@ -95,9 +95,11 @@ class EntitiesManager extends EventEmitter {
   peerInput = async function (input) {
     // validate input data structure e.g. not empty etc.
     console.log('ECS--input+++++++++++++++START++++++++++++++++++')
+    console.log(input)
     // console.log(util.inspect(input, {showHidden: false, depth: null}))
     let inputValid = this.validateInput(input)
     if (inputValid === true) {
+      console.log('SF-valid true')
       let inputUUID = this.liveCrypto.evidenceProof(input)
       let entityData = {}
       entityData[input.exp.key] = await this.addHSentity(input, inputUUID)
@@ -187,12 +189,16 @@ class EntitiesManager extends EventEmitter {
   *
   */
   ECSflow = async function (shellID, ECSinput, inputUUID, modules) {
+    console.log('SF--ECS-flow')
     console.log(ECSinput)
+    console.log(modules)
     // ALL FLOWS MADE IMMUMATABLE via  FORTH like scripting TODO
     let automation = true
     // convert modules to array to order flow
     // module has a specific order  question, data, compute, visualise, etc.
     let moduleOrder = this.orderModuleFlow(modules)
+    console.log('SF--baseAPImodule orders')
+    console.log(moduleOrder)
     // extract types of modules  // if existing should skip all but vis and compute
     let flowState = {}
     let deviceInfo = {}
@@ -210,6 +216,8 @@ class EntitiesManager extends EventEmitter {
       let State = false
     } else {
       // new ENTITY prepare
+      console.log('pre set device api')
+      console.log(moduleOrder.data.value.info)
       deviceInfo = moduleOrder.data.value.info.data.value
       await this.deviceDataflow(shellID, deviceInfo)
       // 2 Compute - feed into ECS -KBID processor
@@ -926,6 +934,8 @@ class EntitiesManager extends EventEmitter {
   *
   */
   deviceDataflow = async function (shellID, apiData) {
+    console.log('SF---deviceflow')
+    console.log(apiData)
     let statusD = false
     // set the device in module
     statusD = await this.liveSEntities[shellID].liveDeviceC.setDevice(apiData.concept)

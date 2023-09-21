@@ -19,9 +19,9 @@ import moment from 'moment'
 
 var TestStorageAPI = function (setUP) {
   events.EventEmitter.call(this)
-  this.baseAPI = setUP.namespace
-  this.tempPubkey = setUP.publickey
-  this.tempToken = setUP.token
+  this.baseAPI = setUP // .namespace
+  this.tempPubkey = setUP // .publickey
+  this.tempToken = setUP // .token
 }
 
 /**
