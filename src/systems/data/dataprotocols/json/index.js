@@ -11,8 +11,8 @@
 */
 import util from 'util'
 import events from 'events'
-import os from 'os'
 import fs from 'fs'
+import { setFlagsFromString } from 'v8'
 
 var JSONfileAPI = function (dataAPI) {
   events.EventEmitter.call(this)
@@ -37,7 +37,7 @@ util.inherits(JSONfileAPI, events.EventEmitter)
 *
 */
 JSONfileAPI.prototype.fileSetup = async function (dapi, device, time) {
-  let dbFile = await this.liveDataAPI.DriveFiles.hyperdriveLocalfile('/json/' + dapi.data.filename + '.json') // ('json/' + dapi)
+  let dbFile = await this.liveDataAPI.DriveFiles.hyperdriveLocalfile('/json/' + dapi.data.name) // ('json/' + dapi)
   return dbFile
 }
 
@@ -50,8 +50,8 @@ JSONfileAPI.prototype.jsonFilebuilder = async function (dapi, device, time) {
   let fileLocal = await this.fileSetup(dapi)
   let timeColumn = ''
   for (let tr of dapi.data.tablestructure) {
-    if (tr.refcontract === 'd76d9c3db7f2212335373873805b54dd1f903a06')
-    timeColumn = tr.column
+    if (tr.refcontract === 'blind1234555554321') // 'd76d9c3db7f2212335373873805b54dd1f903a06')
+    timeColumn = 'blind1234555554321' // tr.column
   }
   // let fileLocation = '/' + dapi.data.apibase + dapi.data.apipath
   // time is in text form need to transform
@@ -71,10 +71,18 @@ JSONfileAPI.prototype.jsonFilebuilder = async function (dapi, device, time) {
         } else {
           // parse JSON string to JSON object
           dataJSON = JSON.parse(data)
-          let filterTime = dataJSON.filter(item => {
-            return item[timeColumn] >= apiTime1 && item[timeColumn] <= apiTime2
-          })
-          resolve(filterTime)
+          // which data format as coming in,  pure =>  timestamp, data or  blind =>  data  label
+          if (dataJSON?.data.length === 0) {
+            let filterTime = dataJSON.filter(item => {
+              return item[timeColumn] >= apiTime1 && item[timeColumn] <= apiTime2
+            })
+            resolve(filterTime)
+          } else {
+            console.log('blind path')
+            // reformat blind for SF data format
+            let blindFilter = this.blindRestructure(dataJSON)
+            resolve(blindFilter)
+          }
         }
       })
     }
@@ -89,7 +97,24 @@ JSONfileAPI.prototype.jsonFilebuilder = async function (dapi, device, time) {
   {
     return dataJ
   })
+  console.log('JSON from file')
+  console.log(extractJSON)
   return extractJSON
+}
+
+/**
+*  make blind structure into SF time data format
+* @method blindRestructure
+*
+*/
+JSONfileAPI.prototype.blindRestructure = function (bData) {
+ let sfData = []
+ for (let i = 0; i < bData.data.length; i++) {
+   sfData.push({'d76d9c3db7f2212335373873805b54dd1f903a06': bData.label[i], 'blind1234555554321': bData.data[i]})
+ }
+ console.log('data ready for tidy cat flter')
+ console.log(sfData)
+ return sfData 
 }
 
 export default JSONfileAPI

@@ -39,22 +39,30 @@ FilterDataSystem.prototype.dtFilterController = function (source, contract, devi
 *
 */
 FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData) {
+  console.log('filtersystem--start')
+  console.log(source)
+  console.log(datatype)
+  console.log(tidyData)
   let singleArray = []
-  if (tidyData.length > 0) {
-    for (let di of tidyData) {
-      let dataPair = {}
-      // extract the time column hash pair
-      let timecolname = this.extractTimeDatatypePair(source.data.tablestructure)
-      let timestamp = di[timecolname]
-      dataPair['d76d9c3db7f2212335373873805b54dd1f903a06'] = timestamp  // 'f3d388ebd946007626ee1d6ce0642710d550eb6d'
-      let valueC = 0
-      if (di[datatype] === null) {
-        valueC = null
-      } else {
-        valueC = parseFloat(di[source.sourceapiquery.column])
+  if (datatype === 'blind1234555554321') {
+    singleArray = tidyData
+  } else {
+    if (tidyData.length > 0) {
+      for (let di of tidyData) {
+        let dataPair = {}
+        // extract the time column hash pair
+        let timecolname = this.extractTimeDatatypePair(source.data.tablestructure)
+        let timestamp = di[timecolname]
+        dataPair['d76d9c3db7f2212335373873805b54dd1f903a06'] = timestamp  // 'f3d388ebd946007626ee1d6ce0642710d550eb6d'
+        let valueC = 0
+        if (di[datatype] === null) {
+          valueC = null
+        } else {
+          valueC = parseFloat(di[source.sourceapiquery.column])
+        }
+        dataPair[datatype] = valueC
+        singleArray.push(dataPair)
       }
-      dataPair[datatype] = valueC
-      singleArray.push(dataPair)
     }
   }
   return singleArray

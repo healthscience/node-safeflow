@@ -40,6 +40,10 @@ TidyDataSystem.prototype.tidyRawData = function (source, contract, device, datat
 *
 */
 TidyDataSystem.prototype.tidyFilterRemove = function (tidyRules, datatype, apiDTinfo, dataRaw) {
+  console.log('SF--tidy')
+  console.log(tidyRules)
+  console.log(apiDTinfo)
+  console.log(dataRaw)
   let tidyHolderF = {}
   const manFilter = (e, datatype, rule) => {
     let keepTidy = null

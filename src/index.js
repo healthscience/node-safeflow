@@ -138,22 +138,22 @@ class SafeFlow extends EventEmitter {
   */
   entityGetter = function (shellID) {
   this.liveEManager.on('visualFirst', (data) => {
-    this.emit('displayEntity', data)
+    this.emit('sf-displayEntity', data)
   })
   this.liveEManager.on('visualFirstRange', (data) => {
-
+    console.log('read for outouotutuo')
     this.resultCount++
     if (this.resultCount > 0) {
-      this.emit('displayEntityRange', data)
+      this.emit('sf-displayEntityRange', data)
       // console.log('memoryPrint Start')
       // console.log(process.memoryUsage())
     }
   })
   this.liveEManager.on('visualUpdate', (data) => {
-    this.emit('displayUpdateEntity', data)
+    this.emit('sf-displayUpdateEntity', data)
   })
   this.liveEManager.on('visualUpdateRange', (data) => {
-    this.emit('displayUpdateEntityRange', data)
+    this.emit('sf-displayUpdateEntityRange', data)
   })
   this.liveEManager.on('updateModule', (data, shellID, dataPrint) => {
     this.emit('updateModule', data, shellID, dataPrint)

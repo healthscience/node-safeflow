@@ -34,6 +34,8 @@ util.inherits(VisSystem, events.EventEmitter)
 *
 */
 VisSystem.prototype.visualControl = function (visModule, contract, dataPrint, dataIN, dtConvert) {
+  console.log('SF--VisSystem--')
+  console.log(contract)
   let visBundlePrepared = {}
   if (contract.value.computational.name === 'chart.js library') {
     visBundlePrepared = this.liveChartSystem.chartjsControl(visModule, contract, dataPrint, dataIN, dtConvert)

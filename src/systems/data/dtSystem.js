@@ -46,6 +46,9 @@ DTSystem.prototype.DTStartMatch = function (sourceAPI, contract, datatype) {
 *
 */
 DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
+  console.log('dtSystem--datatpeTableMapper')
+  console.log(sourceAPI)
+  console.log(dt)
   let apiMatch = {}
   // given datatypes select find match to the query string
   let tableCount = 0
@@ -67,6 +70,8 @@ DTSystem.prototype.datatypeTableMapper = function (sourceAPI, dt) {
       apiMatch = packAPImatch
     }
   }
+  console.log('tablemapper====complete')
+  console.log(apiMatch)
   return apiMatch
 }
 
