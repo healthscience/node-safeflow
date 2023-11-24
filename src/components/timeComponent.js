@@ -90,12 +90,21 @@ TimeComponent.prototype.setTimeList = function (liveDate) {
 }
 
 /**
-*  keep list of timePeriods that data has been asked for
+* keep list of timePeriods that data has been asked for
 * @method setSourceTime
 *
 */
 TimeComponent.prototype.setSourceTime = function (sourcetime) {
   this.sourceTime.push(sourcetime)
+}
+
+/**
+* keep list of timePeriods that data has been asked for
+* @method setSourceTimeRange
+*
+*/
+TimeComponent.prototype.setSourceTimeRange = function (sourcetime) {
+  this.sourceTime = sourcetime
 }
 
 /**

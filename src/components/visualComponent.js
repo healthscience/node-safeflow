@@ -60,8 +60,10 @@ VisualComponent.prototype.clearDeviceCount = function (device) {
 *
 */
 VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrint, resultsData, dtConvert, flag) {
-  console.log('visCOMP--START results in')
-  console.log(resultsData.length)
+  console.log('visCOMP--START 11111111')
+  // console.log(resultsData)
+  // console.log(dataPrint)
+  // console.log(this.liveInputlist)
   let timeFormat = ''
   let settingsLive = visModule.value.info.settings
   let timeFormatSet = settingsLive.hasOwnProperty('timeformat')
@@ -94,7 +96,7 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     inputHash = howManyInputUUID[0]
   } else {
     let howManyInputUUID = Object.keys(this.liveInputlist)
-    inputHash = howManyInputUUID[0]
+    inputHash = howManyInputUUID[1]
   }
   // expected vis results  source or compute flag?
   let deviceDataPrintCount = this.extractVisExpected(inputHash, dataPrint.triplet.device)
@@ -130,7 +132,6 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     this.sourcedataHolder[inputHash].push({ context: dataPrint, data: resultsData })
     // remove item from inputList? (only devices if )
   } else if (deviceDataPrintCount.length === this.deviceCount[dataPrint.triplet.device] && this.deviceCount[dataPrint.triplet.device] > 1) {
-    console.log('VISOCOMP--build range')
     if (this.datasetHolder[inputHash] === undefined) {
       this.datasetHolder[inputHash] = []
       this.dataPrintHolder[inputHash] = []
@@ -160,11 +161,9 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
       delete this.liveInputlist[inputHash]
     }
     this.liveVislist = []
-    console.log('bundle out1')
-    console.log(inputHash)
     this.emit('dataout', inputHash)
   } else {
-    console.log('VISCOMP--batch ready')
+    // console.log('VISCOMP--batch ready')
     // if batch then create resUUID for the batch
     let resultPrint = dataPrint.hash
     // clear the input tracking
@@ -180,7 +179,7 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     }
     this.liveVislist = []
     console.log('bundle out2')
-    console.log(resultPrint)
+    // console.log(resultPrint)
     this.emit('dataout', resultPrint)
   }
   return true
@@ -216,6 +215,7 @@ VisualComponent.prototype.extractVisExpected = function (inputUUID, device) {
 *
 */
 VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
+  console.log('VISCOMP--NNNNOOOOOdatas')
   if (!this.liveVislist[dataPrint.triplet.device]) {
     this.liveVislist[dataPrint.triplet.device] = []
   }

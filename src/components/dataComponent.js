@@ -126,13 +126,9 @@ DataComponent.prototype.TidyDataPrep = function (source, contract, datauuid, dev
 *
 */
 DataComponent.prototype.FilterDownDT = function (source, contract, dataUUID, dataPrint) {
-  console.log('filter start')
-  console.log(this.tidyData[dataUUID])
   let filterDataG = {}
   filterDataG = this.liveFilterData.dtFilterController(source, contract, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, this.tidyData[dataUUID])
   this.liveData[dataUUID] = filterDataG
-  console.log('aferfilerer')
-  console.log(filterDataG)
   filterDataG = {}
   return true
 }

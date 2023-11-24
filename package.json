@@ -1,6 +1,6 @@
 {
   "name": "node-safeflow",
-  "version": "0.9.51",
+  "version": "0.9.52",
   "deprecated": false,
   "description": "Node.js wrapper for safeflow protocol",
   "homepage": "https://github.com/healthscience/node-safeflow#readme",
@@ -37,6 +37,7 @@
     "moment-range": "^4.0.2",
     "object-hash": "^1.3.1",
     "refcontractcomposer": "^0.0.5",
+    "simple-statistics": "^7.8.3",
     "sqlite3": "^5.0.2",
     "throttle-queue": "^0.1.0",
     "throttled-queue": "^2.1.2",

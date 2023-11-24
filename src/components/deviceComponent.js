@@ -57,6 +57,8 @@ DeviceComponent.prototype.setDevice = async function (apiD) {
 *
 */
 DeviceComponent.prototype.updateDevice = function (devices) {
+  console.log('SF--deviceCOMP==date devices')
+  console.log(devices)
   let updateDevices = []
   for (let dev of this.alldevices) {
     // match and keep those on new list

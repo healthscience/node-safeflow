@@ -12,7 +12,6 @@
 import util from 'util'
 import events from 'events'
 import fs from 'fs'
-import { setFlagsFromString } from 'v8'
 
 var JSONfileAPI = function (dataAPI) {
   events.EventEmitter.call(this)
@@ -78,7 +77,6 @@ JSONfileAPI.prototype.jsonFilebuilder = async function (dapi, device, time) {
             })
             resolve(filterTime)
           } else {
-            console.log('blind path')
             // reformat blind for SF data format
             let blindFilter = this.blindRestructure(dataJSON)
             resolve(blindFilter)
@@ -97,8 +95,6 @@ JSONfileAPI.prototype.jsonFilebuilder = async function (dapi, device, time) {
   {
     return dataJ
   })
-  console.log('JSON from file')
-  console.log(extractJSON)
   return extractJSON
 }
 
@@ -112,8 +108,6 @@ JSONfileAPI.prototype.blindRestructure = function (bData) {
  for (let i = 0; i < bData.data.length; i++) {
    sfData.push({'d76d9c3db7f2212335373873805b54dd1f903a06': bData.label[i], 'blind1234555554321': bData.data[i]})
  }
- console.log('data ready for tidy cat flter')
- console.log(sfData)
  return sfData 
 }
 

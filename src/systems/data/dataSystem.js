@@ -67,8 +67,6 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
       rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device, time).catch(e => console.log('Error: ', e.message))
     }
   }
-  console.log('datasystem--rawdata')
-  console.log(rawHolder)
   return rawHolder
 }
 

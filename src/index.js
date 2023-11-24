@@ -16,7 +16,7 @@ class SafeFlow extends EventEmitter {
 
   constructor(dataAPI) {
     super()
-    console.log('SafeFlow-ECS begin')
+    console.log('SafeFlow-ECS begin==future')
     // console.log(dataAPI)
     console.log('bentotemplate-safeflowECS')
     this.dataAPIlive = dataAPI
@@ -141,7 +141,6 @@ class SafeFlow extends EventEmitter {
     this.emit('sf-displayEntity', data)
   })
   this.liveEManager.on('visualFirstRange', (data) => {
-    console.log('read for outouotutuo')
     this.resultCount++
     if (this.resultCount > 0) {
       this.emit('sf-displayEntityRange', data)

@@ -10,6 +10,7 @@
 * @version    $Id$
 */
 // those packages in to be plug in on the fly TODO
+import * as ss from 'simple-statistics'
 import SumSystem from './sumSystem.js'
 import AverageSystem from './averageSystem.js'
 import RecoveryHeartrate from './wasm/recovery-heartrate.js'
@@ -32,26 +33,101 @@ var ComputeSystem = function (setIN) {
 util.inherits(ComputeSystem, events.EventEmitter)
 
 /**
+* dynamically load computation from network TODO
+* @method loadComputations
+*
+*/
+ComputeSystem.prototype.loadComputations = function () {
+  // query network library for compute contracts
+  // then load in computation code ready for use when needed
+}
+
+/**
 * computation gateway  // need function to call library to get list of active compoute contacts??? TODO
 * @method computationSystem
 *
 */
 ComputeSystem.prototype.computationSystem = function (contract, dataPrint, data) {
+  console.log('SF----compute system')
   // match computation to approprate verified compute need LOADER to add what WASM is being used/required
+  let computeCodehash = contract?.value?.info?.compute[0].value?.computational?.hash
   let computeStatus = {}
-  if (contract.value.info.compute.key === 'a7391efedc445038cf631940a04e08e3125164a7') {
-    // console.log('no compute contract')
+  if (computeCodehash === 'a7391efedc445038cf631940a04e08e3125164a7') {
     computeStatus.state = true
     computeStatus.data = data
-  } else if (contract.value.info.compute.key === '7217c36c086453209ac25b5aeb2e947d5ea1f237') {
+  } else if (computeCodehash === '7217c36c086453209ac25b5aeb2e947d5ea1f237') {
     computeStatus = this.liveAverage.averageSystemStart(contract, dataPrint, data)
+  } else if (computeCodehash === 'sum') {
+    computeStatus = this.liveSum.sumSystemStart(contract, data)
+  } else if (computeCodehash === 'gh-12121212112') {
+    computeStatus = this.linearregressionSystem(data, dataPrint)
+    console.log('linearregression--complete----')
+  } else if (computeCodehash === 'autoregression') {
+    computeStatus = this.autoregressionSystem(contract, data)
   }
-  /* else if (contract.cid === 'cnrl-2356388737') {
-    computeStatus = await this.liveSum.sumSystemStart(contract, data)
-  } else if (contract.cid === 'cnrl-2356388733') {
-    computeStatus = await this.recoverySystem(contract, data)
-  } */
   return computeStatus
+}
+
+/**
+* build data pairs for linear regression
+* @method buildDatapairs
+*
+*/
+ComputeSystem.prototype.buildDatapairs = function (data, dataPrint) {
+  // strcuture required [[1, 2], [2, 3], [3, 4], [4, 8]
+  console.log(data)
+  let pairData = []
+  for (let td of data) {
+    pairData.push([td['d76d9c3db7f2212335373873805b54dd1f903a06'], td[dataPrint.triplet.datatype]])
+  }
+  return pairData
+}
+
+/**
+* build future dataa
+* @method buildFuturedata
+*
+*/
+ComputeSystem.prototype.buildFuturedata = function (data, dataPrint, regressionVariables) {
+  // single example console.log(ss.linearRegressionLine(regressionVariables)(7)))
+  console.log('SF--build future')
+  console.log(data)
+  console.log(regressionVariables)
+  // expand the trend by length of past data or by peer input
+  let futureSequence = []
+  let inputLength = data.length
+  let lastPastx = data[data.length - 1]
+  console.log(lastPastx)
+  for (let i = 0; i < inputLength; i++) {
+    let seqBuilder = parseInt(lastPastx['d76d9c3db7f2212335373873805b54dd1f903a06']) + i
+    futureSequence.push(seqBuilder)
+  }
+  console.log('future sequcence')
+  console.log(futureSequence)
+  let futureData = []
+  for (let fd of futureSequence) {
+    let futureValue = ss.linearRegressionLine(regressionVariables)(fd)
+    let futureDataPair = {}
+    futureDataPair['d76d9c3db7f2212335373873805b54dd1f903a06'] = fd
+    futureDataPair[dataPrint.triplet.datatype] = Math.round(futureValue * 10) / 10
+    futureData.push(futureDataPair)   
+  }
+  console.log('future data preduct')
+  console.log(futureData)
+  return futureData
+}
+
+/**
+* does this data ask need updating? Y N
+* @method recoverySystem
+*
+*/
+ComputeSystem.prototype.linearregressionSystem = function (data, dataPrint) {
+  let regressionPair = this.buildDatapairs(data, dataPrint)
+  let regressionVariables = ss.linearRegression(regressionPair)
+  // line pair reprepare
+  let regressionLine = this.buildFuturedata(data, dataPrint, regressionVariables)
+  return regressionLine
 }
 
 /**
