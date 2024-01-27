@@ -14,16 +14,21 @@ import EntitiesManager from './entitiesManager.js'
 
 class SafeFlow extends EventEmitter {
 
-  constructor(dataAPI) {
+  constructor (dataAPI) {
     super()
-    console.log('SafeFlow-ECS begin==future')
-    // console.log(dataAPI)
-    console.log('bentotemplate-safeflowECS')
     this.dataAPIlive = dataAPI
+    // console.log('SF--SQLITE--Dsys====================')
+    // this.dataAPIlive .DriveFiles.listFilesFolder('')
+    // this.dataAPIlive .DriveFiles.hyperdriveLocalfile('sqlite/Gadgetbridge')
     // start error even listener
     this.eventErrorListen()
     this.liveEManager = new EntitiesManager(this.dataAPIlive)
     this.resultCount = 0
+    this.testDrive1()
+  }
+
+  testDrive1 = async function (refCont) {
+    // let dbFile1 = await this.dataAPIlive.DriveFiles.hyperdriveLocalfile('sqlite/Gadgetbride')
   }
 
   /**

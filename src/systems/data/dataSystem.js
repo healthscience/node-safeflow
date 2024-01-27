@@ -15,7 +15,6 @@ import JSONfileAPI from './dataprotocols/json/index.js'
 import LiveSimulatedDataSystem from './simulateddataSystem.js'
 import util from 'util'
 import events from 'events'
-import moment from 'moment'
 
 var DataSystem = function (setIN) {
   events.EventEmitter.call(this)
@@ -37,6 +36,7 @@ util.inherits(DataSystem, events.EventEmitter)
 *
 */
 DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceInfo, device, datatype, time, contract) {
+  console.log(type)
   let rawHolder = []
   if (type === 'SAFE') {
     // no api plug in yet
@@ -55,12 +55,14 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     extractURL.path = sourceInfo.sourceapiquery.apipath
     extractURL.file = sourceInfo.sourceapiquery.namespace
     // temp before smart rest extractor is built
+    console.log(extractURL.path)
     if (extractURL.path === '/computedata/') {
       rawHolder = await this.liveRestStorage.COMPUTEbuilder(extractURL, device, time).catch(e => console.log('Error: ', e.message))
     } else if (extractURL.path === '/luftdatenGet/') {
       rawHolder = await this.liveRestStorage.COMPUTEbuilderLuft(extractURL, device, time).catch(e => console.log('Error: ', e.message))
     } else if (extractURL.path === 'sqlite') { ///Gadgetbridge.db') {
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
+      console.log('SF-sysem aaaaaa=====aaaa===')
       rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo.sourceapiquery.tablesqlite, sourceInfo.sourceapiquery.namespace, device, time)
     } else if (extractURL.path === 'json' || extractURL.path === 'csv') {
       // pass on to either safe API builder, REST API builder or IPSF builder etc.

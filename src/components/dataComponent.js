@@ -15,10 +15,10 @@ import FilterDataSystem from '../systems/data/filterdataSystem.js'
 import CategoryDataSystem from '../systems/data/categorydataSystem.js'
 import util from 'util'
 import events from 'events'
-import moment from 'moment'
 import hashObject from 'object-hash'
 
 var DataComponent = function (setIN) {
+  console.log('SF--DComp=================')
   events.EventEmitter.call(this)
   this.liveTidyData = new TidyDataSystem(setIN)
   this.liveFilterData = new FilterDataSystem(setIN)
@@ -50,7 +50,9 @@ DataComponent.prototype.setDevicesLive = async function () {
 *
 */
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, dataPrint) {
+  console.log('SF--DC--dataComp')
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, contract)
+  console.log(dataRback.length)
   // form unique dataPrint for dataUUID
   let dataID = {}
   dataID.device = dataPrint.triplet.device
@@ -62,6 +64,7 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
   let catFlag = false
   // is there data?
   if (this.dataRaw[datauuid].length > 0) {
+    console.log('data raw yes')
     // is there a categories filter to apply?
     if (contract.value.info.settings.category[0] !== 'none') {
       this.CategoriseData(source, dataAPI.category, contract, datauuid, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
@@ -84,6 +87,7 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
     }
     let dataMatch = this.FilterDownDT(source, contract, datauuid, dataPrint)
   } else {
+    console.log('no data')
     this.dataRaw[datauuid] = []
     this.liveData[datauuid] = []
   }

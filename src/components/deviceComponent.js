@@ -43,9 +43,10 @@ DeviceComponent.prototype.setAuthToken = async function (authDS) {
 * @method setDevice
 *
 */
-DeviceComponent.prototype.setDevice = async function (apiD) {
-  this.apiData = apiD
-  let deviceDetail = await this.liveDeviceSystem.storedDevices(this.apiData)
+DeviceComponent.prototype.setDevice = async function (apiDevice) {
+  console.log(apiDevice)
+  this.apiData = apiDevice
+  let deviceDetail = [apiDevice.device] // old if source api, go look up.  await this.liveDeviceSystem.storedDevices(this.apiData)
   this.alldevices = deviceDetail
   this.devices = deviceDetail
   this.activedevice = this.devices[0]

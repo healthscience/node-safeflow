@@ -48,7 +48,6 @@ ComputeSystem.prototype.loadComputations = function () {
 *
 */
 ComputeSystem.prototype.computationSystem = function (contract, dataPrint, data) {
-  console.log('SF----compute system')
   // match computation to approprate verified compute need LOADER to add what WASM is being used/required
   let computeCodehash = contract?.value?.info?.compute[0].value?.computational?.hash
   let computeStatus = {}
@@ -61,7 +60,6 @@ ComputeSystem.prototype.computationSystem = function (contract, dataPrint, data)
     computeStatus = this.liveSum.sumSystemStart(contract, data)
   } else if (computeCodehash === 'gh-12121212112') {
     computeStatus = this.linearregressionSystem(data, dataPrint)
-    console.log('linearregression--complete----')
   } else if (computeCodehash === 'autoregression') {
     computeStatus = this.autoregressionSystem(contract, data)
   }
@@ -75,7 +73,6 @@ ComputeSystem.prototype.computationSystem = function (contract, dataPrint, data)
 */
 ComputeSystem.prototype.buildDatapairs = function (data, dataPrint) {
   // strcuture required [[1, 2], [2, 3], [3, 4], [4, 8]
-  console.log(data)
   let pairData = []
   for (let td of data) {
     pairData.push([td['d76d9c3db7f2212335373873805b54dd1f903a06'], td[dataPrint.triplet.datatype]])
@@ -90,20 +87,14 @@ ComputeSystem.prototype.buildDatapairs = function (data, dataPrint) {
 */
 ComputeSystem.prototype.buildFuturedata = function (data, dataPrint, regressionVariables) {
   // single example console.log(ss.linearRegressionLine(regressionVariables)(7)))
-  console.log('SF--build future')
-  console.log(data)
-  console.log(regressionVariables)
   // expand the trend by length of past data or by peer input
   let futureSequence = []
   let inputLength = data.length
   let lastPastx = data[data.length - 1]
-  console.log(lastPastx)
   for (let i = 0; i < inputLength; i++) {
     let seqBuilder = parseInt(lastPastx['d76d9c3db7f2212335373873805b54dd1f903a06']) + i
     futureSequence.push(seqBuilder)
   }
-  console.log('future sequcence')
-  console.log(futureSequence)
   let futureData = []
   for (let fd of futureSequence) {
     let futureValue = ss.linearRegressionLine(regressionVariables)(fd)
@@ -112,8 +103,6 @@ ComputeSystem.prototype.buildFuturedata = function (data, dataPrint, regressionV
     futureDataPair[dataPrint.triplet.datatype] = Math.round(futureValue * 10) / 10
     futureData.push(futureDataPair)   
   }
-  console.log('future data preduct')
-  console.log(futureData)
   return futureData
 }
 
@@ -146,10 +135,8 @@ ComputeSystem.prototype.recoverySystem = async function (compInfo, rawIN, device
   } else if (compInfo.status === true) {
     // need to loop over per devices
     let computeTimeRange = compInfo.rangeTime
-    // console.log(computeTimeRange)
     for (let dvc of deviceList) {
       let updateStatus = await this.liveRecoveryHR.prepareRecoveryCompute(computeTimeRange, dvc)
-      // console.log(updateStatus)
     }
   }
   return stateHolder

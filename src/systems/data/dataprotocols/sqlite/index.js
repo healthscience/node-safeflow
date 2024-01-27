@@ -18,6 +18,9 @@ import fs from 'fs'
 var SQLiteAPI = function (dataAPI) {
   events.EventEmitter.call(this)
   this.liveDataAPI = dataAPI
+  // console.log('SF--SQLITE--Dsys====================')
+  // this.liveDataAPI.DriveFiles.listFilesFolder('')
+  // this.liveDataAPI.DriveFiles.hyperdriveLocalfile('sqlite/Gadgetbridge')
   // check if any database files?
   /* let dbSQLitedir = os.homedir() + '/peerlink/sqlite/'
   let dbList = []
@@ -41,10 +44,15 @@ util.inherits(SQLiteAPI, events.EventEmitter)
 *
 */
 SQLiteAPI.prototype.SQLiteSetup = async function (dapi, device, time) {
-  // console.log('list files')
+  console.log('list files--')
   // const stream = this.liveDataAPI.DriveFiles.listFilesFolder('sqlite/')
   let dbFile = await this.liveDataAPI.DriveFiles.hyperdriveLocalfile('sqlite/' + dapi)
+  console.log('SQLitesys sql file please hopepunch')
+  console.log(dbFile)
+  console.log('------------')
   this.db = new sqlite3.Database(dbFile)
+  console.log('sqli file setup')
+  console.log(this.db)
 }
 
 /**
@@ -54,7 +62,12 @@ SQLiteAPI.prototype.SQLiteSetup = async function (dapi, device, time) {
 */
 SQLiteAPI.prototype.SQLitebuilderPromise = async function (table, dapi, device, time) {
   // first setup the db MI_BAND_ACTIVITY_SAMPLE
-  // console.log('slqite query')
+  console.log('slqite query')
+  console.log(table)
+  console.log(dapi)
+  device = 1
+  console.log(device)
+  console.log(time)
   table = 'MI_BAND_ACTIVITY_SAMPLE'
   await this.SQLiteSetup(dapi)
   let apiTime1 = time / 1000
@@ -67,6 +80,8 @@ SQLiteAPI.prototype.SQLitebuilderPromise = async function (table, dapi, device, 
         resolve(rows)
     })
   })
+  console.log('sqlite over')
+  console.log(res)
   return res
 }
 

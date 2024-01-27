@@ -230,8 +230,6 @@ FileParser.prototype.readFileStream = async function (fpath, headerSet) {
 */
 FileParser.prototype.convertJSON = function (o, headerSet, results, source, newFilename) {
   const localthis = this
-  // console.log('convert json')
-  // console.log(results)
   let fileName = ''
   if (source !== 'web') {
     fileName = o.data.name
