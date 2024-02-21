@@ -341,7 +341,7 @@ class EntitiesManager extends EventEmitter {
     this.on('resultsCheckback', async (checkData) => {
       let computeFlag = checkData.entity.computeflag
       let liveContext = this.liveSEntities[checkData.entity.shell].datascience
-      if (checkData.data === false || checkData.data.length !== 0) {
+      if (checkData.data === false || checkData.data.length === 0) {
         await this.subFlowFull(checkData, liveContext, computeFlag)
       } else {
         await this.subFlowShort(checkData, liveContext, computeFlag)
