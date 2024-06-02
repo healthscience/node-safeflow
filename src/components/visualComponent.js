@@ -60,10 +60,7 @@ VisualComponent.prototype.clearDeviceCount = function (device) {
 *
 */
 VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrint, resultsData, dtConvert, flag) {
-  console.log('visCOMP--START 11111111')
-  // console.log(resultsData)
-  // console.log(dataPrint)
-  // console.log(this.liveInputlist)
+  console.log('SF=visCOMP')
   let timeFormat = ''
   let settingsLive = visModule.value.info.settings
   let timeFormatSet = settingsLive.hasOwnProperty('timeformat')
@@ -215,7 +212,7 @@ VisualComponent.prototype.extractVisExpected = function (inputUUID, device) {
 *
 */
 VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
-  console.log('VISCOMP--NNNNOOOOOdatas')
+  console.log('VISCOMP--nodataINFO')
   if (!this.liveVislist[dataPrint.triplet.device]) {
     this.liveVislist[dataPrint.triplet.device] = []
   }
@@ -259,6 +256,7 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
       // add to holder for datasets i.e. multi dataset asked for
       this.datasetHolder[inputHash].push(this.visualData[dataPrint.hash])
       this.dataPrintHolder[inputHash].push(dataPrint)
+      console.log('no data vis emittttttt---1')
     } else if (deviceDataPrintCount.length === this.deviceCount[dataPrint.triplet.device] && this.deviceCount[dataPrint.triplet.device] > 1) {
       // bundle of greater than one length ready for dataSet preparation
       let datasetMulti = this.buildMultiDataset(deviceDataPrintCount, timeFormat, inputHash, dataPrint)
@@ -274,6 +272,7 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
         delete this.liveInputlist[inputHash]
       }
       this.liveVislist = []
+      console.log('no data vis emittttttt---2')
       this.emit('dataout', inputHash[0])
     } else {
       // if batch then create resUUID for the batch
@@ -290,6 +289,7 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
       if (this.liveInputlist[inputHash].length === 0) {
         delete this.liveInputlist[inputHash]
       }
+      console.log('no data vis emittttttt---3')
       this.emit('dataout', resultPrint)
     }
   } else {
@@ -300,6 +300,7 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
     visData.list = this.liveVislist
     // hold the data in the entity component
     this.visualData[dataPrint.hash] = visData
+    console.log('no data vis emittttttt---4')
     this.emit('dataout', dataPrint.hash)
   }
 }

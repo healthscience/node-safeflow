@@ -44,7 +44,6 @@ DeviceComponent.prototype.setAuthToken = async function (authDS) {
 *
 */
 DeviceComponent.prototype.setDevice = async function (apiDevice) {
-  console.log(apiDevice)
   this.apiData = apiDevice
   let deviceDetail = [apiDevice.device] // old if source api, go look up.  await this.liveDeviceSystem.storedDevices(this.apiData)
   this.alldevices = deviceDetail
@@ -58,8 +57,6 @@ DeviceComponent.prototype.setDevice = async function (apiDevice) {
 *
 */
 DeviceComponent.prototype.updateDevice = function (devices) {
-  console.log('SF--deviceCOMP==date devices')
-  console.log(devices)
   let updateDevices = []
   for (let dev of this.alldevices) {
     // match and keep those on new list

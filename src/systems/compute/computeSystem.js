@@ -49,21 +49,52 @@ ComputeSystem.prototype.loadComputations = function () {
 */
 ComputeSystem.prototype.computationSystem = function (contract, dataPrint, data) {
   // match computation to approprate verified compute need LOADER to add what WASM is being used/required
-  let computeCodehash = contract?.value?.info?.compute[0].value?.computational?.hash
+  console.log('SF-computesyeam -- start')
+  console.log(contract)
+  let computeContract = {}
+  // two conflict input needs correlct tmep fix
+  if (contract.value.info.computational === undefined) {
+    console.log('undief1')
+    if (contract?.value?.info?.compute[0]?.value?.computational) {
+      computeContract = contract.value.info.compute[0].value.computational.hash  
+    } else {
+      computeContract = contract?.value?.info?.compute[0].key
+    }
+  } else {
+    console.log('undief2')
+    computeContract = contract.value.info.compute.key
+  }
+  console.log('conract pass')
+  console.log(computeContract)
+  // let computeHash = contract?.value?.info?.compute.value.computational.hash
+  // let checkHashComp = this.chechHashSource(computeHash)
+  // if true go ahead with compute flow
   let computeStatus = {}
-  if (computeCodehash === 'a7391efedc445038cf631940a04e08e3125164a7') {
+  if (computeContract === 'de55381bcc536926eb814480198f1f44ca14e5a6') {
+    // observation compute contract leave data as is
     computeStatus.state = true
     computeStatus.data = data
-  } else if (computeCodehash === '7217c36c086453209ac25b5aeb2e947d5ea1f237') {
+  } else if (computeContract === '7217c36c086453209ac25b5aeb2e947d5ea1f237') {
+    // first check hash of source compute
     computeStatus = this.liveAverage.averageSystemStart(contract, dataPrint, data)
-  } else if (computeCodehash === 'sum') {
+  } else if (computeContract === 'sum') {
     computeStatus = this.liveSum.sumSystemStart(contract, data)
-  } else if (computeCodehash === 'gh-12121212112') {
+  } else if (computeContract === 'gh-12121212112') {
     computeStatus = this.linearregressionSystem(data, dataPrint)
-  } else if (computeCodehash === 'autoregression') {
+  } else if (computeContract === 'autoregression') {
     computeStatus = this.autoregressionSystem(contract, data)
   }
   return computeStatus
+}
+
+/**
+* check hash of source
+* @method chechHashSource
+*
+*/
+ComputeSystem.prototype.chechHashSource = function (claimHash) {
+  // perform sumcheck or hash compare
+  return true
 }
 
 /**

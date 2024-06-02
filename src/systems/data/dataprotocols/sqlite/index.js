@@ -43,16 +43,10 @@ util.inherits(SQLiteAPI, events.EventEmitter)
 * @method SQLitebuilder
 *
 */
-SQLiteAPI.prototype.SQLiteSetup = async function (dapi, device, time) {
-  console.log('list files--')
+SQLiteAPI.prototype.SQLiteSetup = async function (dapi) {
   // const stream = this.liveDataAPI.DriveFiles.listFilesFolder('sqlite/')
   let dbFile = await this.liveDataAPI.DriveFiles.hyperdriveLocalfile('sqlite/' + dapi)
-  console.log('SQLitesys sql file please hopepunch')
-  console.log(dbFile)
-  console.log('------------')
   this.db = new sqlite3.Database(dbFile)
-  console.log('sqli file setup')
-  console.log(this.db)
 }
 
 /**
@@ -60,28 +54,26 @@ SQLiteAPI.prototype.SQLiteSetup = async function (dapi, device, time) {
 * @method SQLitebuilderPromise
 *
 */
-SQLiteAPI.prototype.SQLitebuilderPromise = async function (table, dapi, device, time) {
+SQLiteAPI.prototype.SQLitebuilderPromise = async function (dapi, device, time) {
   // first setup the db MI_BAND_ACTIVITY_SAMPLE
   console.log('slqite query')
-  console.log(table)
   console.log(dapi)
-  device = 1
+  device = 3
   console.log(device)
   console.log(time)
-  table = 'MI_BAND_ACTIVITY_SAMPLE'
-  await this.SQLiteSetup(dapi)
-  let apiTime1 = time / 1000
+  let table = 'MI_BAND_ACTIVITY_SAMPLE'
+  await this.SQLiteSetup(dapi.filename)
+  let apiTime1 = Math.round(time / 1000)
   let apiTime2 = apiTime1 + 86400
   const res = await new Promise((resolve, reject) => {
     let sql = 'SELECT * FROM ' + table + ' WHERE DEVICE_ID = ' + device + ' AND TIMESTAMP BETWEEN ' + apiTime1 + ' AND ' + apiTime2 + ' '
+    console.log(sql)
     this.db.all(sql, [], (err, rows) => {
       if (err)
         reject(err)
         resolve(rows)
     })
   })
-  console.log('sqlite over')
-  console.log(res)
   return res
 }
 
@@ -95,7 +87,7 @@ SQLiteAPI.prototype.SQLiteDevicePromise = async function (table, filename) {
   // first setup the db
   await this.SQLiteSetup(filename)
   const res = await new Promise((resolve, reject) => {
-    let sql = `SELECT * FROM ` + table  // DEVICE`
+    let sql = `SELECT * FROM ` + table
     this.db.all(sql, [], (err, rows) => {
       if (err)
         reject(err)

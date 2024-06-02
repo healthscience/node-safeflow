@@ -47,7 +47,7 @@ DatatypeComponent.prototype.setDataTypeLive = function (liveDTs) {
   this.datatypesLive = []
   for (let dtl of liveDTs) {
     // check if results datatype  inclue hypon
-    let hyponDTs = dtl.includes('-')
+    let hyponDTs = false // dtl.includes('-')
     if (hyponDTs === false) {
       this.datatypesLive.push(dtl)
       // this.sourceDatatypes.push(dtl)

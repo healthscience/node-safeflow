@@ -36,6 +36,7 @@ util.inherits(DataSystem, events.EventEmitter)
 *
 */
 DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceInfo, device, datatype, time, contract) {
+  console.log('SF-datastystem--start')
   console.log(type)
   let rawHolder = []
   if (type === 'SAFE') {
@@ -50,21 +51,26 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
     rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device).catch(e => console.log('Error: ', e.message))
   } else if (type === 'COMPUTE') {
-    let extractURL = {}
-    extractURL.namespace = sourceInfo.sourceapiquery.namespace
-    extractURL.path = sourceInfo.sourceapiquery.apipath
-    extractURL.file = sourceInfo.sourceapiquery.namespace
+    // temp two different structures comign in blind and nxp need to correct
+    let dataPath = ''
+    if (sourceInfo.data.path !== undefined) {
+      console.log('ds1')
+      dataPath = sourceInfo.data.path
+    } else {
+      console.log('ds2')
+      dataPath = 'json'
+    }
+    console.log('dataflow path--------')
+    console.log(dataPath)
     // temp before smart rest extractor is built
-    console.log(extractURL.path)
-    if (extractURL.path === '/computedata/') {
+    if (dataPath === '/rest/') {
       rawHolder = await this.liveRestStorage.COMPUTEbuilder(extractURL, device, time).catch(e => console.log('Error: ', e.message))
-    } else if (extractURL.path === '/luftdatenGet/') {
+    } else if (dataPath === '/luftdatenGet/') {
+      // temp data set for air quality rest
       rawHolder = await this.liveRestStorage.COMPUTEbuilderLuft(extractURL, device, time).catch(e => console.log('Error: ', e.message))
-    } else if (extractURL.path === 'sqlite') { ///Gadgetbridge.db') {
-    // pass on to either safe API builder, REST API builder or IPSF builder etc.
-      console.log('SF-sysem aaaaaa=====aaaa===')
-      rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo.sourceapiquery.tablesqlite, sourceInfo.sourceapiquery.namespace, device, time)
-    } else if (extractURL.path === 'json' || extractURL.path === 'csv') {
+    } else if (dataPath === 'sqlite') { 
+      rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo.data, device, time)
+    } else if (dataPath === 'json' || dataPath === 'csv') {
       // pass on to either safe API builder, REST API builder or IPSF builder etc.
       rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device, time).catch(e => console.log('Error: ', e.message))
     }

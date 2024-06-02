@@ -18,7 +18,6 @@ import events from 'events'
 import hashObject from 'object-hash'
 
 var DataComponent = function (setIN) {
-  console.log('SF--DComp=================')
   events.EventEmitter.call(this)
   this.liveTidyData = new TidyDataSystem(setIN)
   this.liveFilterData = new FilterDataSystem(setIN)
@@ -85,7 +84,8 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
         this.tidyData[datauuid] = this.dataRaw[datauuid]
       }
     }
-    let dataMatch = this.FilterDownDT(source, contract, datauuid, dataPrint)
+    // form SF compute standard ie. dt hash for structuer
+    this.FilterDownDT(source, contract, datauuid, dataPrint)
   } else {
     console.log('no data')
     this.dataRaw[datauuid] = []

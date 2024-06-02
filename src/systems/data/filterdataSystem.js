@@ -39,6 +39,7 @@ FilterDataSystem.prototype.dtFilterController = function (source, contract, devi
 *
 */
 FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData) {
+  console.log('filter to SF RAW to SF structure')
   let singleArray = []
   if (datatype === 'blind1234555554321') {
     singleArray = tidyData
@@ -49,18 +50,20 @@ FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData
         // extract the time column hash pair
         let timecolname = this.extractTimeDatatypePair(source.data.tablestructure)
         let timestamp = di[timecolname]
-        dataPair['d76d9c3db7f2212335373873805b54dd1f903a06'] = timestamp  // 'f3d388ebd946007626ee1d6ce0642710d550eb6d'
+        dataPair['2cad2b187275ae98005bde4271b4e250c6f5151b'] = timestamp
         let valueC = 0
         if (di[datatype] === null) {
           valueC = null
         } else {
-          valueC = parseFloat(di[source.sourceapiquery.column])
+          valueC = parseFloat(di[datatype.column])
         }
-        dataPair[datatype] = valueC
+        dataPair[datatype.refcontract] = valueC
         singleArray.push(dataPair)
       }
     }
   }
+  console.log('after fileer')
+  console.log(singleArray[0])
   return singleArray
 }
 
@@ -72,7 +75,7 @@ FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData
 FilterDataSystem.prototype.extractTimeDatatypePair = function (datatypePairs) {
   let timeColumn = ''
   for (let dtp of datatypePairs) {
-    if (dtp.refcontract === 'd76d9c3db7f2212335373873805b54dd1f903a06') {
+    if (dtp.refcontract === '2cad2b187275ae98005bde4271b4e250c6f5151b') {
       timeColumn = dtp.column
     }
   }

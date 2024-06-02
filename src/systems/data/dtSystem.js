@@ -11,6 +11,7 @@
 */
 import util from 'util'
 import events from 'events'
+import { sourceMapsEnabled } from 'process'
 
 var DTSystem = function () {
   events.EventEmitter.call(this)

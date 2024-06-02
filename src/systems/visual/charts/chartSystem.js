@@ -31,6 +31,9 @@ util.inherits(ChartSystem, events.EventEmitter)
 *
 */
 ChartSystem.prototype.chartjsControl = function (visModule, contract, dataPrint, dataIN, dtConvert) {
+  console.log('chartjs prpare start')
+  console.log(dataIN.length)
+  console.log(dataIN[0])
   let chartData = {}
   let structureRules = this.structureChartData(dataPrint.triplet.datatype, dataIN, dtConvert)
   let dataPrep = this.prepareVueChartJS(visModule, dataPrint.triplet.datatype, dataPrint.triplet.device, structureRules, dtConvert)
@@ -446,12 +449,25 @@ ChartSystem.prototype.prepareOverlayDatasetData = function (dataPrint, labels, d
 * @method structureChartData
 *
 */
-ChartSystem.prototype.structureChartData = function (rule, cData, dtConvert) {
+ChartSystem.prototype.structureChartData = function (rule, cData) {
+  console.log('rule applied to data')
+  console.log(rule)
+  console.log(cData[0])
+  // temp logic while standards put in place to be replaced
   let dataPrep = {}
-  let splitDatax = cData.map(n => (n['d76d9c3db7f2212335373873805b54dd1f903a06'] * 1000))
-  let splitDatay = cData.map(n => n[rule])
-  dataPrep.xaxis = splitDatax
-  dataPrep.yaxis = splitDatay
+  if (rule === 'blind1234555554321') {
+    let splitDatax = cData.map(n => (n['d76d9c3db7f2212335373873805b54dd1f903a06'] * 1000))
+    let splitDatay = cData.map(n => n[rule])
+    dataPrep.xaxis = splitDatax
+    dataPrep.yaxis = splitDatay
+    console.log(dataPrep[0])
+  } else {
+    let splitDatax = cData.map(n => (n['2cad2b187275ae98005bde4271b4e250c6f5151b'] * 1000))
+    let splitDatay = cData.map(n => n[rule.refcontract])
+    dataPrep.xaxis = splitDatax
+    dataPrep.yaxis = splitDatay
+    console.log(dataPrep[0])
+  }
   return dataPrep
 }
 

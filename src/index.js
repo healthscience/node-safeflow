@@ -17,18 +17,40 @@ class SafeFlow extends EventEmitter {
   constructor (dataAPI) {
     super()
     this.dataAPIlive = dataAPI
-    // console.log('SF--SQLITE--Dsys====================')
-    // this.dataAPIlive .DriveFiles.listFilesFolder('')
-    // this.dataAPIlive .DriveFiles.hyperdriveLocalfile('sqlite/Gadgetbridge')
     // start error even listener
     this.eventErrorListen()
     this.liveEManager = new EntitiesManager(this.dataAPIlive)
     this.resultCount = 0
-    this.testDrive1()
   }
 
-  testDrive1 = async function (refCont) {
-    // let dbFile1 = await this.dataAPIlive.DriveFiles.hyperdriveLocalfile('sqlite/Gadgetbride')
+  /**
+  * ask Library for system active
+  * @method askSystemStart
+  *
+  */
+  askSystemStart = function () {
+    let startMessage = {}
+    startMessage.type = 'safe-flow'
+    startMessage.action = 'library-systems'
+    this.emit('start-systems', startMessage)
+  }
+
+  /**
+  * load in system active in library
+  * @method setSystemsStart
+  *
+  */
+  setSystemsStart = function (systemsLive) {
+    console.log('SF--systems data from library')
+    // console.log(systemsLive)
+    // parse out and make available to entities (systems) when they are create
+    /*for (let cont of systemsLive) {
+      if (cont.value. === 'compute') {
+
+      } else if (cont.value. === 'visualise') {
+
+      }
+    }*/
   }
 
   /**
@@ -37,13 +59,9 @@ class SafeFlow extends EventEmitter {
   *
   */
   eventErrorListen = function (refCont) {
-  const logger = console
-  this.on('error', (err) => {
-    logger.error('Unexpected error on emitter', err)
-  })
-  // test the emitter
-  // this.emit('error', new Error('Whoops!'));
-  // Unexpected error on emitter Error: Whoops!
+    this.on('error', (err) => {
+      logger.error('Unexpected error on emitter', err)
+    })
   }
 
   /**
@@ -142,42 +160,42 @@ class SafeFlow extends EventEmitter {
   *
   */
   entityGetter = function (shellID) {
-  this.liveEManager.on('visualFirst', (data) => {
-    this.emit('sf-displayEntity', data)
-  })
-  this.liveEManager.on('visualFirstRange', (data) => {
-    this.resultCount++
-    if (this.resultCount > 0) {
-      this.emit('sf-displayEntityRange', data)
-      // console.log('memoryPrint Start')
-      // console.log(process.memoryUsage())
-    }
-  })
-  this.liveEManager.on('visualUpdate', (data) => {
-    this.emit('sf-displayUpdateEntity', data)
-  })
-  this.liveEManager.on('visualUpdateRange', (data) => {
-    this.emit('sf-displayUpdateEntityRange', data)
-  })
-  this.liveEManager.on('updateModule', (data, shellID, dataPrint) => {
-    this.emit('updateModule', data, shellID, dataPrint)
-  })
-  // update compute modules
-  this.on('updatesaved-compute', (updatesaveModule, shellID, dataPrint) => {
-    this.liveEManager.prepareKBLedger(updatesaveModule, shellID, dataPrint)
-  })
-  this.liveEManager.on('storePeerResults', (data) => {
-    this.emit('storePeerResults', data)
-  })
-  this.liveEManager.on('resultCheck', (data) => {
-    this.emit('checkPeerResults', data)
-  })
-  this.liveEManager.on('kbledgerEntry', (data) => {
-    this.emit('kbledgerEntry', data)
-  })
-  this.liveEManager.on("error", (error) => {
-      console.error(`Gracefully handling our error: ${error}`);
-  })
+    this.liveEManager.on('visualFirst', (data) => {
+      this.emit('sf-displayEntity', data)
+    })
+    this.liveEManager.on('visualFirstRange', (data) => {
+      this.resultCount++
+      if (this.resultCount > 0) {
+        this.emit('sf-displayEntityRange', data)
+        // console.log('memoryPrint Start')
+        // console.log(process.memoryUsage())
+      }
+    })
+    this.liveEManager.on('visualUpdate', (data) => {
+      this.emit('sf-displayUpdateEntity', data)
+    })
+    this.liveEManager.on('visualUpdateRange', (data) => {
+      this.emit('sf-displayUpdateEntityRange', data)
+    })
+    this.liveEManager.on('updateModule', (data, shellID, dataPrint) => {
+      this.emit('updateModule', data, shellID, dataPrint)
+    })
+    // update compute modules
+    this.on('updatesaved-compute', (updatesaveModule, shellID, dataPrint) => {
+      this.liveEManager.prepareKBLedger(updatesaveModule, shellID, dataPrint)
+    })
+    this.liveEManager.on('storePeerResults', (data) => {
+      this.emit('storePeerResults', data)
+    })
+    this.liveEManager.on('resultCheck', (data) => {
+      this.emit('checkPeerResults', data)
+    })
+    this.liveEManager.on('kbledgerEntry', (data) => {
+      this.emit('kbledgerEntry', data)
+    })
+    this.liveEManager.on("error", (error) => {
+        console.error(`Gracefully handling our error: ${error}`);
+    })
   }
 
   /**
@@ -186,8 +204,7 @@ class SafeFlow extends EventEmitter {
   *
   */
   emptyListeners = function (shellID) {
-  // console.log(this.liveEManager)
-  /* console.log(Object.keys(this.liveEManager.liveSEntities))
+  /*
   let entityLive = Object.keys(this.liveEManager.liveSEntities)
   // this.liveEManager.
   function outMessage () {
