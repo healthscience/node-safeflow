@@ -93,8 +93,8 @@ class EntitiesManager extends EventEmitter {
   */
   peerInput = async function (input) {
     // validate input data structure e.g. not empty etc.
-    console.log('ECS--input+++++++++++++++START++++++++++++++++++')
-    console.log(input)
+    // console.log('ECS--input+++++++++++++++START++++++++++++++++++')
+    // console.log(input)
     // console.log(util.inspect(input, {showHidden: false, depth: null}))
     let inputValid = this.validateInput(input)
     if (inputValid === true) {
@@ -187,8 +187,8 @@ class EntitiesManager extends EventEmitter {
   *
   */
   ECSflow = async function (shellID, ECSinput, inputUUID, modules) {
-    console.log('SF  ECS flow-----------------')
-    console.log(ECSinput)
+    // console.log('SF  ECS flow-----------------')
+    // console.log(ECSinput)
     // ALL FLOWS MADE IMMUMATABLE via  FORTH like scripting TODO
     let automation = true
     // convert modules to array to order flow
@@ -219,9 +219,9 @@ class EntitiesManager extends EventEmitter {
       let State = false
     } else {
       // new ENTITY prepare
-      console.log('data packing contract')
-      console.log(moduleOrder.data)
-      console.log(util.inspect(moduleOrder.data, {showHidden: false, depth: null}))
+      // console.log('data packing contract')
+      // console.log(moduleOrder.data)
+      // console.log(util.inspect(moduleOrder.data, {showHidden: false, depth: null}))
       deviceInfo = moduleOrder.data.value.info.value
       await this.deviceDataflow(shellID, deviceInfo)
       // 2 Compute - feed into ECS -KBID processor
@@ -239,6 +239,7 @@ class EntitiesManager extends EventEmitter {
   *
   */
   flowMany = async function (shellID, inputUUID, computeFlag, dataPrint) {
+    // console.log('SF_ECS----flowmany')
     let ecsInput = this.liveSEntities[shellID].datascience
     // look at compute context flag and set datatypes and time as required
     let timeList = []
@@ -262,6 +263,9 @@ class EntitiesManager extends EventEmitter {
         }
         for (let datatype of this.liveSEntities[shellID].liveDatatypeC.datatypesLive) {
           for (let time of timeList) {
+            // console.log(device)
+            // console.log(datatype)
+            // console.log(time)
             this.throttle(() => {
               // hash the context device, datatype and time
               let dataPrint = this.resultsUUIDbuilder(device.device_mac, datatype, time)
@@ -354,21 +358,21 @@ class EntitiesManager extends EventEmitter {
   *
   */
   subFlowFull = async function (entityData, entityContext, computeFlag) {
-    console.log('SF=subFLowFULL---------------------')
+    // console.log('SF=subFLowFULL---------------------')
     if (this.resultcount >= 0) {
       this.resultcount++
       let rDUUID = entityData.entity.resultuuid
       let dataPrint = this.liveSEntities[entityData.entity.shell].datauuid[rDUUID]
-      console.log('dataPRINT-------------------------')
-      console.log(dataPrint)
+      // console.log('dataPRINT-------------------------')
+      // console.log(dataPrint)
       entityContext.dataprint = dataPrint
       if (this.liveSEntities[entityData.entity.shell].liveDatatypeC.sourceDatatypes.length === 0 && computeFlag === false) {
-        console.log('computeflow1')
+        // console.log('computeflow1')
         await this.computeFlow(entityData.entity.shell, entityContext.flowstate.updateModContract, dataPrint, '', '')
         // prepare visualisation datasets
         await this.visualFlow(entityData.entity.shell, entityContext.moduleorder.visualise, entityContext.flowstate, dataPrint, false)
       } else {
-        console.log('computeflow2')
+        // console.log('computeflow2')
         // how to decide to switch to inner compute loop?
         if (this.liveSEntities[entityData.entity.shell].liveDatatypeC.sourceDatatypes.length > 0 && computeFlag === false) {
           let inputUUID = this.liveSEntities[entityData.entity.shell].datascience.inputuuid
@@ -511,9 +515,9 @@ class EntitiesManager extends EventEmitter {
   *
   */
   computeEngine = async function (shellID, apiInfo, modUpdateContract, dataPrint, datastatus, sourceStatus, rDUUID) {
-    console.log('computeEngine')
-    console.log(datastatus)
-    console.log(dataPrint)
+    // console.log('computeEngine')
+    // console.log(datastatus)
+    // console.log(dataPrint)
     // prepare the data inputs for compute
     let dataCheck = false
     this.liveSEntities[shellID].liveTimeC.setMasterClock(dataPrint.triplet.timeout)
@@ -526,25 +530,25 @@ class EntitiesManager extends EventEmitter {
     this.liveSEntities[shellID].evidenceChain.push(evProof1)
     // data live in entity or source query required?
     if (datastatus !== 'datalive' && datastatus !== 'futurelive') {
-      console.log('data1')
+      // console.log('data1')
       await this.liveSEntities[shellID].liveDataC.DataControlFlow(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDeviceC.apiData, modUpdateContract, 'empty', dataPrint)
       // proof of evidence
       let evProof2 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.dataRaw[dataPrint.hash].length)
       this.liveSEntities[shellID].evidenceChain.push(evProof2)
     } else if (datastatus === 'datalive' && sourceStatus === 'savesource') {
-      console.log('data2')
+      // console.log('data2')
       await this.liveSEntities[shellID].liveDataC.DataControlFlow(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDeviceC.apiData, modUpdateContract, 'empty', dataPrint)
       // proof of evidence
       let evProof2 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.dataRaw)
       this.liveSEntities[shellID].evidenceChain.push(evProof2)
     } else if (datastatus === 'futurelive' && sourceStatus === 'savesource') {
-      console.log('data3')
+      // console.log('data3')
       await this.liveSEntities[shellID].liveDataC.DataControlFlow(this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive, this.liveSEntities[shellID].liveDeviceC.apiData, modUpdateContract, 'empty', dataPrint)
       // proof of evidence
       let evProof2 = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.dataRaw)
       this.liveSEntities[shellID].evidenceChain.push(evProof2)
     } else {
-      console.log('compute none')
+      // console.log('compute none')
     }
     // check data in component
     if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined) {
@@ -559,15 +563,15 @@ class EntitiesManager extends EventEmitter {
     // now perform the compute
     if (dataCheck === true) {
       this.computeStatus = this.liveSEntities[shellID].liveComputeC.filterCompute(modUpdateContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
-      console.log('SF--computesdata=================')
+      // console.log('SF--computesdata=================')
       // console.log(this.computeStatus)
       // need to set the compute data per compute dataPrint
       if (datastatus !== 'datalive' && datastatus !== 'futurelive') {
-        console.log('log1')
+        // console.log('log1')
         let evProof3 =  this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
         this.liveSEntities[shellID].evidenceChain.push(evProof3)
       } else if (datastatus === 'futurelive') {
-        console.log('log2')
+        // console.log('log2')
         // need to remove expected data
         // this.removeDataSciencewaiting(shellID, dataPrint)
         // need to produce new dataPrint for saving
@@ -657,8 +661,8 @@ class EntitiesManager extends EventEmitter {
     this.liveSEntities[shellID].liveVisualC.on('dataout', (resultUUID) => {
       let context = this.liveSEntities[shellID].datascience
       // has the update Compute Contract arrived?
-      console.log('contract arrived')
-      console.log(context.tempComputeMod)
+      // console.log('contract arrived')
+      // console.log(context.tempComputeMod)
       if (context.tempComputeMod) {
         console.log('update compuet ID awaiting')
       } else {
@@ -668,7 +672,7 @@ class EntitiesManager extends EventEmitter {
           entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID]
           entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
           // required back instant or update resutls store or both
-          console.log('e1')
+          // console.log('e1')
           this.emit('visualFirstRange', entityOut)
         } else {
           this.liveSEntities[shellID].liveVisualC.visualData
@@ -677,7 +681,7 @@ class EntitiesManager extends EventEmitter {
           // give context of none data
           entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] // 'none'
           entityOut.devices = this.liveSEntities[shellID].liveDeviceC.devices
-          console.log('e1')
+          // console.log('e1')
           this.emit('visualFirstRange', entityOut)
         }
       }
@@ -731,8 +735,8 @@ class EntitiesManager extends EventEmitter {
   *
   */
   deviceDataflow = async function (shellID, apiData) {
-    console.log('SF--device new eneity')
-    console.log(apiData)
+    // console.log('SF--device new eneity')
+    // console.log(apiData)
     let statusD = false
     // set the device in module
     statusD = await this.liveSEntities[shellID].liveDeviceC.setDevice(apiData.concept)
@@ -749,9 +753,9 @@ class EntitiesManager extends EventEmitter {
   *
   */
   deviceUpdateDataflow = function (shellID, module) {
-    console.log('SF---deivce update flow')
-    console.log(shellID)
-    console.log(module)
+    // console.log('SF---deivce update flow')
+    // console.log(shellID)
+    // console.log(module)
     // this.liveSEntities[shellID].liveDeviceC.updateDevice(module.value.info.controls.device)
     return true
   }

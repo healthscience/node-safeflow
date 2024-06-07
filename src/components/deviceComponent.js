@@ -12,7 +12,6 @@
 import DeviceSystem from '../systems/data/datadeviceSystem.js'
 import util from 'util'
 import events from 'events'
-import moment from 'moment'
 
 var DeviceComponent = function (setIN) {
   events.EventEmitter.call(this)
