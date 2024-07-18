@@ -49,10 +49,10 @@ DataComponent.prototype.setDevicesLive = async function () {
 *
 */
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, dataPrint) {
-  console.log('SF--DC--dataComp')
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, contract)
-  console.log(dataRback.length)
   // form unique dataPrint for dataUUID
+  console.log('rowdata source+++++')
+  console.log(dataRback.length)
   let dataID = {}
   dataID.device = dataPrint.triplet.device
   dataID.datatype = dataPrint.triplet.datatype
@@ -63,9 +63,8 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
   let catFlag = false
   // is there data?
   if (this.dataRaw[datauuid].length > 0) {
-    console.log('data raw yes')
     // is there a categories filter to apply?
-    if (contract.value.info.settings.category[0] !== 'none') {
+    if (source.categorydt.status !== 'none') {
       this.CategoriseData(source, dataAPI.category, contract, datauuid, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
       catFlag = true
     } else {
@@ -73,7 +72,7 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
       this.categoryData[datauuid] = this.dataRaw[datauuid]
     }
     // is there any data tidying required
-    if (source.tidydt.status !== 'none') {
+    if (source.tidydt.status !== 'none' && contract.value.info.controls?.tidy === true) {
       this.TidyDataPrep(source, contract, datauuid, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout)
     } else {
       if (catFlag === true) {
@@ -87,7 +86,6 @@ DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contr
     // form SF compute standard ie. dt hash for structuer
     this.FilterDownDT(source, contract, datauuid, dataPrint)
   } else {
-    console.log('no data')
     this.dataRaw[datauuid] = []
     this.liveData[datauuid] = []
   }
@@ -115,7 +113,7 @@ DataComponent.prototype.TidyDataPrep = function (source, contract, datauuid, dev
   let tidyDataG = {}
   let tidyKeys = Object.keys(source.tidydt)
   if (tidyKeys.length > 0) {
-    tidyDataG = this.liveTidyData.tidyRawData(source, contract, device, datatype, time, this.categoryData[datauuid])
+    tidyDataG = this.liveTidyData.tidyRawData(source, datatype, this.categoryData[datauuid])
     this.tidyData[datauuid] = tidyDataG
   } else {
     this.tidyData[datauuid] = this.categoryData[datauuid]
@@ -133,6 +131,8 @@ DataComponent.prototype.FilterDownDT = function (source, contract, dataUUID, dat
   let filterDataG = {}
   filterDataG = this.liveFilterData.dtFilterController(source, contract, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, this.tidyData[dataUUID])
   this.liveData[dataUUID] = filterDataG
+  console.log('fliter dat sets')
+  console.log(filterDataG.length)
   filterDataG = {}
   return true
 }

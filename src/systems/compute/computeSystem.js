@@ -49,23 +49,17 @@ ComputeSystem.prototype.loadComputations = function () {
 */
 ComputeSystem.prototype.computationSystem = function (contract, dataPrint, data) {
   // match computation to approprate verified compute need LOADER to add what WASM is being used/required
-  console.log('SF-computesyeam -- start')
-  console.log(contract)
   let computeContract = {}
   // two conflict input needs correlct tmep fix
   if (contract.value.info.computational === undefined) {
-    console.log('undief1')
     if (contract?.value?.info?.compute[0]?.value?.computational) {
       computeContract = contract.value.info.compute[0].value.computational.hash  
     } else {
       computeContract = contract?.value?.info?.compute[0].key
     }
   } else {
-    console.log('undief2')
     computeContract = contract.value.info.compute.key
   }
-  console.log('conract pass')
-  console.log(computeContract)
   // let computeHash = contract?.value?.info?.compute.value.computational.hash
   // let checkHashComp = this.chechHashSource(computeHash)
   // if true go ahead with compute flow

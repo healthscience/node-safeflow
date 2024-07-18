@@ -86,6 +86,9 @@ DTSystem.prototype.categoryTableMapper = function (sourceAPI, category) {
       catInfo.push(catDT)
     }
   }
+  if (catInfo.length === 0) {
+    catInfo = {'status': 'none'}
+  }
   return catInfo
 }
 

@@ -41,7 +41,7 @@ class SafeFlow extends EventEmitter {
   *
   */
   setSystemsStart = function (systemsLive) {
-    console.log('SF--systems data from library')
+    // console.log('SF--systems data from library')
     // console.log(systemsLive)
     // parse out and make available to entities (systems) when they are create
     /*for (let cont of systemsLive) {

@@ -27,10 +27,10 @@ util.inherits(TidyDataSystem, events.EventEmitter)
 * @method tidyRawData
 *
 */
-TidyDataSystem.prototype.tidyRawData = function (source, contract, device, datatype, time, dataRaw) {
+TidyDataSystem.prototype.tidyRawData = function (source, datatype, dataRaw) {
   // first check if primary data source or derived (if derived dt source will be tidy on compute cycle)
   let tidyBack = []
-  tidyBack = this.tidyFilterRemove(source.tidydt, datatype, source.sourceapiquery, dataRaw)
+  tidyBack = this.tidyFilterRemove(source.tidydt, datatype, dataRaw)
   return tidyBack
 }
 
@@ -39,13 +39,12 @@ TidyDataSystem.prototype.tidyRawData = function (source, contract, device, datat
 * @method tidyFilterRemove
 *
 */
-TidyDataSystem.prototype.tidyFilterRemove = function (tidyRules, datatype, apiDTinfo, dataRaw) {
-  let tidyHolderF = {}
+TidyDataSystem.prototype.tidyFilterRemove = function (tidyRules, datatype, dataRaw) {
   const manFilter = (e, datatype, rule) => {
     let keepTidy = null
     let filterMat = []
     for (var i = 0; i < rule.length; i++) {
-      let convertIntCRule = parseInt(rule[i].tidycode, 10)
+      let convertIntCRule = parseInt(rule[i].tidycode, 10)  // tidycode
       let dataNum = parseInt(e[datatype], 10)
       if (dataNum === convertIntCRule) {
         filterMat.push(false)
@@ -61,7 +60,7 @@ TidyDataSystem.prototype.tidyFilterRemove = function (tidyRules, datatype, apiDT
     }
     return tidyValue
   }
-  const newfullData = dataRaw.filter(n => manFilter(n, apiDTinfo.column, tidyRules))
+  const newfullData = dataRaw.filter(n => manFilter(n, datatype.column, tidyRules))
   return newfullData
 }
 

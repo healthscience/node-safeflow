@@ -13,6 +13,8 @@ import ChartOptions from './chartOptions.js'
 import util from 'util'
 import events from 'events'
 import moment from 'moment'
+import { DateTime } from 'luxon'
+import { match } from 'assert'
 
 var ChartSystem = function () {
   events.EventEmitter.call(this)
@@ -31,9 +33,6 @@ util.inherits(ChartSystem, events.EventEmitter)
 *
 */
 ChartSystem.prototype.chartjsControl = function (visModule, contract, dataPrint, dataIN, dtConvert) {
-  console.log('chartjs prpare start')
-  console.log(dataIN.length)
-  console.log(dataIN[0])
   let chartData = {}
   let structureRules = this.structureChartData(dataPrint.triplet.datatype, dataIN, dtConvert)
   let dataPrep = this.prepareVueChartJS(visModule, dataPrint.triplet.datatype, dataPrint.triplet.device, structureRules, dtConvert)
@@ -63,7 +62,7 @@ ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, res
           label: 'chart',
           borderColor: '#ed7d7d',
           backgroundColor: '#ed7d7d',
-          fill: false,
+          // fill: true,
           data: results,
           yAxisID: ''
         }
@@ -126,8 +125,9 @@ ChartSystem.prototype.structureMulitChartData = function (dataPrint, dataSet, so
       let allLabels = []
       for (let labext of timeseriesDatasetHolder) {
         for (let dspair of labext.sourceData) {
-          for (let eleTime of dspair.data)
-          allLabels.push(eleTime['d76d9c3db7f2212335373873805b54dd1f903a06'])
+          for (let eleTime of dspair.data) {
+            allLabels.push(eleTime['2cad2b187275ae98005bde4271b4e250c6f5151b'])
+          }
         }
       }
       let uniqueTimeLabel = [...new Set(allLabels)]
@@ -434,8 +434,12 @@ ChartSystem.prototype.prepareOverlayDatasetData = function (dataPrint, labels, d
   for (let dsc of dataSetsIN) {
     let chartBundle = dsc[0]
     chartBundle.data = newDatasets[countDS] // need to match to right dataset
-    // chartBundle.fillColor = this.colourList(chartBundle.fillColor)
+     // chartBundle.fillColor = this.colourList(chartBundle.fillColor)
+     // chartBundle.fill = true
+     chartBundle.borderWidth = 1
+     chartBundle.backgroundColor = this.colourList(chartBundle.borderColor, countDS)
      chartBundle.borderColor = this.colourList(chartBundle.borderColor, countDS)
+     chartBundle.label = dataPrints[0].triplet.datatype.column + this.colourList(chartBundle.borderColor, countDS)
     newChartDataset.push(chartBundle)
     countDS++
   }
@@ -450,9 +454,6 @@ ChartSystem.prototype.prepareOverlayDatasetData = function (dataPrint, labels, d
 *
 */
 ChartSystem.prototype.structureChartData = function (rule, cData) {
-  console.log('rule applied to data')
-  console.log(rule)
-  console.log(cData[0])
   // temp logic while standards put in place to be replaced
   let dataPrep = {}
   if (rule === 'blind1234555554321') {
@@ -460,13 +461,11 @@ ChartSystem.prototype.structureChartData = function (rule, cData) {
     let splitDatay = cData.map(n => n[rule])
     dataPrep.xaxis = splitDatax
     dataPrep.yaxis = splitDatay
-    console.log(dataPrep[0])
   } else {
     let splitDatax = cData.map(n => (n['2cad2b187275ae98005bde4271b4e250c6f5151b'] * 1000))
     let splitDatay = cData.map(n => n[rule.refcontract])
     dataPrep.xaxis = splitDatax
     dataPrep.yaxis = splitDatay
-    console.log(dataPrep[0])
   }
   return dataPrep
 }
@@ -514,7 +513,7 @@ ChartSystem.prototype.timestampMatcher = function (dataPrint, mergedLabel, dataI
   for (let tsi of mergedLabel) {
     let include = dataTimeText.includes(tsi)
     if (include === true) {
-      matchList.push(dataIN[count][dataPrint.triplet.datatype])
+      matchList.push(dataIN[count][dataPrint.triplet.datatype.refcontract])
       count++
     } else {
       matchList.push(null)
@@ -535,9 +534,9 @@ ChartSystem.prototype.timestampMatcherTS = function (dataPrint, timeLabels, data
   let count = 0
   // check per existing datasets
   for (let timePoint of timeLabels) {
-    let matchLogic = dataIN.find(elem => elem['d76d9c3db7f2212335373873805b54dd1f903a06'] === timePoint)
+    let matchLogic = dataIN.find(elem => elem['2cad2b187275ae98005bde4271b4e250c6f5151b'] === timePoint)
     if (matchLogic) {
-      matchList.push(matchLogic[dataPrint.triplet.datatype])
+      matchList.push(matchLogic[dataPrint.triplet.datatype.refcontract]) //.triplet.datatype])
     } else {
       matchList.push(null)
     }
@@ -635,28 +634,25 @@ ChartSystem.prototype.datasetPrep = function (visModule, rule, device, results, 
   let labelchart = []
   // if more than one time data source take the longest
   let labelData = []
-  let datachart = []
   let chartItem = {}
   if (visModule.charttype === 'line') {
     // chartItem.type = rules.prime.text
     // chartItem.borderColor = rules.color.borderColor
     // chartItem.backgroundColor = rules.color.backgroundColor
   } else {
-    chartItem.type = 'line'
-    chartItem.fillColor = 'rgb(255, 99, 132)' // rules.color.borderColor // 'rgba(220, 220, 220, 2)'
-    chartItem.borderWidth = 0
-    chartItem.borderColor = 'rgb(255, 99, 132)' // rules.color.borderColor
-    chartItem.backgroundColor = '' // 'rgb(255, 99, 132)' //rules.color.backgroundColor
+    // chartItem.type = 'line'
+    chartItem.fillColor = this.chartColors(rule)
+    chartItem.borderWidth = 1
+    chartItem.borderColor = this.chartColors(rule)
+    chartItem.backgroundColor = this.chartColors(rule)
+    chartItem.label = rule.column
   }
-  // chartItem.label = this.convertCNRLtoText(rule, dtConvert)
-  chartItem.fill = false
   let scaling = 1 // this.yAxisScaleSet(rules.datatype)
   // chartItem.scale = scaling
   chartItem.data = results.yaxis
   // chartItem.yAxisID = 'y-axis-0' // rules.color.datatype
   labelData = results.xaxis
   labelchart = this.prepareLabelchart(labelData)
-  chartItem.label = this.convertCNRLtoText(rule, dtConvert) // + ' ' + labelchart[0]
   let dataHolder = {}
   dataHolder.labels = labelchart
   dataHolder.datasets = chartItem
@@ -686,7 +682,7 @@ ChartSystem.prototype.textDatetoNumberFormat = function (labelIN) {
 ChartSystem.prototype.textDatetoNumberFormatDataset = function (labelIN) {
   let timePrep = []
   for (let li of labelIN) {
-    let fullTime = li['d76d9c3db7f2212335373873805b54dd1f903a06'] * 1000
+    let fullTime = li['2cad2b187275ae98005bde4271b4e250c6f5151b'] * 1000
     let numDate = new Date(fullTime)
     let timeFormat = moment(numDate).format('HH:mm').valueOf()  // .format('YYYY-MM-DD hh:mm')
     timePrep.push(timeFormat)
@@ -702,7 +698,7 @@ ChartSystem.prototype.textDatetoNumberFormatDataset = function (labelIN) {
 ChartSystem.prototype.textDatetoNumberFormatDatasetTS = function (labelIN) {
   let timePrep = []
   for (let li of labelIN) {
-    let fullTime = li['d76d9c3db7f2212335373873805b54dd1f903a06'] * 1000
+    let fullTime = li['2cad2b187275ae98005bde4271b4e250c6f5151b'] * 1000
     // let numDate = new Date(fullTime)
     //let timeFormat = moment(numDate).valueOf() // format('YYYY-MM-DD HH:mm').valueOf()  // .format('YYYY-MM-DD hh:mm')
     timePrep.push(fullTime)
@@ -736,8 +732,8 @@ ChartSystem.prototype.prepareLabelchartTS = function (labelIN) {
   let count = 1
   for (let li of labelIN) {
     let unixtime = li * 1000
-    let timeFormat = moment(unixtime).toDate()  // .format('YYYY-MM-DD hh:mm')
-    let tsimp = moment(timeFormat).format('MM-DD kk:mm')
+    let timeFormat = DateTime.fromMillis(unixtime)
+    let tsimp = timeFormat.toISODate()  // toFormat('MM-DD kk:mm')
     timePrep.push(tsimp)
   }
   return timePrep
@@ -762,30 +758,19 @@ ChartSystem.prototype.yAxisScaleSet = function (data) {
 *
 */
 ChartSystem.prototype.chartColors = function (datatypeItem) {
-  let colorHolder = {}
+  let colorMatch = ''
   // LOOP over datatypeList and prepare chart colors
-  if (datatypeItem.cnrl === 'cnrl-8856388712') {
-    colorHolder.datatype = 'steps'
-    colorHolder.backgroundColor = '#203487'
-    colorHolder.borderColor = '#050d2d'
-  } else if (datatypeItem.cnrl === 'cnrl-8856388711') {
-    colorHolder.datatype = 'bpm'
-    colorHolder.backgroundColor = '#ed7d7d'
-    colorHolder.borderColor = '#ea1212'
-  } else if (datatypeItem.cnrl === 'cnrl-3339949442') {
-    colorHolder.datatype = 'SDS_P2'
-    colorHolder.backgroundColor = '#080e4d'
-    colorHolder.borderColor = '#080e4d'
-  } else if (datatypeItem.cnrl === 'cnrl-3339949443') {
-    colorHolder.datatype = 'SDS_P1'
-    colorHolder.backgroundColor = '#ed7d7d'
-    colorHolder.borderColor = '#ea1212'
-  } else if (datatypeItem.cnrl === 'cnrl-3339949444') {
-    colorHolder.datatype = 'temperature'
-    colorHolder.backgroundColor = '#ed7d7d'
-    colorHolder.borderColor = '#ea1212'
+  if (datatypeItem.refcontract === '44ddfcb4788641e1ac8ddad4f665dcd8a8e85248') {
+    colorMatch = '#203487'
+    // colorHolder.borderColor = '#050d2d'
+  } else if (datatypeItem.refcontract === 'ac945e4343965392c719b15746b6f8a97cd88caf') {
+    colorMatch = '#ed7d7d'
+    // colorHolder.borderColor = '#ea1212'
+  } else if (datatypeItem.refcontract === 'cnrl-3339949442') {
+  } else if (datatypeItem.refcontract === 'cnrl-3339949443') {
+  } else if (datatypeItem.refcontract === 'cnrl-3339949444') {
   }
-  return colorHolder
+  return colorMatch
 }
 
 export default ChartSystem

@@ -36,8 +36,6 @@ util.inherits(DataSystem, events.EventEmitter)
 *
 */
 DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceInfo, device, datatype, time, contract) {
-  console.log('SF-datastystem--start')
-  console.log(type)
   let rawHolder = []
   if (type === 'SAFE') {
     // no api plug in yet
@@ -54,14 +52,10 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     // temp two different structures comign in blind and nxp need to correct
     let dataPath = ''
     if (sourceInfo.data.path !== undefined) {
-      console.log('ds1')
       dataPath = sourceInfo.data.path
     } else {
-      console.log('ds2')
       dataPath = 'json'
     }
-    console.log('dataflow path--------')
-    console.log(dataPath)
     // temp before smart rest extractor is built
     if (dataPath === '/rest/') {
       rawHolder = await this.liveRestStorage.COMPUTEbuilder(extractURL, device, time).catch(e => console.log('Error: ', e.message))

@@ -34,8 +34,6 @@ util.inherits(VisSystem, events.EventEmitter)
 *
 */
 VisSystem.prototype.visualControl = function (visModule, contract, dataPrint, dataIN, dtConvert) {
-  console.log('SF--VisSystem--2222')
-  console.log(contract)
   // temp fix two competin structure comimg in blind and nxp
   let visContract = {}
   if (contract?.value?.computational?.name !== undefined) {
@@ -59,8 +57,10 @@ VisSystem.prototype.visualControl = function (visModule, contract, dataPrint, da
 VisSystem.prototype.singlemultiControl = function (type, dataPrint, inputHash, dataSet, sourceData, dataPrints) {
   let restructureDone = {}
   if (type.format === 'timeseries') {
+    console.log('timeseries-----------')
     restructureDone = this.liveChartSystem.structureMulitChartData(dataPrint, dataSet, sourceData, dataPrints)
   } else if (type.format = 'overlay') {
+    console.log('overlay-----------')
     restructureDone = this.liveChartSystem.structureOverlayChartData(dataPrint, dataSet, sourceData, dataPrints)
   }
   return restructureDone

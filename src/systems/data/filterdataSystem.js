@@ -39,7 +39,6 @@ FilterDataSystem.prototype.dtFilterController = function (source, contract, devi
 *
 */
 FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData) {
-  console.log('filter to SF RAW to SF structure')
   let singleArray = []
   if (datatype === 'blind1234555554321') {
     singleArray = tidyData
@@ -62,8 +61,6 @@ FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData
       }
     }
   }
-  console.log('after fileer')
-  console.log(singleArray[0])
   return singleArray
 }
 
