@@ -55,7 +55,7 @@ SQLiteAPI.prototype.SQLiteSetup = async function (dapi) {
 *
 */
 SQLiteAPI.prototype.SQLitebuilderPromise = async function (dapi, device, time) {
-  // first setup the db MI_BAND_ACTIVITY_SAMPLE
+  // first setup the db MI_BAND_ACTIVITY_SAMPLE  SELECT * FROM MI_BAND_ACTIVITY_SAMPLE WHERE TIMESTAMP BETWEEN 1718279760 AND 1720382880
   device = dapi.deviceinfo.column
   let deviceCol = dapi.deviceinfo.table // 'DEVICE_ID'
   let table = 'MI_BAND_ACTIVITY_SAMPLE'
