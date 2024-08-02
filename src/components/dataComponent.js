@@ -51,8 +51,6 @@ DataComponent.prototype.setDevicesLive = async function () {
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, dataPrint) {
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, contract)
   // form unique dataPrint for dataUUID
-  console.log('rowdata source+++++')
-  console.log(dataRback.length)
   let dataID = {}
   dataID.device = dataPrint.triplet.device
   dataID.datatype = dataPrint.triplet.datatype
@@ -131,8 +129,6 @@ DataComponent.prototype.FilterDownDT = function (source, contract, dataUUID, dat
   let filterDataG = {}
   filterDataG = this.liveFilterData.dtFilterController(source, contract, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, this.tidyData[dataUUID])
   this.liveData[dataUUID] = filterDataG
-  console.log('fliter dat sets')
-  console.log(filterDataG.length)
   filterDataG = {}
   return true
 }

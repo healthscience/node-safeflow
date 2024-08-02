@@ -93,7 +93,7 @@ class EntitiesManager extends EventEmitter {
   */
   peerInput = async function (input) {
     // validate input data structure e.g. not empty etc.
-    console.log('ECS--input++++++++++++++++++++++++++++++++++++++++++START++++++++++++++++++')
+    // console.log('ECS--input++++++++++++++++++++++++++++++++++++++++++START++++++++++++++++++')
     // console.log(input)
     // console.log(util.inspect(input, {showHidden: false, depth: null}))
     let inputValid = this.validateInput(input)
@@ -139,7 +139,6 @@ class EntitiesManager extends EventEmitter {
     let modules = []
     this.computeFlag = false
     if (ecsIN.update !== undefined && ecsIN.update.entityUUID) {
-      console.log('existing---')
       shellID = ecsIN.update.entityUUID
       modules = ecsIN.update.modules
       moduleState = true
@@ -147,7 +146,6 @@ class EntitiesManager extends EventEmitter {
       this.ECSflow(shellID, ecsIN.update, inputUUID, modules)
       // data is ready tell peer
     } else {
-      console.log('firstime ECS')
       // need to setup new ECS entity for this network experiment
       shellID = this.liveCrypto.entityID(ecsIN.exp)
       modules = ecsIN.modules
@@ -202,7 +200,6 @@ class EntitiesManager extends EventEmitter {
     // first assess what first flow and create waiting list (if any)
     // let autoCheck = this.liveAutomation.updateAutomation(moduleOrder.compute.value.info)
     if (ECSinput.input === 'refUpdate') {
-      console.log('update')
       // update device list per peer input
       this.deviceUpdateDataflow(shellID, moduleOrder.compute)
       // update flow state for new input
@@ -221,7 +218,6 @@ class EntitiesManager extends EventEmitter {
       this.flowMany(shellID, inputUUID, true)
       let State = false
     } else {
-      console.log('first or new')
       // new ENTITY prepare
       // console.log(moduleOrder.data)
       // console.log(util.inspect(moduleOrder.data, {showHidden: false, depth: null}))
@@ -246,7 +242,7 @@ class EntitiesManager extends EventEmitter {
   *
   */
   flowMany = async function (shellID, inputUUID, computeFlag, dataPrint) {
-    console.log('SF_ECS----flowmany')
+    // console.log('SF_ECS----flowmany')
     let ecsInput = this.liveSEntities[shellID].datascience
     // console.log(ecsInput)
     // console.log(util.inspect(ecsInput, {showHidden: false, depth: null}))
@@ -261,15 +257,12 @@ class EntitiesManager extends EventEmitter {
     }
     // is a range of devices, datatype or time ranges and single or multi display?
     if (ecsInput.flowstate.devicerange === true && ecsInput.flowstate.datatyperange === true && ecsInput.flowstate.timerange === true) {
-      console.log('logic 1')
       for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
         // reset expect count (incase something didnt clear)
         if (computeFlag === false) {
           this.liveSEntities[shellID].liveVisualC.clearDeviceCount(device)
-          console.log('logic2')
         }
         for (let datatype of this.liveSEntities[shellID].liveDatatypeC.datatypesLive) {
-          console.log('logic3')
           for (let time of timeList) {
             this.throttle(() => {
               // hash the context device, datatype and time
@@ -282,7 +275,6 @@ class EntitiesManager extends EventEmitter {
       }
     } else {
       // matchup input - return no data
-      console.log('')
       let context = this.liveSEntities[shellID].datascience
       let entityOut = {}
       entityOut.context = context
@@ -298,7 +290,6 @@ class EntitiesManager extends EventEmitter {
   *
   */
   entityResultsReady = async function (shellID, ecsIN, hash, computeFlag) {
-    console.log('result already')
     // check ptop Datastore for existing results query by UUID of data results
     // first, check does the data exist in Memory for this input request?
     let checkDataExist = this.checkForResultsMemory(shellID, hash)
@@ -352,10 +343,8 @@ class EntitiesManager extends EventEmitter {
       let computeFlag = checkData.entity.computeflag
       let liveContext = this.liveSEntities[checkData.entity.shell].datascience
       if (checkData.data === false || checkData.data.length === 0) {
-        console.log('full')
         await this.subFlowFull(checkData, liveContext, computeFlag)
       } else {
-        console.log('short')
         await this.subFlowShort(checkData, liveContext, computeFlag)
       }
     })
@@ -955,7 +944,6 @@ class EntitiesManager extends EventEmitter {
     }
     // how many data types, single or multi per this request
     let dtRange = false
-    console.log(modContracts.compute.value)
     if (modContracts.compute.value.info.controls.yaxis.length > 0) {
       dtRange = true
       // set the datatype range
