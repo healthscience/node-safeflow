@@ -12,6 +12,7 @@
 import RestAPI from './dataprotocols/rest/index.js'
 import SQLiteAPI from './dataprotocols/sqlite/index.js'
 import JSONfileAPI from './dataprotocols/json/index.js'
+import CSVfileAPI from './dataprotocols/csv/index.js'
 import LiveSimulatedDataSystem from './simulateddataSystem.js'
 import util from 'util'
 import events from 'events'
@@ -21,6 +22,7 @@ var DataSystem = function (setIN) {
   this.liveRestStorage = new RestAPI(setIN)
   this.liveSQLiteStorage = new SQLiteAPI(setIN)
   this.liveJSONStorage = new JSONfileAPI(setIN)
+  this.liveCSVStorage = new CSVfileAPI(setIN)
   this.devicePairs = []
 }
 
@@ -59,12 +61,15 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     // temp before smart rest extractor is built
     if (dataPath === '/rest/') {
       rawHolder = await this.liveRestStorage.COMPUTEbuilder(extractURL, device, time).catch(e => console.log('Error: ', e.message))
+    } else if (dataPath === 'csv') {
+      // source csv e.g. large file query
+      rawHolder = await this.liveCSVStorage.CSVbuilderPromise(sourceInfo, device, time).catch(e => console.log('Error: ', e.message))
     } else if (dataPath === '/luftdatenGet/') {
       // temp data set for air quality rest
       rawHolder = await this.liveRestStorage.COMPUTEbuilderLuft(extractURL, device, time).catch(e => console.log('Error: ', e.message))
     } else if (dataPath === 'sqlite') { 
       rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo.data, device, time)
-    } else if (dataPath === 'json' || dataPath === 'csv') {
+    } else if (dataPath === 'json') {
       // pass on to either safe API builder, REST API builder or IPSF builder etc.
       rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device, time).catch(e => console.log('Error: ', e.message))
     }

@@ -18,18 +18,6 @@ import fs from 'fs'
 var SQLiteAPI = function (dataAPI) {
   events.EventEmitter.call(this)
   this.liveDataAPI = dataAPI
-  // console.log('SF--SQLITE--Dsys====================')
-  // this.liveDataAPI.DriveFiles.listFilesFolder('')
-  // this.liveDataAPI.DriveFiles.hyperdriveLocalfile('sqlite/Gadgetbridge')
-  // check if any database files?
-  /* let dbSQLitedir = os.homedir() + '/peerlink/sqlite/'
-  let dbList = []
-  fs.readdirSync(dbSQLitedir).forEach(file => {
-    dbList.push(file)
-  })
-  if (dbList.length > 0) {
-    this.db = new sqlite3.Database(os.homedir() + '/peerlink/sqlite/Gadgetbridge')
-  } */
 }
 
 /**
