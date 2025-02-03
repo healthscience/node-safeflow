@@ -35,9 +35,6 @@ util.inherits(TimeUtilities, events.EventEmitter)
 *
 */
 TimeUtilities.prototype.computeTimeSegments = function (startTime, tSegs) {
-  console.log('compute time seg UTILITY')
-  console.log(startTime)
-  console.log(tSegs)
   //
   //
   return timeConversion

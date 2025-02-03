@@ -40,7 +40,6 @@ SAFEmaster.prototype.safeGetData = function (addressIN) {
 *
 */
 SAFEmaster.prototype.sendAuthRequest = async function () {
-  console.log('Authorising SAFE application...')
   let customExecPath = [process.execPath, app.getAppPath()]
   const appInfo = {
     // User-facing name of our app. It will be shown
@@ -69,9 +68,7 @@ SAFEmaster.prototype.sendAuthRequest = async function () {
 *
 */
 SAFEmaster.prototype.uponAuthResponse = async function (resAuthUri) {
-  console.log('Authorisation response received')
   await this.safeApp.auth.loginFromUri(resAuthUri)
-  console.log('Application connected to the network')
 
   const typeTag = 15000
   this.md = await this.safeApp.mutableData.newRandomPublic(typeTag)

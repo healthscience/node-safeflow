@@ -16,7 +16,6 @@ var WebSocketClient = require('websocket').client
 var client = new WebSocketClient()
 
 var PeerLink = function () {
-  console.log('peerlink started')
   events.EventEmitter.call(this)
   this.commWebSocket()
 }
@@ -33,13 +32,11 @@ util.inherits(PeerLink, events.EventEmitter)
 *
 */
 PeerLink.prototype.commWebSocket = function () {
-  console.log('PeerLink active')
   client.on('connectFailed', function(error) {
       console.log('Connect Error: ' + error.toString());
   })
 
   client.on('connect', function(connection) {
-      console.log('WebSocket Client Connected')
       connection.on('error', function(error) {
           console.log("Connection Error: " + error.toString());
       })

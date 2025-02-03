@@ -42,12 +42,8 @@ RecoveryHeartrate.prototype.recoveryHeartSystem = function () {
 *
 */
 RecoveryHeartrate.prototype.prepareRecoveryCompute = async function (range, device) {
-  console.log('prepare recovery compute')
-  console.log(device)
   // get current observation data from its entityData
   let liveObservation = this.emit('liveobserve', true)
-  console.log('what event message')
-  console.log(liveObservation)
   // await this.assessPostHRaverage(range, device)
   return true
 }
@@ -58,18 +54,11 @@ RecoveryHeartrate.prototype.prepareRecoveryCompute = async function (range, devi
 *
 */
 RecoveryHeartrate.prototype.assessPostHRaverage = async function (range, device) {
-  console.log('assess post HR recovery average HR')
-  console.log(range)
-  console.log(this.data)
   let recChunk = []
   let elements = Object.keys(this.data)
   let firstTimeElement = elements[0]
-  // console.log(firstTimeElement)
   let deviceLive = Object.keys(this.data[firstTimeElement])
-  // console.log(device)
   let batchData = this.data[firstTimeElement][deviceLive[0]]
-  console.log('batch aray')
-  console.log(batchData)
   // extract the portion of data chunks for recovery analysisStart
   let twoMinutes = 120
   let fiveMinutes = 300
@@ -87,7 +76,6 @@ RecoveryHeartrate.prototype.assessPostHRaverage = async function (range, device)
     // extract 10 mims post
     console.log(tenMinutes)
   }
-  console.log(recChunk)
   /* let numberEntries = dataArray.length
   // accumulate sum the daily data
   let sum = dataArray.reduce(add, 0)

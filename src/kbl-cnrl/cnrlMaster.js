@@ -715,7 +715,6 @@ CNRLmaster.prototype.lookupContract = function (refIN) {
 *
 */
 CNRLmaster.prototype.subSource = function (refIN) {
-  console.log('CRNL----lookup for upstream structure')
   // if contract has links, follow those to source TODO
   let dataCNRLbundle = {}
   dataCNRLbundle.prime = []
@@ -802,8 +801,6 @@ CNRLmaster.prototype.livingKnowledge = function (refIN) {
 *
 */
 CNRLmaster.prototype.timeContracts = function (refIN) {
-  console.log('CRNL----TIMElook')
-  console.log(refIN)
   let timeIndex = []
   if (refIN === 'time-index') {
     timeIndex =
@@ -891,7 +888,6 @@ CNRLmaster.prototype.timeContracts = function (refIN) {
 *
 */
 CNRLmaster.prototype.coordinateScaffolding = function (refIN) {
-  console.log('CRNL----coordinate simulations computations')
   // if contract has links, follow those to source TODO
   let scaffoldingCOORD = {}
   return scaffoldingCOORD
@@ -903,7 +899,6 @@ CNRLmaster.prototype.coordinateScaffolding = function (refIN) {
 *
 */
 CNRLmaster.prototype.geometryScaffolding = function (refIN) {
-  console.log('CRNL----2d 3d geometry of modecules chemistry')
   // if contract has links, follow those to source TODO
   let scaffoldingGEOM = {}
   return scaffoldingGEOM

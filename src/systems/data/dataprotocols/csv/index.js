@@ -11,7 +11,6 @@
 */
 import util from 'util'
 import events from 'events'
-import sqlite3 from 'sqlite3'
 import os from 'os'
 import fs from 'fs'
 
@@ -31,7 +30,7 @@ util.inherits(CsvAPI, events.EventEmitter)
 * @method CSVbuilder
 *
 */
-CsvAPI.prototype.CSVbuilder = async function (dapi) {
+CsvAPI.prototype.CSVbuilder = function (dapi) {
 
 }
 
@@ -40,21 +39,36 @@ CsvAPI.prototype.CSVbuilder = async function (dapi) {
 * @method CSVbuilderPromise
 *
 */
-CsvAPI.prototype.CSVbuilderPromise = async function (dapi, device, time) {
-  device = dapi.deviceinfo.column
+CsvAPI.prototype.CSVbuilderPromise = function (dapi, device, time) {
   console.log('csv api  part file query?')
-  console.log(dapi)
-  console.log(device)
-  console.log(time)
-  const res = await new Promise((resolve, reject) => {
+  // const res = await new Promise((resolve, reject) => {
      /* this.db.all(sql, [], (err, rows) => {
       if (err)
         reject(err)
         resolve(rows)
     }) */
-  })
+  res = [1, 2, 3]
   return res
 }
 
+/**
+*  stream out line by line
+* @method readCSVfileStream
+*
+*/
+CsvAPI.prototype.readCSVfileStream = async function (fpath) {
+  // limit length until auto route informs the chunk size TODO
+  const rs = this.liveDataAPI.drive.createReadStream(fpath, { start: 0, end: 1000 })
+    return new Promise((resolve, reject) => {
+    let results = []
+      rs.on('data', (data) => results.push(data.toString()))
+      rs.on('end', () => {
+        let makeString = results.toString()
+        let csvFormat = makeString.split(/\r?\n/)
+        resolve(csvFormat)
+        reject('error-csv')
+      })
+  })
+}
 
 export default CsvAPI

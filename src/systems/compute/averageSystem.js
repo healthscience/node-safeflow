@@ -43,9 +43,6 @@ AverageSystem.prototype.verifyComputeWASM = function (wasmFile) {
 *
 */
 AverageSystem.prototype.averageSystemStart = function (contract, dataPrint, data) {
-  console.log('start prepare ===========avg compute')
-  // console.log(dataPrint)
-  // console.log(data[0])
   let saveJSON = []
   if (data.length > 0) {
     let saveReady = this.avgliveStatistics.averageStatistics(data, dataPrint.triplet.datatype)
