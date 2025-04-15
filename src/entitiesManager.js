@@ -548,7 +548,7 @@ class EntitiesManager extends EventEmitter {
     }
     // now perform the compute
     if (dataCheck === true) {
-      this.computeStatus = this.liveSEntities[shellID].liveComputeC.filterCompute(modUpdateContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
+      this.computeStatus = await this.liveSEntities[shellID].liveComputeC.filterCompute(modUpdateContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
       // need to set the compute data per compute dataPrint
       if (datastatus !== 'datalive' && datastatus !== 'futurelive') {
         let evProof3 =  this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
