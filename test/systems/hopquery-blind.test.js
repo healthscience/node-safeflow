@@ -13,7 +13,7 @@ describe('Blind Path Integration', () => {
   let publicLib;
   
   beforeAll(async () => {
-    liveHolepunch = new HolepunchHOP();
+    liveHolepunch = new HolepunchHOP('hop-storage-test');
     await liveHolepunch.BeeData.setupHyperbee();
     await liveHolepunch.DriveFiles.setupHyperdrive();
     
@@ -37,27 +37,21 @@ describe('Blind Path Integration', () => {
       data: {
         text: 'chart the numbers',
         numbers: [10, 20, 30, 40, 50],
-        compute: {
-          type: 'observation'
-        }
+        compute: 'observation'
       },
       bbid: 'test-bbid'
     };
 
-    console.log('Processing through bbAI...');
     const bbAIResponse = await bbAI.nlpflow(message);
-    console.log('bbAI response:', bbAIResponse);
-
     // Generate HOP query with publicLib
     const fileInfo = {}; // Optional parameter
     const hopQuery = queryBuilder.queryPath({
       action: 'blind',
       data: {
         numbers: message.data.numbers,
-        compute: message.data.compute
+        data: { input: { data: { compute: 'observation' } } }
       }
     }, publicLib, fileInfo);
-    console.log('Generated HOP query:', hopQuery);
 
     // Process through compute system
     // extract the compute contract from HOPquery
@@ -68,12 +62,10 @@ describe('Blind Path Integration', () => {
         break;
       }
     }
-    console.log('Extracted compute contract:', computeContract);
 
     try {
       const resultData = await computeSystem.computationSystem(computeContract, {}, message.data.numbers);
-      console.log('Final result:', resultData);
-      
+      // console.log('Final result:', resultData);
       expect(resultData).toBeDefined();
       expect(resultData.state).toBe(true);
       expect(resultData.result.data).toEqual([10, 20, 30, 40, 50]);
@@ -91,9 +83,7 @@ describe('Blind Path Integration', () => {
       data: {
         text: 'chart the numbers',
         numbers: [10, 20, 30, 40, 50],
-        compute: {
-          type: 'average'
-        }
+        compute: 'average'
       },
       bbid: 'test-bbid'
     };
@@ -107,7 +97,7 @@ describe('Blind Path Integration', () => {
       action: 'blind',
       data: {
         numbers: message.data.numbers,
-        compute: message.data.compute
+        data: { input: { data: { compute: 'average' } } }
       }
     }, publicLib, fileInfo);
 
@@ -119,13 +109,8 @@ describe('Blind Path Integration', () => {
         computeContract = mod;
       }
     }
-    console.log('compute contract-----------');
-    console.log(computeContract.value.info);
-    console.log('comoute eninge lookat 33 ');
-    console.log(computeSystem);
+
     const resultData = await computeSystem.computationSystem(computeContract, {}, message.data.numbers);
-    console.log('result');
-    console.log(resultData);
     expect(resultData.state).toBe(true);
     expect(resultData.result.result).toBe(30); // Average of 10-50
   });
