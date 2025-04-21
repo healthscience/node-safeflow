@@ -112,35 +112,7 @@ describe('Blind Path Integration', () => {
 
     const resultData = await computeSystem.computationSystem(computeContract, {}, message.data.numbers);
     expect(resultData.state).toBe(true);
-    expect(resultData.result.result).toBe(30); // Average of 10-50
+    expect(resultData.result.result).toBe(30);
   });
-/*
-  it('should process file data through blind path', async () => {
-    // Create a mock message with file data
-    const message = {
-      action: 'blind',
-      data: {
-        filedata: {
-          content: '1,10\n2,20\n3,30\n4,40\n5,50',
-          type: 'csv',
-          size: 'small'
-        },
-        compute: {
-          type: 'linear-regression'
-        }
-      }
-    };
-
-    // Process through bbAI
-    const bbAIResponse = await bbAI.nlpflow(message);
-
-    // Generate HOP query
-    const hopQuery = queryBuilder.queryPath(bbAIResponse, {}, {});
-
-    // Process through compute system
-    const result = await computeSystem.computationSystem(hopQuery, {}, {});
-    expect(result.data.result.slope).toBeDefined();
-    expect(result.data.result.intercept).toBeDefined();
-  }); */
  
 });
