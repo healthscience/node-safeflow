@@ -131,6 +131,8 @@ class SafeFlow extends EventEmitter {
   */
   startFlow = async function (refContract) {
   let startData = await this.liveEManager.peerKBLstart(refContract)
+  console.log('SF--startFlow')
+  console.log(startData)
   return startData
   }
 
