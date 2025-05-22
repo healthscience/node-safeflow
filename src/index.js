@@ -18,6 +18,7 @@ class SafeFlow extends EventEmitter {
     super()
     this.dataAPIlive = dataAPI
     // start error even listener
+    console.log('SF--safeFlow start--DML branch')
     this.eventErrorListen()
     this.liveEManager = new EntitiesManager(this.dataAPIlive)
     this.resultCount = 0
