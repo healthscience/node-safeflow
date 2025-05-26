@@ -1,10 +1,9 @@
-import ComputeEngine, { registerModelLoader, loadJavaScriptModel } from 'compute-engine';
+import ComputeEngine, { registerModelLoader, loadJavaScriptModel, loadWasmModel } from 'compute-engine';
 import { EventEmitter } from 'events';
 
 class ComputeSystem extends EventEmitter {
   constructor(setIN) {
     super();
-    console.log('SF--compute sysetm start')
     this.models = {}
     // Initialize compute engine
     this.computeEngine = ComputeEngine;
@@ -23,6 +22,7 @@ class ComputeSystem extends EventEmitter {
   * @return {void}
   **/
   async preloadModels() {
+
     if (!this.publicLibrary) {
       console.warn('No public library provided, cannot preload models');
       return;
@@ -58,9 +58,9 @@ class ComputeSystem extends EventEmitter {
       const model = await this.computeEngine.loadModelFromContract(contract);
 
       // Store the loaded model in the system
-      this.models[contract.value.computational.hash] = model;
+      this.computeEngine.models[contract.value.computational.hash] = model;
 
-      console.log(`Model ${contract.value.computational.value} loaded successfully.`);
+      console.log(`Model ${contract.value.computational.hash} loaded successfully.`);
     } catch (error) {
       console.error(`Error loading model ${contract.value.computational.value}:`, error);
     }
@@ -73,15 +73,12 @@ class ComputeSystem extends EventEmitter {
   * @param {object} contract
   **/
   async computationSystem(contract, dataPrint, inputData) {
-    console.log('start computation function------')
     try {
       // Validate contract
       if (!contract) {
         throw new Error('Invalid compute contract - contract is undefined');
       }
       // Get compute info from contract
-      console.log('in coming contract')
-      console.log(contract)
       let modelName = contract.value.computational.name
       let computeMode = contract.value.computational.mode;
 
@@ -93,28 +90,34 @@ class ComputeSystem extends EventEmitter {
           timestamp: Date.now()
         };
       } else {
+        let result = {}
         // model registered or loaded? Check
-        console.log('view into compute engine')
-        console.log(this.computeEngine)
         let checkRegistered = this.computeEngine.checkRegistered(contract)
-        console.log('check reg feedafk')
-        console.log(checkRegistered)
         if (checkRegistered === true) {
           // is model already loaded?
           let checkLoaded = this.computeEngine.checkLoaded(contract)
           if (checkLoaded === true) {
             // perform the compute
-            const result = await this.computeEngine.models[contract.value.computational.hash].compute(inputData);
-            return {
-              state: true,
-              result: result,
-              timestamp: Date.now()
-            };
+            if (contract.value.computational.mode === 'javascript') {
+              result = await this.computeEngine.models[contract.value.computational.hash].compute(inputData);
+            } else if (contract.value.computational.mode === 'wasm') {
+              // Process data through model
+              result = await this.computeEngine.models[contract.value.computational.hash].compute(inputData, { useWasm: true });
+              result.state = true
+            }
+
+            return result
           } else {
             // load the model and then compute
-            let model =  await this.loadModelFromComputeEngine(contract);
-            // Process data through model
-            const result = await model.compute(inputData);
+            let result = {}
+            // check if js wasm or python
+            if (contract.value.computational.mode === 'javascript') {
+              result = null
+            } else if (contract.value.computational.mode === 'wasm') {
+              let model =  await this.loadModelFromComputeEngine(contract);
+              // Process data through model
+              result = await model.compute(inputData, { useWasm: true });
+            }
 
             return {
               state: true,
@@ -124,7 +127,6 @@ class ComputeSystem extends EventEmitter {
           }
         } else {
           // need to register the contracts compute code
-          console.log('need to register model')
           if (contract.value.computational.mode === 'javascript') {
             this.computeEngine.registerModelLoader(contract.value.computational.hash, await this.computeEngine.jsLoader(contract));
           } else if (contract.value.computational.mode === 'wasm') {
@@ -146,6 +148,21 @@ class ComputeSystem extends EventEmitter {
         timestamp: Date.now()
       };
     }
+  }
+
+  /**
+   * new model to register in compute-engine
+   * @method registerModel
+   * @returns 
+  */
+  async registerModel(contract) {
+    if (contract.value.computational.mode === 'javascript') {
+      if (contract.value.computational.name !== 'observation')
+      registerModelLoader(contract.value.computational.hash, await this.computeEngine.jsLoader(contract));
+    } else if (contract.value.computational.mode === 'wasm') {
+      registerModelLoader(contract.value.computational.hash, await this.computeEngine.wasmLoader(contract));
+    }
+    return true
   }
 
   /**

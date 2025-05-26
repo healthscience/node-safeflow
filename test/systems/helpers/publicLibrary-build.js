@@ -352,11 +352,11 @@ class LibraryUtility { //  extends EventEmitter {
     refContract.privacy = 'public'
     let compSettings = {}
     compSettings.primary = true
-    compSettings.name = 'average'
+    compSettings.name = 'average-statistics'
     compSettings.description = 'statistical mean'
     compSettings.dtprefix = 'null'
     compSettings.code = ''
-    compSettings.hash = '8de547c465d517b2058b624b8b299701fd6dea8cf244aa87cef59f2b37fe2645'
+    compSettings.hash = '064158be46a97526a800311ff339f0a0b37afd936c0d8859c07ee3b70cbabc0c'
     compSettings.mode = 'wasm'
     refContract.data = compSettings
     return refContract

@@ -43,7 +43,6 @@ describe('ComputeSystem Initial Preload', () => {
   it('should preload default models on initialization', async () => {
     await new Promise((resolve) => setTimeout(resolve, 3000))
     // Prepare default contracts using the helper
-    console.log('start of test')
     const defaultLibraryContracts = await libraryHelper.setupMinLibrary();
     // Initialize ComputeSystem with the contracts
     const computeSystem = new ComputeSystem({ publicLibrary: defaultLibraryContracts });
@@ -55,9 +54,9 @@ describe('ComputeSystem Initial Preload', () => {
       if (compCont.value.refcontract === 'compute') {
         if (compCont.value.computational.mode === 'javascript') {
         } else if (compCont.value.computational.mode === 'wasm') {
-          const model = await computeSystem.loadModelFromComputeEngine(compCont);
+          await computeSystem.loadModelFromComputeEngine(compCont);
           // Test the model
-          const result = await computeSystem.models[compCont.value.computational.hash].compute([1, 2, 3, 4, 5]);
+          const result = await computeSystem.computeEngine.models[compCont.value.computational.hash].compute([1, 2, 3, 4, 5], { useWasm: true });
           expect(result.result).toBe(3);
         }
       }
