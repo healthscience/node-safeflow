@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    setupFiles: ['./test/systems/test-compute-engine.mock.js'],
+    // setupFiles: ['./test/systems/test-compute-engine.mock.js'],
     include: ['**/*.test.js'],
     exclude: ['node_modules', 'dist'],
     root: __dirname,

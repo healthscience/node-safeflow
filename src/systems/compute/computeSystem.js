@@ -1,11 +1,13 @@
-import { ComputeEngine } from 'compute-engine';
+import ComputeEngine, { registerModelLoader, loadJavaScriptModel } from 'compute-engine';
 import { EventEmitter } from 'events';
 
 class ComputeSystem extends EventEmitter {
   constructor(setIN) {
     super();
+    console.log('SF--compute sysetm start')
+    this.models = {}
     // Initialize compute engine
-    this.computeEngine = new ComputeEngine();
+    this.computeEngine = ComputeEngine;
     // Track last compute times
     this.lastComputeTime = {};
     // Store reference to public library
@@ -25,37 +27,42 @@ class ComputeSystem extends EventEmitter {
       console.warn('No public library provided, cannot preload models');
       return;
     }
-
     // Find all compute models in the public library
-    const computeModels = this.publicLibrary.filter(libItem => {
+    const computeConracts = this.publicLibrary.filter(libItem => {
       return libItem.value?.refcontract === 'compute';
     });
-
     // Load each model
-    for (const model of computeModels) {
+    for (const contract of computeConracts) {
       try {
-        const modelName = model.value.computational.name;
-        await this.loadModelFromLibrary(modelName);
-        console.log(`Successfully loaded model: ${modelName}`);
+        if (contract.value.computational.mode === 'javascript') {
+          if (contract.value.computational.name !== 'observation')
+          this.computeEngine.registerModelLoader(contract.value.computational.hash, await this.computeEngine.jsLoader(contract));
+        } else if (contract.value.computational.mode === 'wasm') {
+          registerModelLoader(contract.value.computational.hash, await this.computeEngine.wasmLoader(contract));
+        }
+        console.log(`Successfully loaded model: ${contract}`);
       } catch (error) {
         console.error('Failed to preload model:', error);
       }
     }
   }
 
-  async loadModelFromLibrary(contract) {
-    console.log('load this compute contract please')
-    console.log(modelContract)
+  /*
+   * 
+   * @param
+   * @method loadModelFromComputeEngine
+  */
+  async loadModelFromComputeEngine(contract) {
     try {
       // Use the updated compute-engine to load the model from the contract
-      const model = await computeEngine.loadModelFromContract(contract);
+      const model = await this.computeEngine.loadModelFromContract(contract);
 
       // Store the loaded model in the system
-      this.models[contract.id] = model;
+      this.models[contract.value.computational.hash] = model;
 
-      console.log(`Model ${contract.id} loaded successfully.`);
+      console.log(`Model ${contract.value.computational.value} loaded successfully.`);
     } catch (error) {
-      console.error(`Error loading model ${contract.id}:`, error);
+      console.error(`Error loading model ${contract.value.computational.value}:`, error);
     }
   }
 
@@ -66,47 +73,71 @@ class ComputeSystem extends EventEmitter {
   * @param {object} contract
   **/
   async computationSystem(contract, dataPrint, inputData) {
+    console.log('start computation function------')
     try {
       // Validate contract
       if (!contract) {
         throw new Error('Invalid compute contract - contract is undefined');
       }
-
       // Get compute info from contract
-      let modelName;
-      let modelType;
+      console.log('in coming contract')
+      console.log(contract)
+      let modelName = contract.value.computational.name
+      let computeMode = contract.value.computational.mode;
 
-      // Check for new structure from query builder
-      if (contract.compute?.[0]?.value?.computational?.name) {
-        modelName = contract.compute[0].value.computational.name;
-        // Set model type based on name
-        modelType = modelName === 'average' ? 'average' : 'observation';
-      } else if (contract.value?.info?.compute?.[0]?.value?.computational?.name) {
-        // Old structure
-        modelName = contract.value.info.compute[0].value.computational.name;
-        modelType = modelName === 'average' ? 'average' : 'observation';
+      // options here, first time new or returning, ie is registered, already loaded? speical case observation just return data as it
+      if (modelName === 'observation') {
+           return {
+          state: true,
+          result: inputData,
+          timestamp: Date.now()
+        };
       } else {
-        throw new Error('Invalid compute contract - cannot find model name');
+        // model registered or loaded? Check
+        console.log('view into compute engine')
+        console.log(this.computeEngine)
+        let checkRegistered = this.computeEngine.checkRegistered(contract)
+        console.log('check reg feedafk')
+        console.log(checkRegistered)
+        if (checkRegistered === true) {
+          // is model already loaded?
+          let checkLoaded = this.computeEngine.checkLoaded(contract)
+          if (checkLoaded === true) {
+            // perform the compute
+            const result = await this.computeEngine.models[contract.value.computational.hash].compute(inputData);
+            return {
+              state: true,
+              result: result,
+              timestamp: Date.now()
+            };
+          } else {
+            // load the model and then compute
+            let model =  await this.loadModelFromComputeEngine(contract);
+            // Process data through model
+            const result = await model.compute(inputData);
+
+            return {
+              state: true,
+              result: result,
+              timestamp: Date.now()
+            };
+          }
+        } else {
+          // need to register the contracts compute code
+          console.log('need to register model')
+          if (contract.value.computational.mode === 'javascript') {
+            this.computeEngine.registerModelLoader(contract.value.computational.hash, await this.computeEngine.jsLoader(contract));
+          } else if (contract.value.computational.mode === 'wasm') {
+            registerModelLoader(contract.value.computational.hash, await this.computeEngine.wasmLoader(contract));
+          }
+          // Load the model from the contract
+          const model = await this.computeEngine.loadModelFromContract(contract);
+          const result = await model.compute(inputData);
+          result.state = true
+          return result
+        }
       }
 
-      // Load model
-      const model = await this.computeEngine.loadModel(modelName);
-      if (!model) {
-        throw new Error(`Model not found: ${modelName}`);
-      }
-
-      // Process data through model
-      const result = await model.compute(inputData, {
-        controls: contract.controls,
-        settings: contract.settings,
-        type: modelType // Pass the correct type
-      });
-
-      return {
-        state: true,
-        result: result,
-        timestamp: Date.now()
-      };
     } catch (error) {
       console.error('Compute error:', error);
       return {
@@ -144,47 +175,4 @@ class ComputeSystem extends EventEmitter {
   }
 }
 
-/**
- * Base model class
- * @class BaseModel
- * @package safeFlow
- * @subpackage compute
- * @copyright Copyright (c) 2025 James Littlejohn
- * @license http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
- * @version $Id$
- */
-class BaseModel {
-  constructor(modelData) {
-    this.modelData = modelData;
-  }
-
-  async compute(data, options) {
-    const modelType = options?.type || this.modelData.value.computational.type;
-    switch (modelType) {
-      case 'average':
-        const averageResult = await this.computeAverage(data, options);
-        return {
-          result: averageResult,
-          timestamp: Date.now()
-        };
-      case 'observation':
-        return {
-          data: data,
-          timestamp: Date.now()
-        };
-      default:
-        throw new Error(`Unsupported model type: ${modelType}`);
-    }
-  }
-
-  async computeAverage(data, options) {
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('Invalid data array');
-    }
-    const sum = data.reduce((acc, val) => acc + val, 0);
-    return sum / data.length;
-  }
-}
-
 export default ComputeSystem;
-export { BaseModel };
