@@ -1,4 +1,4 @@
-import ComputeEngine, { registerModelLoader, loadJavaScriptModel, loadWasmModel } from 'compute-engine';
+import ComputeEngine, { registerModelLoader } from 'compute-engine';
 import { EventEmitter } from 'events';
 
 class ComputeSystem extends EventEmitter {
@@ -22,7 +22,8 @@ class ComputeSystem extends EventEmitter {
   * @return {void}
   **/
   async preloadModels() {
-
+    console.log('COM-ENG=====prelaod model')
+    console.log(this.publicLibrary)
     if (!this.publicLibrary) {
       console.warn('No public library provided, cannot preload models');
       return;
@@ -73,6 +74,8 @@ class ComputeSystem extends EventEmitter {
   * @param {object} contract
   **/
   async computationSystem(contract, dataPrint, inputData) {
+    console.log('SF contract in system')
+    console.log(contract)
     try {
       // Validate contract
       if (!contract) {
@@ -129,14 +132,23 @@ class ComputeSystem extends EventEmitter {
           // need to register the contracts compute code
           if (contract.value.computational.mode === 'javascript') {
             this.computeEngine.registerModelLoader(contract.value.computational.hash, await this.computeEngine.jsLoader(contract));
+            // Load the model from the contract
+            const model = await this.computeEngine.loadModelFromContract(contract);
+            const result = await model.compute(inputData);
+            result.state = true
+            return result
           } else if (contract.value.computational.mode === 'wasm') {
             registerModelLoader(contract.value.computational.hash, await this.computeEngine.wasmLoader(contract));
+            // Load the model from the contract
+            const model = await this.computeEngine.loadModelFromContract(contract);
+            let wasmDataFormat = this.wasmArrayStructure(inputData)
+            const result = await model.compute(wasmDataFormat.data, { useWasm: true });
+            result.state = true
+            let sfResult = this.convertSFDataStructure(wasmDataFormat.datatypes, result)
+            console.log('converteeteteed')
+            console.log(sfResult)
+            return sfResult
           }
-          // Load the model from the contract
-          const model = await this.computeEngine.loadModelFromContract(contract);
-          const result = await model.compute(inputData);
-          result.state = true
-          return result
         }
       }
 
@@ -149,6 +161,51 @@ class ComputeSystem extends EventEmitter {
       };
     }
   }
+
+  /**
+   * wasm require number only
+   * @method wasmArrayStructure
+   * @returns 
+  */
+  wasmArrayStructure(data) {
+    let wasmArray = []
+    for (let item of data) {
+      let dataKeys = Object.keys(item)
+      let numberF = parseInt(item[dataKeys[1]])
+      wasmArray.push(numberF)
+    }
+    let wasmHolder = {}
+    wasmHolder.datatypes = data[0]
+    wasmHolder.data = wasmArray
+    return wasmHolder
+  }
+
+  /**
+   * return wasm data structure to SF
+   * @method convertSFDataStructure
+   * @returns 
+  */
+  convertSFDataStructure(datatypes, data) {
+    // is data.result already an array?
+    let dataLength = data.result instanceof Array
+    let convertData = {}
+    let sfArray = []
+    if (dataLength === true) {
+      for (let item of data) {
+        sfArray.push({})
+      }
+    } else {
+      let singleR = data.result
+      let dataKeys = Object.keys(datatypes)
+      datatypes[dataKeys[1]] = singleR
+      data.result = [ datatypes ]
+      convertData = data
+      
+    }
+    return convertData
+  }
+
+
 
   /**
    * new model to register in compute-engine

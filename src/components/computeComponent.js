@@ -36,8 +36,13 @@ util.inherits(ComputeComponent, events.EventEmitter)
 * @returns {Promise<object>} Compute result
 */
 ComputeComponent.prototype.filterCompute = async function (contract, dataPrint, data) {
+  console.log('SF-comuteCOMP---contract')
+  // console.log(contract)
+  // console.log(util.inspect(contract, {showHidden: false, depth: null}))
   try {
-    const computeState = await this.liveComputeSystem.computationSystem(contract, dataPrint, data);
+    const computeState = await this.liveComputeSystem.computationSystem(contract.value.info.compute[0], dataPrint, data);
+    console.log('SF-- COMP--compute back form system')
+    console.log(computeState)
     this.compute = computeState;
     return this.compute;
   } catch (error) {

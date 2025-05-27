@@ -551,6 +551,8 @@ class EntitiesManager extends EventEmitter {
       this.computeStatus = await this.liveSEntities[shellID].liveComputeC.filterCompute(modUpdateContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
       // need to set the compute data per compute dataPrint
       if (datastatus !== 'datalive' && datastatus !== 'futurelive') {
+        let computeDatauuid = dataPrint.hash
+        this.liveSEntities[shellID].liveDataC.liveData[computeDatauuid] = this.computeStatus
         let evProof3 =  this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
         this.liveSEntities[shellID].evidenceChain.push(evProof3)
       } else if (datastatus === 'futurelive') {
@@ -599,9 +601,9 @@ class EntitiesManager extends EventEmitter {
   */
   visualFlow = async function (shellID, visModule, flowState, dataPrint, flag) {
     let visContract = visModule.value.info.visualise
-    if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined && this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].length > 0) {
+    if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined && this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result.length > 0) {
       // yes data to visualise
-      this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure, flag)
+      this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result, this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure, flag)
       // proof of evidence
       let evProof = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveVisualC.visualData[dataPrint.hash])
       this.liveSEntities[shellID].evidenceChain.push(evProof)
@@ -687,6 +689,9 @@ class EntitiesManager extends EventEmitter {
   *
   */
   saveResultsProtocol = function (shellID, dataID) {
+    console.log('save result protocol')
+    console.log(shellID)
+    console.log(dataID)
     let localthis = this
     // first save results crypto storage
     // prepare save structure
