@@ -22,8 +22,6 @@ class ComputeSystem extends EventEmitter {
   * @return {void}
   **/
   async preloadModels() {
-    console.log('COM-ENG=====prelaod model')
-    console.log(this.publicLibrary)
     if (!this.publicLibrary) {
       console.warn('No public library provided, cannot preload models');
       return;
@@ -83,7 +81,7 @@ class ComputeSystem extends EventEmitter {
       }
       // Get compute info from contract
       let modelName = contract.value.computational.name
-      let computeMode = contract.value.computational.mode;
+      let computeMode = contract.value.computational.mode
 
       // options here, first time new or returning, ie is registered, already loaded? speical case observation just return data as it
       if (modelName === 'observation') {
@@ -102,11 +100,17 @@ class ComputeSystem extends EventEmitter {
           if (checkLoaded === true) {
             // perform the compute
             if (contract.value.computational.mode === 'javascript') {
-              result = await this.computeEngine.models[contract.value.computational.hash].compute(inputData);
+              let latestHash = contract.value.computational.hash + '@latest'
+              let getModel = this.computeEngine.models.get(latestHash)
+              result = await getModel.compute(inputData)
             } else if (contract.value.computational.mode === 'wasm') {
               // Process data through model
-              result = await this.computeEngine.models[contract.value.computational.hash].compute(inputData, { useWasm: true });
+              let latestHash = contract.value.computational.hash + '@latest'
+              let getModel = this.computeEngine.models.get(latestHash)
+              let wasmDataFormat = this.wasmArrayStructure(inputData)
+              result = await getModel.compute(wasmDataFormat.data, { useWasm: true })
               result.state = true
+              let sfResult = this.convertSFDataStructure(wasmDataFormat.datatypes, result)
             }
 
             return result
@@ -117,9 +121,9 @@ class ComputeSystem extends EventEmitter {
             if (contract.value.computational.mode === 'javascript') {
               result = null
             } else if (contract.value.computational.mode === 'wasm') {
-              let model =  await this.loadModelFromComputeEngine(contract);
+              let model =  await this.loadModelFromComputeEngine(contract)
               // Process data through model
-              result = await model.compute(inputData, { useWasm: true });
+              result = await model.compute(inputData, { useWasm: true })
             }
 
             return {
@@ -145,8 +149,6 @@ class ComputeSystem extends EventEmitter {
             const result = await model.compute(wasmDataFormat.data, { useWasm: true });
             result.state = true
             let sfResult = this.convertSFDataStructure(wasmDataFormat.datatypes, result)
-            console.log('converteeteteed')
-            console.log(sfResult)
             return sfResult
           }
         }
