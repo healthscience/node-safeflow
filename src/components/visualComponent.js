@@ -42,6 +42,7 @@ util.inherits(VisualComponent, events.EventEmitter)
 *
 */
 VisualComponent.prototype.manageVisDatasets = function (inputBatch, expectedVis) {
+  console.log('SF VSOCMP--manageVisDatasets')
   this.liveInputlist[inputBatch] = expectedVis[inputBatch]
 
 }
@@ -61,6 +62,11 @@ VisualComponent.prototype.clearDeviceCount = function (device) {
 *
 */
 VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrint, resultsData, dtConvert, flag) {
+  console.log('SF--VISCOMP--')
+  console.log(visModule)
+  console.log(contract)
+  console.log(dataPrint)
+  console.log(dtConvert)
   let timeFormat = ''
   let settingsLive = visModule.value.info.settings
   let controlsLive = visModule.value.info.controls
@@ -196,6 +202,10 @@ VisualComponent.prototype.extractVisExpected = function (inputUUID, device) {
   if (inputIndex.length > 0) {
     matchDataList = this.liveInputlist[inputUUID]
     let matchDindex = Object.keys(matchDataList)
+    console.log('device set SF  VICOMP')
+    console.log(inputUUID)
+    console.log(device)
+    console.log(matchDataList)
     if (matchDindex.length > 0 && matchDataList[device] !== undefined) {
       dataPlusmatch = matchDataList[device]
     } else if (visDataAvailable.length > 0) {

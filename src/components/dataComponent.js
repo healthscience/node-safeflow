@@ -49,6 +49,7 @@ DataComponent.prototype.setDevicesLive = async function () {
 *
 */
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, dataPrint) {
+  console.log('DC-compt start')
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, contract)
   // form unique dataPrint for dataUUID
   let dataID = {}

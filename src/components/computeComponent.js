@@ -37,12 +37,18 @@ util.inherits(ComputeComponent, events.EventEmitter)
 */
 ComputeComponent.prototype.filterCompute = async function (contract, dataPrint, data) {
   console.log('SF-comuteCOMP---contract')
-  // console.log(contract)
+  console.log(contract)
   // console.log(util.inspect(contract, {showHidden: false, depth: null}))
+  // blind structure of NXPcontract?
+  let nxporBlind = typeof contract.value.info
+  let contractLive = {}
+  if (nxporBlind === 'object') {
+    contractLive = { key: '', value: contract.value.info }
+  } else {
+    contractLive = contract.value.info.compute[0]
+  }
   try {
-    const computeState = await this.liveComputeSystem.computationSystem(contract.value.info.compute[0], dataPrint, data);
-    console.log('SF-- COMP--compute back form system')
-    console.log(computeState)
+    const computeState = await this.liveComputeSystem.computationSystem(contractLive, dataPrint, data);
     this.compute = computeState;
     return this.compute;
   } catch (error) {

@@ -43,16 +43,15 @@ SQLiteAPI.prototype.SQLiteSetup = async function (dapi) {
 *
 */
 SQLiteAPI.prototype.SQLitebuilderPromise = async function (dapi, device, time) {
+  let table = dapi.sqlitetablename
+  let deviceCol = dapi.sourcedevicecol.name
   // first setup the db MI_BAND_ACTIVITY_SAMPLE  SELECT * FROM MI_BAND_ACTIVITY_SAMPLE WHERE TIMESTAMP BETWEEN 1718279760 AND 1720382880
-  device = dapi.deviceinfo.column
-  let deviceCol = dapi.deviceinfo.table // 'DEVICE_ID'
-  let table = 'MI_BAND_ACTIVITY_SAMPLE'
   let timeCol = 'TIMESTAMP'
   await this.SQLiteSetup(dapi.filename)
   let apiTime1 = Math.round(time / 1000)
   let apiTime2 = apiTime1 + 86400
   const res = await new Promise((resolve, reject) => {
-     let sql = 'SELECT * FROM ' + table + ' WHERE ' + deviceCol + ' == ' + device + ' AND ' +  timeCol + ' BETWEEN ' + apiTime1 + ' AND ' + apiTime2
+    let sql = 'SELECT * FROM ' + table + ' WHERE ' + deviceCol + ' == ' + device + ' AND ' +  timeCol + ' BETWEEN ' + apiTime1 + ' AND ' + apiTime2
     this.db.all(sql, [], (err, rows) => {
       if (err)
         reject(err)

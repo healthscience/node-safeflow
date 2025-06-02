@@ -61,13 +61,11 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     } else {
       dataPath = 'json'
     }
-    console.log(dataPath)
     // temp before smart rest extractor is built
     if (dataPath === '/rest/') {
       rawHolder = await this.liveRestStorage.COMPUTEbuilder(sourceInfo.data, device, time).catch(e => console.log('Error: ', e.message))
     } else if (dataPath === 'csv') {
       // source csv e.g. large file query
-      console.log('compute csv builder')
       rawHolder =  await this.liveCSVStorage.readCSVfileStream(pathFile, sourceInfo.data, device, time).catch(e => console.log('Error: ', e.message)) // this.liveCSVStorage.CSVbuilderPromise(sourceInfo, device, time) // .catch(e => console.log('Error: ', e.message))
     } else if (dataPath === 'sqlite') { 
       rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo.data, device, time)

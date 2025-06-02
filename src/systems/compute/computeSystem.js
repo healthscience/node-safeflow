@@ -72,7 +72,7 @@ class ComputeSystem extends EventEmitter {
   * @param {object} contract
   **/
   async computationSystem(contract, dataPrint, inputData) {
-    console.log('SF contract in system')
+    console.log('SF compsys contract in system')
     console.log(contract)
     try {
       // Validate contract

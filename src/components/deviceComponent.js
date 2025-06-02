@@ -45,24 +45,12 @@ DeviceComponent.prototype.setAuthToken = async function (authDS) {
 *
 */
 DeviceComponent.prototype.setDevice = async function (apiDeviceInfo, computeInfo) {
-  // is the data coming from blind or NXP?
-  if (apiDeviceInfo.info.value.concept.device.device_name.length > 0) {
-    this.apiData = apiDeviceInfo.info.value.concept
-    let deviceDetail = apiDeviceInfo.info.value.concept.device // old if source api, go look up.  await this.liveDeviceSystem.storedDevices(this.apiData)
-    this.alldevices = [apiDeviceInfo.info.value.concept.device]
-    this.devices = [deviceDetail]
-    this.activedevice = this.devices
-  } else {
-    // data table  device column
-    this.deviceColID = computeInfo.info.settings.devices[0][apiDeviceInfo.info.value.concept.deviceColumnID]
-    this.deviceTable = apiDeviceInfo.info.value.concept.sourcedevicecol.name
-    this.apiData = apiDeviceInfo.info.value.concept
-    this.apiData['deviceinfo'] = { table: this.deviceTable, column: this.deviceColID }
-    let deviceDetail = computeInfo.info.settings.devices // old if source api, go look up.  await this.liveDeviceSystem.storedDevices(this.apiData)
-    this.alldevices = computeInfo.info.settings.devices
-    this.devices = deviceDetail
-    this.activedevice = this.devices
-  }
+  this.apiData = apiDeviceInfo.info.value.concept
+  // assess if blind or nxp and device info provide are db query provided?
+  let assessDevice = await this.liveDeviceSystem.assessDevices(apiDeviceInfo)
+  this.alldevices = assessDevice
+  this.devices = assessDevice
+  this.activedevice = assessDevice[0]
 }
 
 /**

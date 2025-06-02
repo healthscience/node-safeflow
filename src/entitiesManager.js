@@ -181,18 +181,16 @@ class EntitiesManager extends EventEmitter {
 
   /**
   *  control the adding of data to the entity
-  *  KnowledgeSciptingLanguage(forth/stack)to give gurantees)
-  *  perform action in modules
+  *  KnowledgeSciptingLanguage(forth/stack inspired) loop with WofW guarantees)
+  *  deliver modudes to right systems
   * @method ECSflow
   *
   */
   ECSflow = async function (shellID, ECSinput, inputUUID, modules) {
     // console.log('SF  ECS flow-----------------')
     // console.log(ECSinput)
-    // ALL FLOWS MADE IMMUMATABLE via  FORTH like scripting TODO
     let automation = true
     // convert modules to array to order flow
-    // module has a specific order  question, data, compute, visualise, etc.
     let moduleOrder = this.orderModuleFlow(modules)
     // extract types of modules  // if existing should skip all but vis and compute
     let flowState = {}
@@ -200,6 +198,7 @@ class EntitiesManager extends EventEmitter {
     // first assess what first flow and create waiting list (if any)
     // let autoCheck = this.liveAutomation.updateAutomation(moduleOrder.compute.value.info)
     if (ECSinput.input === 'refUpdate') {
+      console.log('ECSflow--update')
       // update device list per peer input
       this.deviceUpdateDataflow(shellID, moduleOrder.compute)
       // update flow state for new input
@@ -209,6 +208,7 @@ class EntitiesManager extends EventEmitter {
       this.flowMany(shellID, inputUUID, false)
       let State = false
     } else if (ECSinput.input === 'future') {
+      console.log('ECSflow--future')
       // update device list per peer input
       this.deviceUpdateDataflow(shellID, moduleOrder.compute)
       // update flow state for new input
@@ -218,9 +218,8 @@ class EntitiesManager extends EventEmitter {
       this.flowMany(shellID, inputUUID, true)
       let State = false
     } else {
+      console.log('ECSflow--first')
       // new ENTITY prepare
-      // console.log(moduleOrder.data)
-      // console.log(util.inspect(moduleOrder.data, {showHidden: false, depth: null}))
       let deviceMod = {}
       deviceMod.packaging = moduleOrder.data.value
       deviceMod.compute = moduleOrder.compute.value
@@ -290,6 +289,7 @@ class EntitiesManager extends EventEmitter {
   *
   */
   entityResultsReady = async function (shellID, ecsIN, hash, computeFlag) {
+    console.log('SF--results in ledger already???')
     // check ptop Datastore for existing results query by UUID of data results
     // first, check does the data exist in Memory for this input request?
     let checkDataExist = this.checkForResultsMemory(shellID, hash)
@@ -356,16 +356,19 @@ class EntitiesManager extends EventEmitter {
   *
   */
   subFlowFull = async function (entityData, entityContext, computeFlag) {
+    console.log('SF subflow FULL')
     if (this.resultcount >= 0) {
       this.resultcount++
       let rDUUID = entityData.entity.resultuuid
       let dataPrint = this.liveSEntities[entityData.entity.shell].datauuid[rDUUID]
       entityContext.dataprint = dataPrint
       if (this.liveSEntities[entityData.entity.shell].liveDatatypeC.sourceDatatypes.length === 0 && computeFlag === false) {
+        console.log('path1')
         await this.computeFlow(entityData.entity.shell, entityContext.flowstate.updateModContract, dataPrint, '', '')
         // prepare visualisation datasets
         await this.visualFlow(entityData.entity.shell, entityContext.moduleorder.visualise, entityContext.flowstate, dataPrint, false)
       } else {
+        console.log('path2')
         // how to decide to switch to inner compute loop?
         if (this.liveSEntities[entityData.entity.shell].liveDatatypeC.sourceDatatypes.length > 0 && computeFlag === false) {
           let inputUUID = this.liveSEntities[entityData.entity.shell].datascience.inputuuid
@@ -508,6 +511,7 @@ class EntitiesManager extends EventEmitter {
   *
   */
   computeEngine = async function (shellID, apiInfo, modUpdateContract, dataPrint, datastatus, sourceStatus, rDUUID) {
+    console.log('SF--computeengine')
     // prepare the data inputs for compute
     let dataCheck = false
     this.liveSEntities[shellID].liveTimeC.setMasterClock(dataPrint.triplet.timeout)
@@ -548,6 +552,8 @@ class EntitiesManager extends EventEmitter {
     }
     // now perform the compute
     if (dataCheck === true) {
+      console.log('datachat ')
+      console.log(dataCheck)
       this.computeStatus = await this.liveSEntities[shellID].liveComputeC.filterCompute(modUpdateContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
       // need to set the compute data per compute dataPrint
       if (datastatus !== 'datalive' && datastatus !== 'futurelive') {
@@ -573,6 +579,9 @@ class EntitiesManager extends EventEmitter {
         let setExpt = {}
         setExpt[futureDataprint.triplet.device] = [futureDataprint.hash]
         buildExpected[dsl.inputuuid] = setExpt
+        console.log('set mange vis dadaataset')
+        console.log(dsl)
+        console.log(buildExpected)
         this.liveSEntities[shellID].liveVisualC.manageVisDatasets(dsl.inputuuid, buildExpected)
         this.futurePrint = futureUUID
         // set the future data
@@ -590,6 +599,7 @@ class EntitiesManager extends EventEmitter {
         return true
       }
     } else {
+      console.log('emty')
       return false
     }
   }
@@ -601,6 +611,9 @@ class EntitiesManager extends EventEmitter {
   */
   visualFlow = async function (shellID, visModule, flowState, dataPrint, flag) {
     let visContract = visModule.value.info.visualise
+    console.log('SF--EM--visualFlow-------')
+    console.log(dataPrint)
+    console.log(this.liveSEntities[shellID].liveDataC.liveData)
     if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined && this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result.length > 0) {
       // yes data to visualise
       this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result, this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure, flag)
@@ -689,9 +702,6 @@ class EntitiesManager extends EventEmitter {
   *
   */
   saveResultsProtocol = function (shellID, dataID) {
-    console.log('save result protocol')
-    console.log(shellID)
-    console.log(dataID)
     let localthis = this
     // first save results crypto storage
     // prepare save structure
@@ -738,7 +748,7 @@ class EntitiesManager extends EventEmitter {
   }
 
   /**
-  *
+  * module has a specific order  question, data, compute, visualise, etc.
   * @method orderModuleFlow
   *
   */
@@ -979,6 +989,7 @@ class EntitiesManager extends EventEmitter {
   *
   */
   setDataScienceInputs = function (shellID, inputUUID, ecsIN, moduleOrder, flowState, status) {
+    console.log('SF EM-- setdatasic ne inputs')
     let entityInput = {}
     entityInput.input = ecsIN
     entityInput.inputuuid = inputUUID
@@ -1075,9 +1086,6 @@ class EntitiesManager extends EventEmitter {
     } else {
       console.log('not complete----')
     }
-    // entityInput.moduleorder.compute = computeModLink
-    // set the number of visualisations to be prepared?
-    // this.trackINPUTvisUUIDS(shellID, inputUUID, ecsIN, moduleOrder, flowState, status)
     return true
   }
 
@@ -1087,38 +1095,15 @@ class EntitiesManager extends EventEmitter {
   *
   */
   trackINPUTvisUUIDS = function (shellID, inputUUID, ecsIN, moduleOrder, flowState, status) {
+    console.log('SF CM--track UUUIDS')
     let visExpNumber = 0
     visExpNumber = 1 // per device, number of datatype * number of dates
     let expectedVisData = {}
     expectedVisData[inputUUID] = {}
     // if no device list then take default from component
-    let deviceList = []
-    if (moduleOrder.compute.value.info.controls.devices === undefined || moduleOrder.compute.value.info.controls.devices[0] === 'future') {
-      for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
-        if (device.device_mac === undefined) {
-          deviceList.push(device['IDENTIFIER'])
-        } else {
-         deviceList.push(device.device_mac)
-        }
-      }
-    } else if (status === 'first') {
-      for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
-        if (device.device_mac === undefined) {
-          deviceList.push(device['IDENTIFIER'])
-        } else {
-          deviceList.push(device.device_mac)
-        }
-      }
-    } else {
-      // deviceList.push(moduleOrder.compute.value.info.controls.devices)
-      for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
-        if (device.device_mac === undefined) {
-          deviceList.push(device['IDENTIFIER'])
-        } else {
-         deviceList.push(device.device_mac)
-        }
-      }
-    }
+    let deviceList = this.liveSEntities[shellID].liveDeviceC.devices
+    console.log('devices listed in device compoent')
+    console.log(deviceList)
     for (let dev of deviceList) {
       expectedVisData[inputUUID][dev] = []
       // for (let dt of moduleOrder.compute.value.info.settings.yaxis) {
@@ -1137,6 +1122,12 @@ class EntitiesManager extends EventEmitter {
   *
   */
   resultsUUIDbuilder = function (device, datatype, date, tidy, category) {
+    console.log('SF EM ----result UUID builer')
+    console.log(device)
+    console.log(datatype)
+    console.log(date)
+    console.log(tidy)
+    console.log(category)
     let resultsUUID = ''
     let dataID = {}
     dataID.device = device

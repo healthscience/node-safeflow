@@ -46,6 +46,37 @@ DatadeviceSystem.prototype.getLiveDevices = function (devicesIN) {
 }
 
 /**
+* check if device info provide or requires query?
+* @method assessDevices
+*
+*/
+DatadeviceSystem.prototype.assessDevices = async function (datapackModule) {
+  console.log('SF device system ')
+  let dapi = datapackModule.info.packaging.value.concept
+  let deviceDetail = {}
+  if (dapi.devicequery.length > 0) {
+    deviceDetail = await this.storedDevices(dapi)
+    /* let deviceLive = await this.liveSQLiteStorage.SQLiteDevicePromise(dapi.devicequery, dapi.filename)
+    for (let dev of deviceLive) {
+      if (dev[dapi.deviceColumnID] === dapi.deviceinfo.column) {
+        device = dev[dapi.deviceColumnID]
+        deviceCol = dapi.deviceinfo.table
+        table = dapi.sqlitetablename
+      }
+    }
+  } else {
+    deviceCol = dapi.deviceinfo.table
+    table = ''
+  } */
+
+  } else {
+    // manual provide device info.
+    deviceDetail = datapackModule.info.packaging.value.concept
+  }
+  return deviceDetail
+}
+
+/**
 * get the inital device(s) for data required
 * @method storedDevices
 *
@@ -55,14 +86,11 @@ DatadeviceSystem.prototype.storedDevices = async function (dapi) {
   const localthis = this
   let currentDevices = []
   let result = []
-  if (dapi.api === 'sqlite') {
-    if (dapi.device?.query.length === 0) {
-      currentDevices.push(dapi.device)
-    } else {
-      let promiseDevice = await this.liveSQLiteStorage.SQLiteDevicePromise(dapi.device.query, dapi.filename)
-      currentDevices = this.convertStandardKeyNames(promiseDevice)
-    }
-  } else if (dapi.api === 'json') {
+  if (dapi.path === 'sqlite') {
+    console.log('device system sqlite device query')
+    let promiseDevice = await this.liveSQLiteStorage.SQLiteDevicePromise(dapi.devicequery, dapi.filename)
+    currentDevices = this.convertStandardKeyNames(promiseDevice)
+  } else if (dapi.path === 'json') {
     if (dapi.device?.query.length === 0) {
       currentDevices.push(dapi.device)
     } else {
@@ -79,7 +107,7 @@ DatadeviceSystem.prototype.storedDevices = async function (dapi) {
       renameKeys.device_model = 'version'
       currentDevices.push(renameKeys)
     }
-  } else if (dapi.api === 'rest') {
+  } else if (dapi.path === 'rest') {
       if (dapi.device?.query.length === 0) {
         currentDevices.push(dapi.device)
       } else {
@@ -90,7 +118,7 @@ DatadeviceSystem.prototype.storedDevices = async function (dapi) {
           currentDevices = result
         }
       }
-  } else if (dapi.api === 'csv') {
+  } else if (dapi.path === 'csv') {
     if (dapi.device?.query.length === 0) {
       currentDevices.push(dapi.device)
     } else {
