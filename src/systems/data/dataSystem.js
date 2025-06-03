@@ -46,7 +46,7 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     rawHolder = await this.liveRestStorage.RESTbuilder(api, hash).catch(e => console.log('Error: ', e.message))
   } else if (type === 'SQLITE') {
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
-    rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo, device).catch(e => console.log('Error: ', e.message))
+    rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo, device.device_mac).catch(e => console.log('Error: ', e.message))
   } else if (type === 'JSON') {
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
     rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device).catch(e => console.log('Error: ', e.message))
@@ -68,7 +68,7 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
       // source csv e.g. large file query
       rawHolder =  await this.liveCSVStorage.readCSVfileStream(pathFile, sourceInfo.data, device, time).catch(e => console.log('Error: ', e.message)) // this.liveCSVStorage.CSVbuilderPromise(sourceInfo, device, time) // .catch(e => console.log('Error: ', e.message))
     } else if (dataPath === 'sqlite') { 
-      rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo.data, device, time)
+      rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo.data, device.device_mac, time)
     } else if (dataPath === 'json') {
       // pass on to either safe API builder, REST API builder or IPSF builder etc.
       rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device, time).catch(e => console.log('Error: ', e.message))

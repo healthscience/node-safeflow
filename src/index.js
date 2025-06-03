@@ -18,7 +18,6 @@ class SafeFlow extends EventEmitter {
     super()
     this.dataAPIlive = dataAPI
     // start error even listener
-    console.log('SF--safeFlow start--DML branch')
     this.eventErrorListen()
     this.liveEManager = new EntitiesManager(this.dataAPIlive)
     this.resultCount = 0
@@ -132,8 +131,6 @@ class SafeFlow extends EventEmitter {
   */
   startFlow = async function (refContract) {
   let startData = await this.liveEManager.peerKBLstart(refContract)
-  console.log('SF--startFlow')
-  console.log(startData)
   return startData
   }
 

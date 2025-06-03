@@ -243,6 +243,7 @@ class EntitiesManager extends EventEmitter {
   flowMany = async function (shellID, inputUUID, computeFlag, dataPrint) {
     // console.log('SF_ECS----flowmany')
     let ecsInput = this.liveSEntities[shellID].datascience
+    console.log('SF--EM--flowMany')
     // console.log(ecsInput)
     // console.log(util.inspect(ecsInput, {showHidden: false, depth: null}))
     // look at compute context flag and set datatypes and time as required
@@ -254,7 +255,7 @@ class EntitiesManager extends EventEmitter {
     } else {
       timeList = this.liveSEntities[shellID].liveTimeC.timerange
     }
-    // is a range of devices, datatype or time ranges and single or multi display?
+    // is a range of devices, datatype or time ranges, tidy, category  ( and single or multi display?)
     if (ecsInput.flowstate.devicerange === true && ecsInput.flowstate.datatyperange === true && ecsInput.flowstate.timerange === true) {
       for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
         // reset expect count (incase something didnt clear)
@@ -265,8 +266,10 @@ class EntitiesManager extends EventEmitter {
           for (let time of timeList) {
             this.throttle(() => {
               // hash the context device, datatype and time
-              let dataPrintHash = this.resultsUUIDbuilder(device.device_mac, datatype, time, null, null)
-              this.trackDataUUIDS(shellID, inputUUID, dataPrintHash, device.device_mac, datatype, time, computeFlag, dataPrint)
+              let tidy = ecsInput.flowstate.updateModContract.value.info.controls.tidy
+              let category = ''
+              let dataPrintHash = this.resultsUUIDbuilder(device, datatype, time, tidy, category)
+              this.trackDataUUIDS(shellID, inputUUID, dataPrintHash, device, datatype, time, tidy, category, computeFlag, dataPrint)
               this.entityResultsReady(shellID, ecsInput.input, dataPrintHash, computeFlag)
             })
           }
@@ -325,11 +328,11 @@ class EntitiesManager extends EventEmitter {
   *
   */
   checkResults = function (shellID, uuidRData, computeFlag) {
-    let dataPrint = {}
-    dataPrint.shell = shellID
-    dataPrint.resultuuid = uuidRData
-    dataPrint.computeflag = computeFlag
-    this.emit('resultCheck', dataPrint)
+    let resultsPrint = {}
+    resultsPrint.shell = shellID
+    resultsPrint.resultuuid = uuidRData
+    resultsPrint.computeflag = computeFlag
+    this.emit('resultCheck', resultsPrint)
     return true
   }
 
@@ -568,7 +571,7 @@ class EntitiesManager extends EventEmitter {
         let futureTime = 'futuretime'
         let futureUUID = this.resultsUUIDbuilder(dataPrint.triplet.device, dataPrint.triplet.datatype, futureTime)
         this.futurePrint = futureUUID
-        this.trackDataUUIDS(shellID, 'none', futureUUID, dataPrint.triplet.device, dataPrint.triplet.datatype, futureTime, true, dataPrint)
+        this.trackDataUUIDS(shellID, 'none', futureUUID, dataPrint.triplet.device, dataPrint.triplet.datatype, true, '', futureTime, true, dataPrint)
         // need to track TODO make compatible
         // this.trackINPUTvisUUIDS(shellID, futureUUID, {}, modUpdateContract, flowState, status)
         let futureDataprint = this.liveSEntities[shellID].datauuid[futureUUID]
@@ -613,7 +616,6 @@ class EntitiesManager extends EventEmitter {
     let visContract = visModule.value.info.visualise
     console.log('SF--EM--visualFlow-------')
     console.log(dataPrint)
-    console.log(this.liveSEntities[shellID].liveDataC.liveData)
     if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined && this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result.length > 0) {
       // yes data to visualise
       this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result, this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure, flag)
@@ -1033,7 +1035,9 @@ class EntitiesManager extends EventEmitter {
   */
   updateDataScienceInputs = function (shellID, computeModLink) {
     // is this a single or part of range query?
-    let rangeActive = this.liveSEntities[shellID].liveVisualC.extractVisExpected(this.liveSEntities[shellID].datascience.inputuuid, this.liveSEntities[shellID].datascience.dataprint.triplet.device)
+    console.log('epxected 3')
+    console.log(this.liveSEntities[shellID].datascience.dataprint.triplet.device)
+    let rangeActive = this.liveSEntities[shellID].liveVisualC.extractVisExpected(this.liveSEntities[shellID].datascience.inputuuid, this.liveSEntities[shellID].datascience.dataprint.hash, this.liveSEntities[shellID].datascience.dataprint.triplet.device.id)
     if (rangeActive.length > 0 && rangeActive.length !== 1) {
     } else if (rangeActive.length === 0 || rangeActive.length === 1) {
       // restructure object to use value instead of value
@@ -1096,20 +1100,26 @@ class EntitiesManager extends EventEmitter {
   */
   trackINPUTvisUUIDS = function (shellID, inputUUID, ecsIN, moduleOrder, flowState, status) {
     console.log('SF CM--track UUUIDS')
+    // console.log(moduleOrder.compute.value.info)
     let visExpNumber = 0
     visExpNumber = 1 // per device, number of datatype * number of dates
     let expectedVisData = {}
     expectedVisData[inputUUID] = {}
     // if no device list then take default from component
     let deviceList = this.liveSEntities[shellID].liveDeviceC.devices
-    console.log('devices listed in device compoent')
-    console.log(deviceList)
+    // console.log('devices listed in device compoent')
+    // console.log(deviceList)
     for (let dev of deviceList) {
-      expectedVisData[inputUUID][dev] = []
+      expectedVisData[inputUUID][dev.id] = []
       // for (let dt of moduleOrder.compute.value.info.settings.yaxis) {
       for (let dt of moduleOrder.compute.value.info.controls.yaxis) {
         for (let time of moduleOrder.compute.value.info.controls.rangedate) {
-          expectedVisData[inputUUID][dev].push(this.resultsUUIDbuilder(dev, dt, time))
+          let tidy = moduleOrder.compute.value.info.controls.tidy
+          let category = ''
+          console.log('set expetion of results=========================')
+          console.log(dev)
+          console.log(dev.id)
+          expectedVisData[inputUUID][dev.id].push(this.resultsUUIDbuilder(dev, dt, time, tidy, category))
         }
       }
     }
@@ -1133,9 +1143,11 @@ class EntitiesManager extends EventEmitter {
     dataID.device = device
     dataID.datatype = datatype
     dataID.time = date
-    // dataID.tidy = tidy
-    // dataID.category = category
+    dataID.tidy = tidy
+    dataID.category = category
     resultsUUID = this.liveCrypto.evidenceProof(dataID)
+    console.log('hash fo UUID ==============dataprintt===============')
+    console.log(resultsUUID)
     return resultsUUID
   }
 
@@ -1144,7 +1156,7 @@ class EntitiesManager extends EventEmitter {
   * @method trackDataUUIDS
   *
   */
-  trackDataUUIDS = function (shellID, inputUUID, uuid, device, datatype, time, computeFlag, dataPrint) {
+  trackDataUUIDS = function (shellID, inputUUID, uuid, device, datatype, time, tidy, category, computeFlag, dataPrint) {
     // check if dataPrint linked to compute dataPrint?
     let dataPrintCouple = false
     if (dataPrint !== undefined && computeFlag === true) {
@@ -1154,6 +1166,8 @@ class EntitiesManager extends EventEmitter {
     tripletData.device = device
     tripletData.timeout = time
     tripletData.datatype = datatype
+    tripletData.tidy = tidy
+    tripletData.category = category
     let trackDataUUID = {}
     trackDataUUID.shell = shellID
     trackDataUUID.hash = uuid
