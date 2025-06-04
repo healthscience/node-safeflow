@@ -51,27 +51,19 @@ DatadeviceSystem.prototype.getLiveDevices = function (devicesIN) {
 *
 */
 DatadeviceSystem.prototype.assessDevices = async function (datapackModule) {
-  console.log('SF device system ')
-  let dapi = datapackModule.info.packaging.value.concept
-  let deviceDetail = {}
-  if (dapi.devicequery.length > 0) {
-    deviceDetail = await this.storedDevices(dapi)
-    /* let deviceLive = await this.liveSQLiteStorage.SQLiteDevicePromise(dapi.devicequery, dapi.filename)
-    for (let dev of deviceLive) {
-      if (dev[dapi.deviceColumnID] === dapi.deviceinfo.column) {
-        device = dev[dapi.deviceColumnID]
-        deviceCol = dapi.deviceinfo.table
-        table = dapi.sqlitetablename
-      }
-    }
+  // check if blind or nxp input
+  let dapi = {}
+  if (datapackModule?.style !== 'packaging') {
+    dapi = datapackModule.info.packaging.value.concept
   } else {
-    deviceCol = dapi.deviceinfo.table
-    table = ''
-  } */
-
+    dapi = datapackModule.info.value.concept
+  }
+  let deviceDetail = {}
+  if (dapi.devicequery !== undefined && dapi.devicequery.length > 0) {
+    deviceDetail = await this.storedDevices(dapi)
   } else {
     // manual provide device info.
-    deviceDetail = datapackModule.info.packaging.value.concept
+    deviceDetail = [datapackModule.info.value.concept.device]
   }
   return deviceDetail
 }
@@ -87,7 +79,6 @@ DatadeviceSystem.prototype.storedDevices = async function (dapi) {
   let currentDevices = []
   let result = []
   if (dapi.path === 'sqlite') {
-    console.log('device system sqlite device query')
     let promiseDevice = await this.liveSQLiteStorage.SQLiteDevicePromise(dapi.devicequery, dapi.filename)
     currentDevices = this.convertStandardKeyNames(promiseDevice)
   } else if (dapi.path === 'json') {

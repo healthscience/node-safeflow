@@ -42,11 +42,7 @@ util.inherits(VisualComponent, events.EventEmitter)
 *
 */
 VisualComponent.prototype.manageVisDatasets = function (inputBatch, expectedVis) {
-  console.log('SF VSOCMP--manageVisDatasets')
-  console.log(inputBatch)
-  console.log(expectedVis)
   this.liveInputlist[inputBatch] = expectedVis[inputBatch]
-  console.log(this.liveInputlist)
 }
 
 /**
@@ -64,17 +60,10 @@ VisualComponent.prototype.clearDeviceCount = function (device) {
 *
 */
 VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrint, resultsData, dtConvert, flag) {
-  console.log('SF--VISCOMP--')
-  // console.log(visModule)
-  // console.log(contract)
-  // console.log(dataPrint)
-  // console.log(dtConvert)
   let timeFormat = ''
   let settingsLive = visModule.value.info.settings
   let controlsLive = visModule.value.info.controls
   let deviceID = dataPrint.triplet.device.id
-  // console.log('deviceIDIDIDIDIDDI')
-  // console.log(deviceID)
   let timeFormatSet = controlsLive?.hasOwnProperty('timeformat')
   if (timeFormatSet === true) {
     timeFormat = controlsLive.timeformat
@@ -108,7 +97,6 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     inputHash = howManyInputUUID[1]
   }
   // expected vis results  source or compute flag?
-  console.log('expeddddddd 1')
   let deviceDataPrintCount = this.extractVisExpected(inputHash, dataPrint.hash, deviceID)  // (inputHash, deviceID)
   // is there a list to bundle together?
   let completeVisList = []
@@ -126,11 +114,8 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
       }
     }
   }
-  console.log('count===================count===========')
-  console.log(deviceDataPrintCount)
   // decide to return or go to next vis data to process
   if (deviceDataPrintCount.length !== this.deviceCount[deviceID]) {
-    console.log('single')
     // not yet keep hold of data to batch
     if (this.datasetHolder[inputHash] === undefined) {
       this.datasetHolder[inputHash] = []
@@ -176,7 +161,6 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     this.liveVislist = []
     this.emit('dataout', inputHash)
   } else {
-    console.log('else 3')
     // if batch then create resUUID for the batch
     let resultPrint = dataPrint.hash
     // clear the input tracking
@@ -202,13 +186,6 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
 *
 */
 VisualComponent.prototype.extractVisExpected = function (inputUUID, dataHash, device) {
-  console.log('SF VisCOMP---extravis Expeteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
-  console.log(inputUUID)
-  console.log(dataHash)
-  console.log(device)
-  console.log('---------------------------------')
-  console.log(this.visualData)
-  console.log(this.liveInputlist)
   let visDataAvailable= []
   if (this.visualData[inputUUID] !== undefined) {
     visDataAvailable = Object.keys(this.visualData[dataHash])
@@ -220,10 +197,6 @@ VisualComponent.prototype.extractVisExpected = function (inputUUID, dataHash, de
   if (inputIndex.length > 0) {
     matchDataList = this.liveInputlist[inputUUID]
     let matchDindex = Object.keys(matchDataList)
-    console.log('device set SF  VICOMP')
-    console.log(inputUUID)
-    console.log(device)
-    console.log(matchDataList)
     if (matchDindex.length > 0 && matchDataList[device] !== undefined) {
       dataPlusmatch = matchDataList[device]
     } else if (visDataAvailable.length > 0) {
@@ -244,8 +217,6 @@ VisualComponent.prototype.extractVisExpected = function (inputUUID, dataHash, de
 *
 */
 VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
-  console.log('NO data000000000000000000000000000000000')
-  console.log(dataPrint)
   let deviceID = dataPrint.triplet.device.id
   if (!this.liveVislist[deviceID]) {
     this.liveVislist[deviceID] = []
@@ -253,11 +224,6 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
   this.liveVislist[deviceID].push(dataPrint.hash)
   let inputHash = Object.keys(this.datasetsOutpattern) // this.datasetsOutpattern[deviceID]
   // expected vis results
-  console.log('####################')
-  console.log(inputHash[0])
-  console.log(dataPrint.hash)
-  console.log(deviceID)
-  console.log('expeddddddd 2')
   let deviceDataPrintCount = this.extractVisExpected(inputHash[0], dataPrint.hash, deviceID)  // (inputHash[0], deviceID)
   // single or part of expected list
   if (deviceDataPrintCount.length > 1) {

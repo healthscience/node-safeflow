@@ -45,6 +45,7 @@ DeviceComponent.prototype.setAuthToken = async function (authDS) {
 *
 */
 DeviceComponent.prototype.setDevice = async function (apiDeviceInfo, computeInfo) {
+
   this.apiData = apiDeviceInfo.info.value.concept
   // assess if blind or nxp and device info provide are db query provided?
   let assessDevice = await this.liveDeviceSystem.assessDevices(apiDeviceInfo)

@@ -187,8 +187,6 @@ class EntitiesManager extends EventEmitter {
   *
   */
   ECSflow = async function (shellID, ECSinput, inputUUID, modules) {
-    // console.log('SF  ECS flow-----------------')
-    // console.log(ECSinput)
     let automation = true
     // convert modules to array to order flow
     let moduleOrder = this.orderModuleFlow(modules)
@@ -208,7 +206,6 @@ class EntitiesManager extends EventEmitter {
       this.flowMany(shellID, inputUUID, false)
       let State = false
     } else if (ECSinput.input === 'future') {
-      console.log('ECSflow--future')
       // update device list per peer input
       this.deviceUpdateDataflow(shellID, moduleOrder.compute)
       // update flow state for new input
@@ -241,11 +238,7 @@ class EntitiesManager extends EventEmitter {
   *
   */
   flowMany = async function (shellID, inputUUID, computeFlag, dataPrint) {
-    // console.log('SF_ECS----flowmany')
     let ecsInput = this.liveSEntities[shellID].datascience
-    console.log('SF--EM--flowMany')
-    // console.log(ecsInput)
-    // console.log(util.inspect(ecsInput, {showHidden: false, depth: null}))
     // look at compute context flag and set datatypes and time as required
     let timeList = []
     if (computeFlag === true) {
@@ -292,7 +285,6 @@ class EntitiesManager extends EventEmitter {
   *
   */
   entityResultsReady = async function (shellID, ecsIN, hash, computeFlag) {
-    console.log('SF--results in ledger already???')
     // check ptop Datastore for existing results query by UUID of data results
     // first, check does the data exist in Memory for this input request?
     let checkDataExist = this.checkForResultsMemory(shellID, hash)
@@ -359,19 +351,16 @@ class EntitiesManager extends EventEmitter {
   *
   */
   subFlowFull = async function (entityData, entityContext, computeFlag) {
-    console.log('SF subflow FULL')
     if (this.resultcount >= 0) {
       this.resultcount++
       let rDUUID = entityData.entity.resultuuid
       let dataPrint = this.liveSEntities[entityData.entity.shell].datauuid[rDUUID]
       entityContext.dataprint = dataPrint
       if (this.liveSEntities[entityData.entity.shell].liveDatatypeC.sourceDatatypes.length === 0 && computeFlag === false) {
-        console.log('path1')
         await this.computeFlow(entityData.entity.shell, entityContext.flowstate.updateModContract, dataPrint, '', '')
         // prepare visualisation datasets
         await this.visualFlow(entityData.entity.shell, entityContext.moduleorder.visualise, entityContext.flowstate, dataPrint, false)
       } else {
-        console.log('path2')
         // how to decide to switch to inner compute loop?
         if (this.liveSEntities[entityData.entity.shell].liveDatatypeC.sourceDatatypes.length > 0 && computeFlag === false) {
           let inputUUID = this.liveSEntities[entityData.entity.shell].datascience.inputuuid
@@ -514,7 +503,6 @@ class EntitiesManager extends EventEmitter {
   *
   */
   computeEngine = async function (shellID, apiInfo, modUpdateContract, dataPrint, datastatus, sourceStatus, rDUUID) {
-    console.log('SF--computeengine')
     // prepare the data inputs for compute
     let dataCheck = false
     this.liveSEntities[shellID].liveTimeC.setMasterClock(dataPrint.triplet.timeout)
@@ -555,8 +543,6 @@ class EntitiesManager extends EventEmitter {
     }
     // now perform the compute
     if (dataCheck === true) {
-      console.log('datachat ')
-      console.log(dataCheck)
       this.computeStatus = await this.liveSEntities[shellID].liveComputeC.filterCompute(modUpdateContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
       // need to set the compute data per compute dataPrint
       if (datastatus !== 'datalive' && datastatus !== 'futurelive') {
@@ -582,9 +568,6 @@ class EntitiesManager extends EventEmitter {
         let setExpt = {}
         setExpt[futureDataprint.triplet.device] = [futureDataprint.hash]
         buildExpected[dsl.inputuuid] = setExpt
-        console.log('set mange vis dadaataset')
-        console.log(dsl)
-        console.log(buildExpected)
         this.liveSEntities[shellID].liveVisualC.manageVisDatasets(dsl.inputuuid, buildExpected)
         this.futurePrint = futureUUID
         // set the future data
@@ -614,8 +597,6 @@ class EntitiesManager extends EventEmitter {
   */
   visualFlow = async function (shellID, visModule, flowState, dataPrint, flag) {
     let visContract = visModule.value.info.visualise
-    console.log('SF--EM--visualFlow-------')
-    console.log(dataPrint)
     if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined && this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result.length > 0) {
       // yes data to visualise
       this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result, this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure, flag)
@@ -660,7 +641,6 @@ class EntitiesManager extends EventEmitter {
       let context = this.liveSEntities[shellID].datascience
       // has the update Compute Contract arrived?
       if (context.tempComputeMod) {
-        console.log('EM--update compuet ID awaiting')
       } else {
         if (this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] !== undefined && this.liveSEntities[shellID].liveVisualC.visualData[resultUUID].data !== 'none') {
           let entityOut = {}
@@ -1035,8 +1015,6 @@ class EntitiesManager extends EventEmitter {
   */
   updateDataScienceInputs = function (shellID, computeModLink) {
     // is this a single or part of range query?
-    console.log('epxected 3')
-    console.log(this.liveSEntities[shellID].datascience.dataprint.triplet.device)
     let rangeActive = this.liveSEntities[shellID].liveVisualC.extractVisExpected(this.liveSEntities[shellID].datascience.inputuuid, this.liveSEntities[shellID].datascience.dataprint.hash, this.liveSEntities[shellID].datascience.dataprint.triplet.device.id)
     if (rangeActive.length > 0 && rangeActive.length !== 1) {
     } else if (rangeActive.length === 0 || rangeActive.length === 1) {
@@ -1099,16 +1077,12 @@ class EntitiesManager extends EventEmitter {
   *
   */
   trackINPUTvisUUIDS = function (shellID, inputUUID, ecsIN, moduleOrder, flowState, status) {
-    console.log('SF CM--track UUUIDS')
-    // console.log(moduleOrder.compute.value.info)
     let visExpNumber = 0
     visExpNumber = 1 // per device, number of datatype * number of dates
     let expectedVisData = {}
     expectedVisData[inputUUID] = {}
     // if no device list then take default from component
     let deviceList = this.liveSEntities[shellID].liveDeviceC.devices
-    // console.log('devices listed in device compoent')
-    // console.log(deviceList)
     for (let dev of deviceList) {
       expectedVisData[inputUUID][dev.id] = []
       // for (let dt of moduleOrder.compute.value.info.settings.yaxis) {
@@ -1116,9 +1090,6 @@ class EntitiesManager extends EventEmitter {
         for (let time of moduleOrder.compute.value.info.controls.rangedate) {
           let tidy = moduleOrder.compute.value.info.controls.tidy
           let category = ''
-          console.log('set expetion of results=========================')
-          console.log(dev)
-          console.log(dev.id)
           expectedVisData[inputUUID][dev.id].push(this.resultsUUIDbuilder(dev, dt, time, tidy, category))
         }
       }
@@ -1132,12 +1103,6 @@ class EntitiesManager extends EventEmitter {
   *
   */
   resultsUUIDbuilder = function (device, datatype, date, tidy, category) {
-    console.log('SF EM ----result UUID builer')
-    console.log(device)
-    console.log(datatype)
-    console.log(date)
-    console.log(tidy)
-    console.log(category)
     let resultsUUID = ''
     let dataID = {}
     dataID.device = device
@@ -1146,8 +1111,6 @@ class EntitiesManager extends EventEmitter {
     dataID.tidy = tidy
     dataID.category = category
     resultsUUID = this.liveCrypto.evidenceProof(dataID)
-    console.log('hash fo UUID ==============dataprintt===============')
-    console.log(resultsUUID)
     return resultsUUID
   }
 

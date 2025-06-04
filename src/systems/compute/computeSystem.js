@@ -72,8 +72,6 @@ class ComputeSystem extends EventEmitter {
   * @param {object} contract
   **/
   async computationSystem(contract, dataPrint, inputData) {
-    console.log('SF compsys contract in system')
-    // console.log(contract)
     try {
       // Validate contract
       if (!contract) {
@@ -89,7 +87,7 @@ class ComputeSystem extends EventEmitter {
           state: true,
           result: inputData,
           timestamp: Date.now()
-        };
+        }
       } else {
         let result = {}
         // model registered or loaded? Check
@@ -107,7 +105,7 @@ class ComputeSystem extends EventEmitter {
               // Process data through model
               let latestHash = contract.value.computational.hash + '@latest'
               let getModel = this.computeEngine.models.get(latestHash)
-              let wasmDataFormat = this.wasmArrayStructure(inputData)
+              let wasmDataFormat = this.wasmArrayStructure(inputData.data)
               result = await getModel.compute(wasmDataFormat.data, { useWasm: true })
               result.state = true
               let sfResult = this.convertSFDataStructure(wasmDataFormat.datatypes, result)
@@ -121,9 +119,10 @@ class ComputeSystem extends EventEmitter {
             if (contract.value.computational.mode === 'javascript') {
               result = null
             } else if (contract.value.computational.mode === 'wasm') {
+              let wasmDataFormat = this.wasmArrayStructure(inputData)
               let model =  await this.loadModelFromComputeEngine(contract)
               // Process data through model
-              result = await model.compute(inputData, { useWasm: true })
+              result = await model.compute(wasmDataFormat, { useWasm: true })
             }
 
             return {
@@ -145,7 +144,7 @@ class ComputeSystem extends EventEmitter {
             registerModelLoader(contract.value.computational.hash, await this.computeEngine.wasmLoader(contract));
             // Load the model from the contract
             const model = await this.computeEngine.loadModelFromContract(contract);
-            let wasmDataFormat = this.wasmArrayStructure(inputData)
+            let wasmDataFormat = this.wasmArrayStructure(inputData.data)
             const result = await model.compute(wasmDataFormat.data, { useWasm: true });
             result.state = true
             let sfResult = this.convertSFDataStructure(wasmDataFormat.datatypes, result)

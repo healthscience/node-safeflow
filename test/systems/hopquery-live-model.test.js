@@ -32,9 +32,10 @@ describe('a BLIND HOPquery with data, model already active ie. many compute at s
 
   
   it('model live in compute-engine simply do compute - average', async () => {
-    const inputData = [1, 2, 3, 4, 5];
+    const inputData = {}
+    inputData.data = [{ key: 'a', data: 1 }, { key: 'b', data: 2 }, { key: 'c', data: 3 }, {key: 'd',  data: 4 }, {key: 'e',  data: 5 }];
     const result = await computeSystem.computationSystem(contract, {}, inputData);
     expect(result.state).toBe(true);
-    expect(result.result).toBe(3);
+    expect(result.result[0].data).toBe(3);
   });
 });

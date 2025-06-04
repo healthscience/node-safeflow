@@ -21,11 +21,12 @@ describe('a BLIND HOPquery with data, assume model not registered and needs load
           dtprefix: 'null',
           code: 'null',
           hash: 'hash',
-          mode: 'null'
+          mode: 'wasm'
         }
       }
     };
-    const inputData = [1, 2, 3, 4, 5];
+    const inputData = {}
+    inputData.data = [{ key: 'a', data: 1 }, { key: 'b', data: 2 }, { key: 'c', data: 3 }, {key: 'd',  data: 4 }, {key: 'e',  data: 5 }];
     const result = await computeSystem.computationSystem(contract, {}, inputData);
     expect(result.state).toBe(true);
     expect(result.result).toEqual(inputData);
@@ -49,10 +50,10 @@ describe('a BLIND HOPquery with data, assume model not registered and needs load
         }
       }
     };
-    const inputData = [1, 2, 3, 4, 5];
+    const inputData = {}
+    inputData.data = [{ key: 'a', data: 1 }, { key: 'b', data: 2 }, { key: 'c', data: 3 }, {key: 'd',  data: 4 }, {key: 'e',  data: 5 }];
     const result = await computeSystem.computationSystem(contract, {}, inputData);
-    console.log(result)
     expect(result.state).toBe(true);
-    expect(result.result).toBe(3); // Update the expected result based on the new logic
+    expect(result.result[0].data).toBe(3); // Update the expected result based on the new logic
   });
 });

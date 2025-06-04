@@ -36,8 +36,6 @@ util.inherits(ComputeComponent, events.EventEmitter)
 * @returns {Promise<object>} Compute result
 */
 ComputeComponent.prototype.filterCompute = async function (contract, dataPrint, data) {
-  console.log('SF-comuteCOMP---contract')
-  console.log(contract)
   // console.log(util.inspect(contract, {showHidden: false, depth: null}))
   // blind structure of NXPcontract?
   let nxporBlind = typeof contract.value.info
