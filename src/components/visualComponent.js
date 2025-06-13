@@ -97,7 +97,9 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     inputHash = howManyInputUUID[1]
   }
   // expected vis results  source or compute flag?
-  let deviceDataPrintCount = this.extractVisExpected(inputHash, dataPrint.hash, deviceID)  // (inputHash, deviceID)
+  let deviceDataPrintCount = this.extractVisExpected(inputHash, dataPrint.hash, deviceID)
+  console.log('device count expect ==============')
+  console.log(deviceDataPrintCount)
   // is there a list to bundle together?
   let completeVisList = []
   if (deviceDataPrintCount.length > 0) {
@@ -129,7 +131,7 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     this.dataPrintHolder[inputHash].push(dataPrint)
     this.sourcedataHolder[inputHash].push({ context: dataPrint, data: resultsData })
   } else if (deviceDataPrintCount.length === this.deviceCount[deviceID] && this.deviceCount[deviceID] > 1) {
-    console.log('mulit')
+    console.log('EM--VC--mulit')
     if (this.datasetHolder[inputHash] === undefined) {
       this.datasetHolder[inputHash] = []
       this.dataPrintHolder[inputHash] = []
@@ -321,6 +323,7 @@ VisualComponent.prototype.restVisDataList = function () {
 *
 */
 VisualComponent.prototype.buildMultiDataset = function (dataList, type, inputHash, dataPrint) {
+  console.log('SF__VC--build muislt')
   // take live list and merge data for one chart
   // extract the dataPrints and check if data for not?
   let dataPerDevice = []

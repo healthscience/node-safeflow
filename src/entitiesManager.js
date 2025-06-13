@@ -262,6 +262,8 @@ class EntitiesManager extends EventEmitter {
               let tidy = ecsInput.flowstate.updateModContract.value.info.controls.tidy
               let category = ''
               let dataPrintHash = this.resultsUUIDbuilder(device, datatype, time, tidy, category)
+              console.log('data print build--------------')
+              console.log(dataPrintHash)
               this.trackDataUUIDS(shellID, inputUUID, dataPrintHash, device, datatype, time, tidy, category, computeFlag, dataPrint)
               this.entityResultsReady(shellID, ecsInput.input, dataPrintHash, computeFlag)
             })
@@ -290,12 +292,14 @@ class EntitiesManager extends EventEmitter {
     let checkDataExist = this.checkForResultsMemory(shellID, hash)
     let liveContext = this.liveSEntities[shellID].datascience
     if (checkDataExist.vis === true && computeFlag === false) {
+      console.log('check 1')
       // pass to short flow cycle, just return vis data again
       let dataPrint = this.liveSEntities[shellID].datauuid[hash]
       await this.visualFlow(shellID, liveContext.moduleorder.visualise, {}, dataPrint, false)
       let resultExist = true
       return resultExist
     } else if (checkDataExist.data === true && computeFlag === true) {
+      console.log('check 2')
       let checkData = {}
       checkData.entity =
       {
@@ -308,6 +312,7 @@ class EntitiesManager extends EventEmitter {
       let resultExist = true
       return resultExist
     } else {
+      console.log('check 3')
       // check via Ledger if results exist?
       let resultExist = this.checkResults(shellID, hash, computeFlag)
       return resultExist
@@ -335,11 +340,14 @@ class EntitiesManager extends EventEmitter {
   */
   resultListener = function () {
     this.on('resultsCheckback', async (checkData) => {
+      console.log('result listen----------')
       let computeFlag = checkData.entity.computeflag
       let liveContext = this.liveSEntities[checkData.entity.shell].datascience
       if (checkData.data === false || checkData.data.length === 0) {
+        console.log('flow full')
         await this.subFlowFull(checkData, liveContext, computeFlag)
       } else {
+        console.log('flowShort')
         await this.subFlowShort(checkData, liveContext, computeFlag)
       }
     })
@@ -408,13 +416,18 @@ class EntitiesManager extends EventEmitter {
   *
   */
   subFlowShort = async function (entityData, context, computeFlag) {
+    console.log('EM--SHORTFLOW---------')
+    // console.log(entityData)
+    // console.log(context)
+    // console.log(util.inspect(context, {showHidden: false, depth: null}))
+    // console.log(computeFlag)
     // set dataPrint
     let dataPrint = this.liveSEntities[entityData.entity.shell].datauuid[entityData.entity.resultuuid]
     if (computeFlag === false) {
       // datatype table structure needs setting for visualisation
       this.liveSEntities[entityData.entity.shell].liveDatatypeC.datatypeInfoLive = {}
       this.liveSEntities[entityData.entity.shell].liveDatatypeC.datatypeInfoLive.data = {}
-      this.liveSEntities[entityData.entity.shell].liveDatatypeC.datatypeInfoLive.data.tablestructure = context.moduleorder.data.value.info.data.value.concept.tablestructure
+      this.liveSEntities[entityData.entity.shell].liveDatatypeC.datatypeInfoLive.data.tablestructure = context.moduleorder.data.value.info.value.concept.tablestructure
       // set data in entity component data
       this.liveSEntities[entityData.entity.shell].liveDataC.setFilterResults(entityData.entity.resultuuid, entityData.data.value.tidydata)
       // preprae visualisation datasets
@@ -596,16 +609,25 @@ class EntitiesManager extends EventEmitter {
   *
   */
   visualFlow = async function (shellID, visModule, flowState, dataPrint, flag) {
+    console.log('SF__EM--visflow')
+    // console.log(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash])
     let visContract = visModule.value.info.visualise
-    if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined && this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result.length > 0) {
-      // yes data to visualise
-      this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result, this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure, flag)
-      // proof of evidence
-      let evProof = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveVisualC.visualData[dataPrint.hash])
-      this.liveSEntities[shellID].evidenceChain.push(evProof)
+    if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result !== undefined) {
+      console.log('yes data')
+      if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined && this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result.length > 0) {
+        // yes data to visualise
+        this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, dataPrint, this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].result, this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure, flag)
+        // proof of evidence
+        let evProof = this.liveCrypto.evidenceProof(this.liveSEntities[shellID].liveVisualC.visualData[dataPrint.hash])
+        this.liveSEntities[shellID].evidenceChain.push(evProof)
+      } else {
+        // no data to process
+        this.liveSEntities[shellID].liveVisualC.nodataInfo(dataPrint, visModule)
+      }
     } else {
-      // no data to process
-      this.liveSEntities[shellID].liveVisualC.nodataInfo(dataPrint, visModule)
+      console.log('no data for this cycle')
+      // need to update expected count
+      this.liveSEntities[shellID].liveVisualC.filterVisual(visModule, visContract, dataPrint, [], this.liveSEntities[shellID].liveDatatypeC.datatypeInfoLive.data.tablestructure, flag)
     }
     return true
   }
@@ -616,6 +638,10 @@ class EntitiesManager extends EventEmitter {
   *
   */
   prepareKBLedger = function (uniqueCompute, shellID, dataPrint) {
+    console.log('Ledger prepare EM')
+    console.log(uniqueCompute)
+    console.log(shellID)
+    console.log(dataPrint)
     // update the datascience holder
     this.updateDataScienceInputs(shellID, uniqueCompute)
     // gather proof of evidence chain and hash and send KBLedger store
@@ -626,6 +652,8 @@ class EntitiesManager extends EventEmitter {
     // currently dataprint but should make hash of unique compute contract key?
     // proofChain.data = uniqueCompute.key
     proofChain.data = dataPrint.hash
+    console.log('LBLegerer prepared=========')
+    console.log(proofChain)
     this.emit('kbledgerEntry', proofChain)
     this.liveSEntities[shellID].evidenceChain = []
     return true
@@ -684,6 +712,9 @@ class EntitiesManager extends EventEmitter {
   *
   */
   saveResultsProtocol = function (shellID, dataID) {
+    console.log('EM--save protocol')
+    console.log(shellID)
+    console.log(dataID)
     let localthis = this
     // first save results crypto storage
     // prepare save structure
@@ -735,6 +766,8 @@ class EntitiesManager extends EventEmitter {
   *
   */
   orderModuleFlow = function (modules) {
+    console.log('EM--module order')
+    console.log(modules)
     let moduleOrder = {}
     for (let mod of modules) {
       if (mod.value.style === 'packaging') {
@@ -1103,6 +1136,12 @@ class EntitiesManager extends EventEmitter {
   *
   */
   resultsUUIDbuilder = function (device, datatype, date, tidy, category) {
+    console.log('result UUID buildfunction=========')
+    console.log(device)
+    console.log(datatype)
+    console.log(date)
+    console.log(tidy)
+    console.log(category)
     let resultsUUID = ''
     let dataID = {}
     dataID.device = device
