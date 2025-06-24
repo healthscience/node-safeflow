@@ -49,7 +49,7 @@ FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData
         // extract the time column hash pair
         let timecolname = this.extractTimeDatatypePair(source.data.tablestructure)
         let timestamp = di[timecolname]
-        dataPair['2cad2b187275ae98005bde4271b4e250c6f5151b'] = timestamp
+        dataPair['cf137103b22baa17894b52dca68d079163e57328'] = timestamp
         let valueC = 0
         if (di[datatype] === null) {
           valueC = null
@@ -72,7 +72,7 @@ FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData
 FilterDataSystem.prototype.extractTimeDatatypePair = function (datatypePairs) {
   let timeColumn = ''
   for (let dtp of datatypePairs) {
-    if (dtp.refcontract === '2cad2b187275ae98005bde4271b4e250c6f5151b') {
+    if (dtp.refcontract === 'cf137103b22baa17894b52dca68d079163e57328') {
       timeColumn = dtp.column
     }
   }

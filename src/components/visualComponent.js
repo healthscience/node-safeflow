@@ -98,8 +98,6 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
   }
   // expected vis results  source or compute flag?
   let deviceDataPrintCount = this.extractVisExpected(inputHash, dataPrint.hash, deviceID)
-  console.log('device count expect ==============')
-  console.log(deviceDataPrintCount)
   // is there a list to bundle together?
   let completeVisList = []
   if (deviceDataPrintCount.length > 0) {
@@ -131,7 +129,6 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     this.dataPrintHolder[inputHash].push(dataPrint)
     this.sourcedataHolder[inputHash].push({ context: dataPrint, data: resultsData })
   } else if (deviceDataPrintCount.length === this.deviceCount[deviceID] && this.deviceCount[deviceID] > 1) {
-    console.log('EM--VC--mulit')
     if (this.datasetHolder[inputHash] === undefined) {
       this.datasetHolder[inputHash] = []
       this.dataPrintHolder[inputHash] = []
@@ -148,7 +145,7 @@ VisualComponent.prototype.filterVisual = function (visModule, contract, dataPrin
     this.sourcedataHolder[inputHash].push(contextBundle)
     // bundle of greater than one length ready for dataSet preparation
     // need dataPrints if more than one datatype?  Need to check TODO
-    this.buildMultiDataset(deviceDataPrintCount, timeFormat, inputHash, dataPrint)
+    this.buildMultiDataset(deviceDataPrintCount, this.visualData[dataPrint.hash].data.chartOptions, timeFormat, inputHash, dataPrint)
     // clear the input tracking this.deviceCount
     this.deviceCount[deviceID] = 0
     // just remove device element unless none left, delete input hash holder
@@ -265,7 +262,7 @@ VisualComponent.prototype.nodataInfo = function (dataPrint, visModule) {
       this.dataPrintHolder[inputHash].push(dataPrint)
     } else if (deviceDataPrintCount.length === this.deviceCount[deviceID] && this.deviceCount[deviceID] > 1) {
       // bundle of greater than one length ready for dataSet preparation
-      let datasetMulti = this.buildMultiDataset(deviceDataPrintCount, timeFormat, inputHash, dataPrint)
+      let datasetMulti = this.buildMultiDataset(deviceDataPrintCount, {}, timeFormat, inputHash, dataPrint)
       // if batch then create resUUID for the batch
       this.deviceCount[deviceID] = 0
       // just remove device element unless none left, delete input hash holder
@@ -322,21 +319,21 @@ VisualComponent.prototype.restVisDataList = function () {
 * @method buildMultiDataset
 *
 */
-VisualComponent.prototype.buildMultiDataset = function (dataList, type, inputHash, dataPrint) {
-  console.log('SF__VC--build muislt')
+VisualComponent.prototype.buildMultiDataset = function (dataList, chartOptions, type, inputHash, dataPrint) {
   // take live list and merge data for one chart
-  // extract the dataPrints and check if data for not?
+  // extract the dataPrints and check if data or not?
   let dataPerDevice = []
-  for (let dataH of this.datasetHolder[inputHash]) {
-    for (let rhash of dataList)
+  for (let dataH of this.sourcedataHolder[inputHash]) { // this.datasetHolder[inputHash]) {
+    for (let rhash of dataList) {
       if (dataH !== undefined && dataH.context.hash === rhash) {
         dataPerDevice.push(dataH)
       }
+    }
   }
   if (dataPerDevice.length > 0) {
     let formatOption = {}
     formatOption.format = type // other mode overlay format
-    let accumData = this.liveVisSystem.singlemultiControl(formatOption, dataPrint, inputHash, dataPerDevice, this.sourcedataHolder[inputHash], this.dataPrintHolder[inputHash])
+    let accumData = this.liveVisSystem.singlemultiControl(formatOption, chartOptions, dataPrint, inputHash, dataPerDevice, this.sourcedataHolder[inputHash], this.dataPrintHolder[inputHash])
     let visData = {}
     visData.data = accumData
     visData.context = dataPrint

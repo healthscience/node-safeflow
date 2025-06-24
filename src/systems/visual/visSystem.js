@@ -54,12 +54,12 @@ VisSystem.prototype.visualControl = function (visModule, contract, dataPrint, da
 * @method singlemultiControl
 *
 */
-VisSystem.prototype.singlemultiControl = function (type, dataPrint, inputHash, dataSet, sourceData, dataPrints) {
+VisSystem.prototype.singlemultiControl = function (type, chartOptions, dataPrint, inputHash, dataSet, sourceData, dataPrints) {
   let restructureDone = {}
   if (type.format === 'timeseries') {
-    restructureDone = this.liveChartSystem.structureMulitChartData(dataPrint, dataSet, sourceData, dataPrints)
+    restructureDone = this.liveChartSystem.structureMulitChartData(dataPrint, chartOptions, dataSet, sourceData, dataPrints)
   } else if (type.format = 'overlay') {
-    restructureDone = this.liveChartSystem.structureOverlayChartData(dataPrint, dataSet, sourceData, dataPrints)
+    restructureDone = this.liveChartSystem.structureOverlayChartData(dataPrint, chartOptions, dataSet, sourceData, dataPrints)
   }
   return restructureDone
 }

@@ -50,11 +50,8 @@ DataComponent.prototype.setDevicesLive = async function () {
 */
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, dataPrint) {
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, contract)
-  // form unique dataPrint for dataUUID
-  // let dataID = {}
-  // dataID.device = dataPrint.triplet.device
-  // dataID.datatype = dataPrint.triplet.datatype
-  // dataID.time = dataPrint.triplet.timeout
+  console.log('DC--data back')
+  console.log(dataRback.length)
   let datauuid = dataPrint.hash // hashObject(dataID)
   this.dataRaw[datauuid] = dataRback
   dataRback = []

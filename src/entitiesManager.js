@@ -544,6 +544,8 @@ class EntitiesManager extends EventEmitter {
       this.liveSEntities[shellID].evidenceChain.push(evProof2)
     } else {
     }
+    // console.log('AFTER-------AFTER EM  com engine')
+    // console.log(this.liveSEntities[shellID].liveDataC.liveData)
     // check data in component
     if (this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash] !== undefined) {
       if(this.liveSEntities[shellID].liveDataC.liveData[dataPrint.hash].length === 0 ) {
@@ -666,11 +668,14 @@ class EntitiesManager extends EventEmitter {
   */
   dataoutListener = function (shellID) {
     this.liveSEntities[shellID].liveVisualC.on('dataout', (resultUUID) => {
+      console.log('SF--EM----data out listener')
       let context = this.liveSEntities[shellID].datascience
       // has the update Compute Contract arrived?
       if (context.tempComputeMod) {
+        console.log('out1')
       } else {
         if (this.liveSEntities[shellID].liveVisualC.visualData[resultUUID] !== undefined && this.liveSEntities[shellID].liveVisualC.visualData[resultUUID].data !== 'none') {
+          console.log('out2')
           let entityOut = {}
           entityOut.context = context
           entityOut.data = this.liveSEntities[shellID].liveVisualC.visualData[resultUUID]
@@ -678,6 +683,7 @@ class EntitiesManager extends EventEmitter {
           // required back instant or update resutls store or both
           this.emit('visualFirstRange', entityOut)
         } else {
+          console.log('out3')
           this.liveSEntities[shellID].liveVisualC.visualData
           let entityOut = {}
           entityOut.context = context
@@ -766,8 +772,6 @@ class EntitiesManager extends EventEmitter {
   *
   */
   orderModuleFlow = function (modules) {
-    console.log('EM--module order')
-    console.log(modules)
     let moduleOrder = {}
     for (let mod of modules) {
       if (mod.value.style === 'packaging') {
