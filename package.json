@@ -1,6 +1,6 @@
 {
   "name": "node-safeflow",
-  "version": "0.9.65",
+  "version": "0.9.66",
   "deprecated": false,
   "description": "Node.js wrapper for safeflow protocol",
   "homepage": "https://github.com/healthscience/node-safeflow#readme",
