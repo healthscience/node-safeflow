@@ -16,6 +16,7 @@ class SafeFlow extends EventEmitter {
 
   constructor (dataAPI) {
     super()
+    console.log('udpat eo ECS')
     this.dataAPIlive = dataAPI
     // start error even listener
     this.eventErrorListen()

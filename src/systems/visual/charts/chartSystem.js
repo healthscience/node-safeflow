@@ -13,7 +13,6 @@ import ChartOptions from './chartOptions.js'
 import util from 'util'
 import events from 'events'
 import { DateTime } from 'luxon'
-import { text } from 'stream/consumers'
 
 var ChartSystem = function () {
   events.EventEmitter.call(this)

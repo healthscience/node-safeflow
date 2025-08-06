@@ -356,7 +356,7 @@ class LibraryUtility { //  extends EventEmitter {
     compSettings.description = 'statistical mean'
     compSettings.dtprefix = 'null'
     compSettings.code = ''
-    compSettings.hash = '064158be46a97526a800311ff339f0a0b37afd936c0d8859c07ee3b70cbabc0c'
+    compSettings.hash = '01fa9053131d6bd4e3f766d1e1bd0b58ec9eb99c59df7614975ff22bdbd0d471'
     compSettings.mode = 'wasm'
     refContract.data = compSettings
     return refContract

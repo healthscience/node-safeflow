@@ -22,6 +22,7 @@ class EntitiesManager extends EventEmitter {
 
   constructor(dataAPI) {
     super()
+    console.log('entity manerage live')
     // start error even listener
     this.eventErrorListen()
     this.auth = dataAPI
