@@ -1,6 +1,6 @@
 {
   "name": "node-safeflow",
-  "version": "0.9.69",
+  "version": "0.9.70",
   "deprecated": false,
   "description": "Node.js wrapper for safeflow protocol",
   "homepage": "https://github.com/healthscience/node-safeflow#readme",
@@ -51,7 +51,7 @@
     "@vue/test-utils": "^2.0.0",
     "beebee-ai": "^0.3.9",
     "holepunch-hop": "^0.4.8",
-    "hop-query-builder": "^0.1.4",
+    "hop-query-builder": "^0.2.4",
     "library-hop": "^0.2.4",
     "vitest": "^3.1.1"
   }
