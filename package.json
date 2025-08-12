@@ -1,8 +1,8 @@
 {
   "name": "node-safeflow",
-  "version": "0.9.70",
+  "version": "0.9.71",
   "deprecated": false,
-  "description": "Node.js wrapper for safeflow protocol",
+  "description": "Node.js wrapper for HOP protocol",
   "homepage": "https://github.com/healthscience/node-safeflow#readme",
   "keywords": [
     "safeflow",
@@ -31,7 +31,7 @@
   "dependencies": {
     "axios": "^1.8.4",
     "bs58": "^4.0.1",
-    "compute-engine": "^0.0.8",
+    "compute-engine": "^0.0.9",
     "crypto-browserify": "^3.12.1",
     "csv-parser": "^2.3.1",
     "esm": "^3.2.25",
@@ -49,10 +49,10 @@
   },
   "devDependencies": {
     "@vue/test-utils": "^2.0.0",
-    "beebee-ai": "^0.3.9",
-    "holepunch-hop": "^0.4.8",
+    "beebee-ai": "^0.4.6",
+    "holepunch-hop": "^0.5.0",
     "hop-query-builder": "^0.2.4",
-    "library-hop": "^0.2.4",
+    "library-hop": "^0.2.7",
     "vitest": "^3.1.1"
   }
 }
