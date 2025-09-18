@@ -13,7 +13,6 @@ import RestAPI from './dataprotocols/rest/index.js'
 import SQLiteAPI from './dataprotocols/sqlite/index.js'
 import JSONfileAPI from './dataprotocols/json/index.js'
 import CSVfileAPI from './dataprotocols/csv/index.js'
-import LiveSimulatedDataSystem from './simulateddataSystem.js'
 import util from 'util'
 import events from 'events'
 
@@ -38,6 +37,13 @@ util.inherits(DataSystem, events.EventEmitter)
 *
 */
 DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceInfo, device, datatype, time, contract) {
+  console.log('SF -datasysem -- mappping')
+  console.log(type)
+  console.log(sourceInfo)
+  console.log(device)
+  console.log(datatype)
+  console.log(time)
+  console.log(contract)
   let rawHolder = []
   if (type === 'SAFE') {
     // no api plug in yet
@@ -50,7 +56,7 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
   } else if (type === 'JSON') {
     // pass on to either safe API builder, REST API builder or IPSF builder etc.
     rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device).catch(e => console.log('Error: ', e.message))
-  } else if (type === 'COMPUTE') {
+  } else if (type === 'DATA-COMPUTE') {
     // temp two different structures comign in blind and nxp need to correct
     let pathFile = sourceInfo.data
     let dataPath = ''
@@ -63,8 +69,11 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     if (dataPath === '/rest/') {
       rawHolder = await this.liveRestStorage.COMPUTEbuilder(sourceInfo.data, device, time).catch(e => console.log('Error: ', e.message))
     } else if (dataPath === 'csv') {
+      console.log('read scvs SF--sysmtes----')
       // source csv e.g. large file query
-      rawHolder =  await this.liveCSVStorage.readCSVfileStream(pathFile, sourceInfo.data, device, time).catch(e => console.log('Error: ', e.message)) // this.liveCSVStorage.CSVbuilderPromise(sourceInfo, device, time) // .catch(e => console.log('Error: ', e.message))
+      rawHolder =  await this.liveCSVStorage.csvTimeFilter(sourceInfo.data, device, datatype, time).catch(e => console.log('Error: ', e.message))
+      console.log(rawHolder)
+      // this.liveCSVStorage.CSVbuilderPromise(sourceInfo, device, time) // .catch(e => console.log('Error: ', e.message))
     } else if (dataPath === 'sqlite') { 
       rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo.data, device.device_mac, time)
     } else if (dataPath === 'json') {

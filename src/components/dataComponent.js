@@ -15,7 +15,6 @@ import FilterDataSystem from '../systems/data/filterdataSystem.js'
 import CategoryDataSystem from '../systems/data/categorydataSystem.js'
 import util from 'util'
 import events from 'events'
-import hashObject from 'object-hash'
 
 var DataComponent = function (setIN) {
   events.EventEmitter.call(this)
@@ -45,11 +44,13 @@ DataComponent.prototype.setDevicesLive = async function () {
 }
 
 /**
-*
-*
+*  get the source data to compute on
+*  @method DataControlFlow
 */
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, dataPrint) {
-  let dataRback = await this.liveDataSystem.datatypeQueryMapping('COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, contract)
+  console.log('SF-COMP DATA--')
+  console.log(dataAPI)
+  let dataRback = await this.liveDataSystem.datatypeQueryMapping('DATA-COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, contract)
   console.log('DC--data back')
   console.log(dataRback.length)
   let datauuid = dataPrint.hash // hashObject(dataID)

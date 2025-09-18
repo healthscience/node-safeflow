@@ -11,12 +11,13 @@
 */
 import util from 'util'
 import events from 'events'
-import os from 'os'
-import fs from 'fs'
+import FileParser from '../fileParser.js'
+import DataComponent from '../../../../components/dataComponent.js'
 
 var CsvAPI = function (dataAPI) {
   events.EventEmitter.call(this)
   this.liveDataAPI = dataAPI
+  this.parseFiles = new FileParser()
 }
 
 /**
@@ -26,29 +27,85 @@ var CsvAPI = function (dataAPI) {
 util.inherits(CsvAPI, events.EventEmitter)
 
 /**
-*  set file path, read and make sqlite3 connect db
-* @method CSVbuilder
+*  csv time filter
+* @method csvTimeFilter
 *
 */
-CsvAPI.prototype.CSVbuilder = function (dapi) {
-
+CsvAPI.prototype.csvTimeFilter = async function (fpath, device, datatype, time) {
+  console.log('datatype and ')
+  console.log(fpath)
+  // get the source csv file and then apply filter, converting time and by device id (if many devices) and datatype
+  let sourceData = await this.CSVSetup(fpath.filename) // await this.readCSVfileStream(fpath, device, time)
+  // TODO  make call to Code LLM  local open source agent for this.
+  // extract header and read fle in csv parser
+  let delimInfo = {}
+  delimInfo.info = {}
+  delimInfo.info.delimiter = ','
+  delimInfo.info.dataline = 1
+  delimInfo.data = {}
+  delimInfo.data.web = sourceData
+  delimInfo.data.file = sourceData
+  delimInfo.data.info = {}
+  delimInfo.data.info.cnumber = 0
+  let headerInfo = this.parseFiles.extractCSVHeaderInfo(delimInfo)
+  // pass to csv parser
+  let sourceCSVparser = await this.parseFiles.readFileStream(sourceData, headerInfo)
+  // now filter by devices, datatpe and time
+  let dataQuery = this.filterQuery(sourceCSVparser, device, datatype, time)
+  console.log('data filter returned=========')
+  console.log(dataQuery)
+  return dataQuery
 }
 
 /**
-*  from SQL query to extract data Promise version
-* @method CSVbuilderPromise
+*  set file path, read and make sqlite3 connect db
+* @method SQLitebuilder
 *
 */
-CsvAPI.prototype.CSVbuilderPromise = function (dapi, device, time) {
-  console.log('csv api  part file query?')
-  // const res = await new Promise((resolve, reject) => {
-     /* this.db.all(sql, [], (err, rows) => {
-      if (err)
-        reject(err)
-        resolve(rows)
-    }) */
-  res = [1, 2, 3]
-  return res
+CsvAPI.prototype.CSVSetup = async function (dapi) {
+  // const stream = this.liveDataAPI.DriveFiles.listFilesFolder('sqlite/')
+  let csvFile = await this.liveDataAPI.DriveFiles.CSVhyperdriveLocalfile('csv/' + dapi)
+  return csvFile
+}
+
+/**
+*  stream out line by line
+* @method filterQuery
+*
+*/
+CsvAPI.prototype.filterQuery = function (dataF, device, datatype, time) {
+  console.log('filer cdvices')
+  console.log(datatype)
+  let results = []
+  let timeStart = time
+  let timeEnd = time + 86400000
+  console.log('start end times filer CSV')
+  console.log(timeStart)
+  console.log(timeEnd)
+  for (let item of dataF) {
+    // convert time to unix
+    // TODO get AI agent help to assess time structure of source  (mean time simple rules)
+    let timeSplit = item['Date'].split(' ')
+    let timeItem = ''
+    if (timeSplit.length > 0 ) {
+      timeItem = timeSplit[0]
+    } else {
+      timeItem = item['Date']
+    }
+    let dateConvert = this.liveDataAPI.DriveFiles.testDataExtact(timeItem)
+    console.log('date convert')
+    console.log(timeStart)
+    console.log(dateConvert)
+    console.log(timeEnd)
+    if(dateConvert >= timeStart && dateConvert <=  timeEnd) {
+      console.log('yes pass time filter')
+      let resultItem = {}
+      resultItem['Date'] = dateConvert
+      resultItem[datatype.column] = item[datatype.column]
+      results.push(resultItem)
+    }
+  } 
+  return results
 }
 
 /**
@@ -56,9 +113,20 @@ CsvAPI.prototype.CSVbuilderPromise = function (dapi, device, time) {
 * @method readCSVfileStream
 *
 */
-CsvAPI.prototype.readCSVfileStream = async function (fpath) {
+CsvAPI.prototype.readCSVfileStream = async function (fpath, device, time) {
+  console.log('cvs protocol sf')
+  // console.log(fpath)
+  console.log(device)
+  console.log('timmemememeem')
+  console.log(time)
+  let hyperdrivePath = '/' + fpath.path + '/' + fpath.filename
+  /* let stream = await this.liveDataAPI.DriveFiles.listFilesFolder('/')
+  for await (const { key, value } of stream) {
+      console.log({ key, value })
+  }
+  */
   // limit length until auto route informs the chunk size TODO
-  const rs = this.liveDataAPI.drive.createReadStream(fpath, { start: 0, end: 1000 })
+  const rs = await this.liveDataAPI.DriveFiles.drive.createReadStream(hyperdrivePath)
     return new Promise((resolve, reject) => {
     let results = []
       rs.on('data', (data) => results.push(data.toString()))

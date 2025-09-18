@@ -458,18 +458,36 @@ ChartSystem.prototype.structureChartData = function (rule, cData) {
   console.log('structure time for chart')
   console.log(rule)
   console.log(cData)
+  // double check if data is not alread in right format
+  let sampleStructure = cData[0]
+  let structureCheck = false
+  console.log('ehck ccsusus')
+  console.log(sampleStructure['cf137103b22baa17894b52dca68d079163e57328'])
+  if (sampleStructure['cf137103b22baa17894b52dca68d079163e57328']) {
+    structureCheck = true
+  }
+
   let dataPrep = {}
-  if (rule === 'blind1234555554321') {
-    let splitDatax = cData.map(n => (n['d76d9c3db7f2212335373873805b54dd1f903a06']))
-    let splitDatay = cData.map(n => n[rule])
-    dataPrep.xaxis = splitDatax
-    dataPrep.yaxis = splitDatay
+  if (structureCheck === false) {
+    if (rule === 'blind1234555554321') {
+      let splitDatax = cData.map(n => (n['d76d9c3db7f2212335373873805b54dd1f903a06']))
+      let splitDatay = cData.map(n => n[rule])
+      dataPrep.xaxis = splitDatax
+      dataPrep.yaxis = splitDatay
+    } else {
+      let splitDatax = cData.map(n => (n['cf137103b22baa17894b52dca68d079163e57328'] * 1000))
+      let splitDatay = cData.map(n => n[rule.refcontract])
+      dataPrep.xaxis = splitDatax
+      dataPrep.yaxis = splitDatay
+    }
   } else {
-    let splitDatax = cData.map(n => (n['cf137103b22baa17894b52dca68d079163e57328'] * 1000))
+    let splitDatax = cData.map(n => (n['cf137103b22baa17894b52dca68d079163e57328']))
     let splitDatay = cData.map(n => n[rule.refcontract])
     dataPrep.xaxis = splitDatax
     dataPrep.yaxis = splitDatay
   }
+  console.log('rdididididiididid')
+  console.log(dataPrep)
   return dataPrep
 }
 

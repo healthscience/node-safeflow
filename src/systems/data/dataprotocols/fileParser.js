@@ -87,7 +87,7 @@ FileParser.prototype.localFileParse = async function (o, ws) {
   //  csv to JSON convertion and save into HOP
   // const praser = readStream(newPathcsv, headerSet, delimiter, dataline)
   const parser = await this.readFileStream(newPathFile, headerSet)
-  this.convertJSON(o, headerSet, parser, 'local', null)
+  this.convertJSON(o, headerSet, parser, 'localcsv', null)
 }
 
 /**
@@ -140,8 +140,7 @@ FileParser.prototype.extractCSVHeaderInfo = function (o) {
       }
     })
   } else {
-    // let filePathCSV = fs.existsSync(os.homedir() + this.storepath + '/csv/') + o.data.name
-    const allFileContents = fs.readFileSync(filePathCSV, 'utf-8')
+    const allFileContents = fs.readFileSync(o.data.file, 'utf-8')
     allFileContents.split(/\r?\n/).forEach(line =>  {
       lcounter++
       if (lcounter === (parseInt(o.data.info.cnumber) +1 )) {
@@ -201,7 +200,7 @@ FileParser.prototype.extractCSVheaders = function (o, lineData) {
   headerInfo.headerset = headerSet
   headerInfo.splitwords = splitWords
   headerInfo.delimiter = delimiter
-  headerInfo.dataline = dataline
+  headerInfo.dataline = 1
   return headerInfo
 }
 
