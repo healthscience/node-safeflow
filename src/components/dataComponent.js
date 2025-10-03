@@ -49,7 +49,6 @@ DataComponent.prototype.setDevicesLive = async function () {
 */
 DataComponent.prototype.DataControlFlow = async function (source, dataAPI, contract, hash, dataPrint) {
   console.log('SF-COMP DATA--')
-  console.log(dataAPI)
   let dataRback = await this.liveDataSystem.datatypeQueryMapping('DATA-COMPUTE', '#####', source, dataPrint.triplet.device, dataPrint.triplet.datatype, dataPrint.triplet.timeout, contract)
   console.log('DC--data back')
   console.log(dataRback.length)

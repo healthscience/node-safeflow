@@ -38,12 +38,6 @@ util.inherits(DataSystem, events.EventEmitter)
 */
 DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceInfo, device, datatype, time, contract) {
   console.log('SF -datasysem -- mappping')
-  console.log(type)
-  console.log(sourceInfo)
-  console.log(device)
-  console.log(datatype)
-  console.log(time)
-  console.log(contract)
   let rawHolder = []
   if (type === 'SAFE') {
     // no api plug in yet
@@ -69,10 +63,8 @@ DataSystem.prototype.datatypeQueryMapping = async function (type, hash, sourceIn
     if (dataPath === '/rest/') {
       rawHolder = await this.liveRestStorage.COMPUTEbuilder(sourceInfo.data, device, time).catch(e => console.log('Error: ', e.message))
     } else if (dataPath === 'csv') {
-      console.log('read scvs SF--sysmtes----')
       // source csv e.g. large file query
       rawHolder =  await this.liveCSVStorage.csvTimeFilter(sourceInfo.data, device, datatype, time).catch(e => console.log('Error: ', e.message))
-      console.log(rawHolder)
       // this.liveCSVStorage.CSVbuilderPromise(sourceInfo, device, time) // .catch(e => console.log('Error: ', e.message))
     } else if (dataPath === 'sqlite') { 
       rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo.data, device.device_mac, time)

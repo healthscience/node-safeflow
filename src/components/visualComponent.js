@@ -320,6 +320,8 @@ VisualComponent.prototype.restVisDataList = function () {
 *
 */
 VisualComponent.prototype.buildMultiDataset = function (dataList, chartOptions, type, inputHash, dataPrint) {
+  console.log('build multi dataset ++++++++++')
+  console.log(inputHash)
   // take live list and merge data for one chart
   // extract the dataPrints and check if data or not?
   let dataPerDevice = []

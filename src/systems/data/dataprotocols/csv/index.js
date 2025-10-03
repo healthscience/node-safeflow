@@ -12,7 +12,6 @@
 import util from 'util'
 import events from 'events'
 import FileParser from '../fileParser.js'
-import DataComponent from '../../../../components/dataComponent.js'
 
 var CsvAPI = function (dataAPI) {
   events.EventEmitter.call(this)
@@ -32,8 +31,6 @@ util.inherits(CsvAPI, events.EventEmitter)
 *
 */
 CsvAPI.prototype.csvTimeFilter = async function (fpath, device, datatype, time) {
-  console.log('datatype and ')
-  console.log(fpath)
   // get the source csv file and then apply filter, converting time and by device id (if many devices) and datatype
   let sourceData = await this.CSVSetup(fpath.filename) // await this.readCSVfileStream(fpath, device, time)
   // TODO  make call to Code LLM  local open source agent for this.
@@ -52,8 +49,6 @@ CsvAPI.prototype.csvTimeFilter = async function (fpath, device, datatype, time) 
   let sourceCSVparser = await this.parseFiles.readFileStream(sourceData, headerInfo)
   // now filter by devices, datatpe and time
   let dataQuery = this.filterQuery(sourceCSVparser, device, datatype, time)
-  console.log('data filter returned=========')
-  console.log(dataQuery)
   return dataQuery
 }
 
@@ -74,37 +69,27 @@ CsvAPI.prototype.CSVSetup = async function (dapi) {
 *
 */
 CsvAPI.prototype.filterQuery = function (dataF, device, datatype, time) {
-  console.log('filer cdvices')
-  console.log(datatype)
   let results = []
   let timeStart = time
   let timeEnd = time + 86400000
-  console.log('start end times filer CSV')
-  console.log(timeStart)
-  console.log(timeEnd)
   for (let item of dataF) {
     // convert time to unix
     // TODO get AI agent help to assess time structure of source  (mean time simple rules)
     let timeSplit = item['Date'].split(' ')
     let timeItem = ''
     if (timeSplit.length > 0 ) {
-      timeItem = timeSplit[0]
+      timeItem = timeSplit[0] + 'T' + timeSplit[1] + 'Z'
     } else {
       timeItem = item['Date']
     }
     let dateConvert = this.liveDataAPI.DriveFiles.testDataExtact(timeItem)
-    console.log('date convert')
-    console.log(timeStart)
-    console.log(dateConvert)
-    console.log(timeEnd)
     if(dateConvert >= timeStart && dateConvert <=  timeEnd) {
-      console.log('yes pass time filter')
       let resultItem = {}
       resultItem['Date'] = dateConvert
       resultItem[datatype.column] = item[datatype.column]
       results.push(resultItem)
     }
-  } 
+  }
   return results
 }
 
@@ -114,11 +99,6 @@ CsvAPI.prototype.filterQuery = function (dataF, device, datatype, time) {
 *
 */
 CsvAPI.prototype.readCSVfileStream = async function (fpath, device, time) {
-  console.log('cvs protocol sf')
-  // console.log(fpath)
-  console.log(device)
-  console.log('timmemememeem')
-  console.log(time)
   let hyperdrivePath = '/' + fpath.path + '/' + fpath.filename
   /* let stream = await this.liveDataAPI.DriveFiles.listFilesFolder('/')
   for await (const { key, value } of stream) {

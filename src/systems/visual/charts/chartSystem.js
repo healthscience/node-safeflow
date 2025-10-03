@@ -79,6 +79,8 @@ ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, res
   } else {
     // prepare the Chart OBJECT FOR CHART.JS  Up to 2 line e.g. BMP or Steps or BPM + Steps
     let prepareDataset = this.datasetPrep(visModule, rule, device, results, dtConvert)
+    console.log('dataset muilt------------')
+    console.log(prepareDataset)
     let datasetHolder = []
     datasetHolder.push(prepareDataset.datasets)
     datacollection = {
@@ -95,6 +97,7 @@ ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, res
 *
 */
 ChartSystem.prototype.structureMulitChartData = function (dataPrint, chartOptions, dataSet, sourceData, dataPrints) {
+  console.log('structure mulit data start----------')
   let singleMulti = {}
   // need to analysis datatype numbers and time to decide if overlay of seperate datatypes over time is needed?
   let extractContext = []
@@ -133,10 +136,13 @@ ChartSystem.prototype.structureMulitChartData = function (dataPrint, chartOption
       uniqueTimeLabel.sort((a,b) => a-b)
       let dtcount = 0
       let prepardTSdatasets = []
+      console.log('input items aggrated')
+      console.log(timeseriesDatasetHolder)
+      console.log(util.inspect(timeseriesDatasetHolder, {showHidden: false, depth: null}))
       for (let dttts of timeseriesDatasetHolder) {
         let datatype = uniqueDT[dtcount]
         dataPrint.triplet.datatype = datatype
-        prepardTSdatasets.push(this.structureTimeOverlayDataset(dataPrint, uniqueTimeLabel, dttts, dataPrints))
+        prepardTSdatasets.push(this.structureTimeSeriesDataset(dataPrint, uniqueTimeLabel, dttts, dataPrints))
         dtcount++
       }
       let dataSetList = []
@@ -264,13 +270,19 @@ ChartSystem.prototype.prepareLabelList = function (labelsIN) {
 *
 */
 ChartSystem.prototype.prepareColourTSList = function (datasetsIN) {
+  console.log('prepare data setcolors TS')
+  console.log(datasetsIN)
   let colorsUpdated = []
   let count = 0
   for (let ds of datasetsIN) {
-    ds.borderColor = this.colourList(ds.borderColor, count)
+    let colorNew = this.colourList(ds.borderColor, count)
+    ds.borderColor = colorNew
+    ds.backgroundColor = colorNew
     colorsUpdated.push(ds)
     count++
   }
+  console.log('color over  structure updated++++++')
+  console.log(colorsUpdated)
   return colorsUpdated
 }
 /**
@@ -307,20 +319,24 @@ ChartSystem.prototype.updateChartOptions = function (chartOptions, type) {
 
 /**
 * pairs of datatype per same time period
-* @method structureTimeOverlayDataset
+* @method structureTimeSeriesDataset
 *
 */
-ChartSystem.prototype.structureTimeOverlayDataset = function (dataPrint, timeLabels, dataSets, dataPrints) {
+ChartSystem.prototype.structureTimeSeriesDataset = function (dataPrint, timeLabels, dataSets, dataPrints) {
   let aggDatasource = []
   let newDataset = []
+  let newLabelds = []
   // build new x-axis dataset i.e. timeseries order
   for (let cda of dataSets.sourceData) {
     aggDatasource.push(cda.data)
+    newLabelds.push(cda.context.triplet.datatype)
   }
+  console.log('keep tracke of label per dataset it datatype')
+  console.log(newLabelds)
   let mergeSource = []
   mergeSource = aggDatasource.flat()
   // package pairs
-  newDataset = this.prepareTimeseriesDatasetData(dataPrint, timeLabels, dataSets.datasets, mergeSource)
+  newDataset = this.prepareTimeseriesDatasetData(dataPrint, timeLabels, dataSets.datasets, newLabelds, mergeSource)
   // time converted to text
   let updateTimeList = this.prepareLabelchartTS(timeLabels)
   let dataPairs = {}
@@ -337,15 +353,43 @@ ChartSystem.prototype.structureTimeOverlayDataset = function (dataPrint, timeLab
 * @method prepareTimeseriesDatasetData
 *
 */
-ChartSystem.prototype.prepareTimeseriesDatasetData = function (dataPrint, timeLabels, aggDatasets, sourceDataIN) {
+ChartSystem.prototype.prepareTimeseriesDatasetData = function (dataPrint, timeLabels, aggDatasets, newLabelds, sourceDataIN) {
+  console.log('chartsys===prepTS datasetses')
+  console.log(sourceDataIN)
+  console.log('aggDdadadaddada')
+  console.log(aggDatasets)
   let newDataset = {}
   let datasetStructure = {} // aggDatasets[0].data.chartPackage.datasets[0]
   let normalisedTSMatch = this.timestampMatcherTS(dataPrint, timeLabels, sourceDataIN)
   // now pad out for x axis ie time labels
   datasetStructure.data = normalisedTSMatch
+  datasetStructure.label = newLabelds[0].column
   newDataset = datasetStructure
   normalisedTSMatch = []
   return newDataset
+}
+
+/**
+*  timestamp padding to unify array data with nulls
+* @method timestampMatcherTS
+*
+*/
+ChartSystem.prototype.timestampMatcherTS = function (dataPrint, timeLabels, dataIN) {
+  // pad out each exising dataset y
+  // check if dataset of right length if not padd the dataset
+  let matchList = []
+  let count = 0
+  // check per existing datasets
+  for (let timePoint of timeLabels) {
+    let matchLogic = dataIN.find(elem => elem['cf137103b22baa17894b52dca68d079163e57328'] === timePoint)
+    if (matchLogic) {
+      matchList.push(matchLogic[dataPrint.triplet.datatype.refcontract]) //.triplet.datatype])
+    } else {
+      matchList.push(null)
+    }
+    count++
+  }
+  return matchList
 }
 
 /**
@@ -455,16 +499,13 @@ ChartSystem.prototype.prepareOverlayDatasetData = function (dataPrint, labels, d
 */
 ChartSystem.prototype.structureChartData = function (rule, cData) {
   // temp logic while standards put in place to be replaced
-  console.log('structure time for chart')
-  console.log(rule)
-  console.log(cData)
   // double check if data is not alread in right format
   let sampleStructure = cData[0]
   let structureCheck = false
-  console.log('ehck ccsusus')
-  console.log(sampleStructure['cf137103b22baa17894b52dca68d079163e57328'])
-  if (sampleStructure['cf137103b22baa17894b52dca68d079163e57328']) {
-    structureCheck = true
+  if (cData.length > 0 ) {
+    if (sampleStructure['cf137103b22baa17894b52dca68d079163e57328']) {
+      structureCheck = true
+    }
   }
 
   let dataPrep = {}
@@ -486,8 +527,6 @@ ChartSystem.prototype.structureChartData = function (rule, cData) {
     dataPrep.xaxis = splitDatax
     dataPrep.yaxis = splitDatay
   }
-  console.log('rdididididiididid')
-  console.log(dataPrep)
   return dataPrep
 }
 
@@ -559,29 +598,6 @@ ChartSystem.prototype.timestampMatcher = function (dataPrint, mergedLabel, dataI
     } else {
       matchList.push(null)
     }
-  }
-  return matchList
-}
-
-/**
-*  timestamp padding to unify array data with nulls
-* @method timestampMatcherTS
-*
-*/
-ChartSystem.prototype.timestampMatcherTS = function (dataPrint, timeLabels, dataIN) {
-  // pad out each exising dataset y
-  // check if dataset of right length if not padd the dataset
-  let matchList = []
-  let count = 0
-  // check per existing datasets
-  for (let timePoint of timeLabels) {
-    let matchLogic = dataIN.find(elem => elem['cf137103b22baa17894b52dca68d079163e57328'] === timePoint)
-    if (matchLogic) {
-      matchList.push(matchLogic[dataPrint.triplet.datatype.refcontract]) //.triplet.datatype])
-    } else {
-      matchList.push(null)
-    }
-    count++
   }
   return matchList
 }
@@ -671,6 +687,8 @@ ChartSystem.prototype.datasetPrep = function (visModule, rule, device, results, 
     chartItem.borderWidth = 1
     chartItem.borderColor = this.chartColors(rule)
     chartItem.backgroundColor = this.chartColors(rule)
+    console.log('label name for set')
+    console.log(rule)
     chartItem.label = rule.column
   }
   let scaling = 1 // this.yAxisScaleSet(rules.datatype)
@@ -749,15 +767,15 @@ ChartSystem.prototype.prepareLabelchart = function (labelIN) {
 }
 
 /**
-* prepare the x axis data array
-* @method prepareLabelchart
+* prepare the x axis data array time series
+* @method prepareLabelchartTS
 *
 */
 ChartSystem.prototype.prepareLabelchartTS = function (labelIN) {
   let timePrep = []
   let count = 1
   for (let li of labelIN) {
-    let unixtime = li * 1000
+    let unixtime = li * 1
     let timeFormat = DateTime.fromMillis(unixtime)
     let tsimp = timeFormat.toISO()  // toFormat('MM-DD kk:mm')
     timePrep.push(tsimp)

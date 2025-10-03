@@ -39,8 +39,6 @@ FilterDataSystem.prototype.dtFilterController = function (source, contract, devi
 *
 */
 FilterDataSystem.prototype.filterDataType = function (source, datatype, tidyData) {
-  console.log('tidy datga')
-  console.log(tidyData)
   let singleArray = []
   if (datatype === 'blind1234555554321') {
     singleArray = tidyData
