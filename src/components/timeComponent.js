@@ -40,7 +40,6 @@ util.inherits(TimeComponent, events.EventEmitter)
 * @method setMasterClock
 *
 */
-
 TimeComponent.prototype.setMasterClock = function (startTime) {
   this.livedate = startTime
   return true

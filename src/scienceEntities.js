@@ -15,6 +15,7 @@ import DatatypeComponent from './components/datatypeComponent.js'
 import TimeComponent from './components/timeComponent.js'
 import ComputeComponent from './components/computeComponent.js'
 import VisualComponent from './components/visualComponent.js'
+import PlaceComponent from './components/placeComponent.js'
 // import SimComponent from './components/simComponent.js'
 import util from 'util'
 import events from 'events'
@@ -27,6 +28,7 @@ var ScienceEntities = function (dAccess) {
   this.liveDataC = new DataComponent(dAccess)
   this.liveComputeC = new ComputeComponent(dAccess)
   this.liveVisualC = new VisualComponent()
+  this.livePlaceC = new PlaceComponent()
   // this.liveSimC = new SimComponent()
   this.datascience = {}
   this.datauuid = {}
