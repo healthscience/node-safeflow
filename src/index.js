@@ -71,26 +71,26 @@ class SafeFlow extends EventEmitter {
   *
   */
   networkAuthorisation = function (auth) {
-  // need library to check token or verify key ownership TODO:
-  // TEMP testnetwork defaults
-  let peerAuth = {}
-  peerAuth.settings = auth
-  peerAuth.dataAPI = this.dataAPIlive 
-  peerAuth.storageAuth = this.defaultStorage
-  let authState = {}
-  let verify = false
-  // check release is compatible and untampered
-  verify = this.verifyRelease()
-  // verify keys
-  if (verify === true ) {
-    this.liveEManager = new EntitiesManager(peerAuth)
-    // set listener for ECS data back peer
-    this.entityGetter()
-    authState.safeflow = true
-    authState.type = 'auth-hop'
-    authState.auth = true
-  }
-  return authState
+    // need library to check token or verify key ownership TODO:
+    // TEMP testnetwork defaults
+    let peerAuth = {}
+    peerAuth.settings = auth
+    peerAuth.dataAPI = this.dataAPIlive 
+    peerAuth.storageAuth = this.defaultStorage
+    let authState = {}
+    let verify = false
+    // check release is compatible and untampered
+    verify = this.verifyRelease()
+    // verify keys
+    if (verify === true ) {
+      this.liveEManager = new EntitiesManager(peerAuth)
+      // set listener for ECS data back peer
+      this.entityGetter()
+      authState.safeflow = true
+      authState.type = 'auth-hop'
+      authState.auth = true
+    }
+    return authState
   }
 
   /**
