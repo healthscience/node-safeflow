@@ -49,6 +49,8 @@ ChartSystem.prototype.chartjsControl = function (visModule, contract, dataPrint,
 ChartSystem.prototype.prepareVueChartJS = function (visModule, rule, device, results, dtConvert) {
   let datacollection = {}
   // check for no data available
+  console.log('charting pepe type')
+  console.log(results)
   if (results.yaxis.length === 0) {
     // no data to display
     this.chartmessage = 'No data to display'

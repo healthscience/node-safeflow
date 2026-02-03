@@ -497,7 +497,6 @@ class EntitiesManager extends EventEmitter {
       let futureDataprint = this.liveSEntities[shellID].datauuid[this.futurePrint]
       this.setNewCompuateModule(shellID, updateModule, futureDataprint)
     }
-
     this.emit('updateModule', updateModule, shellID, dataPrint)
     return true
   }
@@ -653,6 +652,8 @@ class EntitiesManager extends EventEmitter {
     this.liveSEntities[shellID].liveVisualC.on('dataout', (resultUUID) => {
       let context = this.liveSEntities[shellID].datascience
       // has the update Compute Contract arrived?
+      console.log('SF dataoutlisten')
+      console.log(context)
       if (context.tempComputeMod) {
         console.log('out1')
       } else {
