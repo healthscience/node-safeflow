@@ -9,28 +9,23 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-import util from 'util'
-import events from 'events'
+import { EventEmitter } from 'events'
 
-var PlaceSystem = function () {
-  events.EventEmitter.call(this)
-}
+class PlaceSystem extends EventEmitter {
+  constructor() {
+    super()
+  }
 
-/**
-* inherits core emitter class within this class
-* @method inherits
-*/
-util.inherits(PlaceSystem, events.EventEmitter)
-
-/**
-*  find where move to
-* @method updatePlace
-*
-*/
-PlaceSystem.prototype.updatePlace = function () {
-  // cues space
-  // planet earth coords
-  // other
+  /**
+  *  find where move to
+  * @method updatePlace
+  *
+  */
+  updatePlace() {
+    // cues space
+    // planet earth coords
+    // other
+  }
 }
 
 export default PlaceSystem

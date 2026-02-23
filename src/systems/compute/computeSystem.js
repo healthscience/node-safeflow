@@ -1,5 +1,7 @@
 import ComputeEngine, { registerModelLoader } from 'compute-engine';
 import { EventEmitter } from 'events';
+import ResultComponent from '../../components/pipeline/resultComponent.js';
+import objectHash from 'object-hash';
 
 class ComputeSystem extends EventEmitter {
   constructor(setIN) {
@@ -62,6 +64,45 @@ class ComputeSystem extends EventEmitter {
       console.log(`Model ${contract.value.computational.hash} loaded successfully.`);
     } catch (error) {
       console.error(`Error loading model ${contract.value.computational.value}:`, error);
+    }
+  }
+
+  /**
+  * Run the system on a collection of entities
+  * @param {Object} entities - Map of entities
+  */
+  async update(entities) {
+    for (const entityId in entities) {
+      const entity = entities[entityId]
+      
+      // Logic: Query entities with TidiedDataComponent and ComputeContractComponent, but lacking ResultComponent
+      if (entity.tidiedData && entity.computeContract && !entity.result) {
+        await this.processEntity(entity)
+      }
+    }
+  }
+
+  /**
+  * Run compute for a specific entity
+  * @param {Object} entity 
+  */
+  async processEntity(entity) {
+    try {
+      const tidiedData = entity.tidiedData.data
+      const contract = entity.computeContract.contract
+      
+      const computeResult = await this.computationSystem(contract, {}, tidiedData)
+
+      if (computeResult) {
+        // Calculate final chained hash for Proof of Work
+        const hash = objectHash({ result: computeResult, previousHash: entity.tidiedData.hash })
+        // Attach ResultComponent
+        entity.result = new ResultComponent(computeResult, entity.tidiedData.hash, hash)
+        this.emit('computeCompleted', { entityId: entity.id, hash })
+      }
+    } catch (error) {
+      console.error(`ComputeSystem update error for entity ${entity.id}:`, error)
+      this.emit('error', error)
     }
   }
 

@@ -9,25 +9,21 @@
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
-const util = require('util')
-const events = require('events')
+import { EventEmitter } from 'events'
 
-var DMLnetwork = function () {
-  events.EventEmitter.call(this)
-}
+class DMLnetwork extends EventEmitter {
+  constructor() {
+    super()
+  }
 
-/**
-* inherits core emitter class within this class
-* @method inherits
-*/
-util.inherits(DMLnetwork, events.EventEmitter)
-
-/**
-*  get base time from LKN
-* @method connectDML
-*
-*/
-DMLnetwork.prototype.connectDML = function (peerIN) {
+  /**
+  *  get base time from LKN
+  * @method connectDML
+  *
+  */
+  connectDML(peerIN) {
+    // implementation here
+  }
 }
 
 export default DMLnetwork

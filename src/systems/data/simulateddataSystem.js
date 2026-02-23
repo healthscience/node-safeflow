@@ -11,29 +11,24 @@
 */
 
 import TestStorageAPI from './dataprotocols/rest/index.js'
-import util from 'util'
-import events from 'events'
+import { EventEmitter } from 'events'
 
-var SimulatedDataSystem = function (setIN) {
-  events.EventEmitter.call(this)
-  this.liveTestStorage = new TestStorageAPI(setIN)
-  this.simulatedData = []
-}
+class SimulatedDataSystem extends EventEmitter {
+  constructor(setIN) {
+    super()
+    this.liveTestStorage = new TestStorageAPI(setIN)
+    this.simulatedData = []
+  }
 
-/**
-* inherits core emitter class within this class
-* @method inherits
-*/
-util.inherits(SimulatedDataSystem, events.EventEmitter)
-
-/**
-*  which future time period, which assumption about it?
-* @method assessFuture
-*
-*/
-SimulatedDataSystem.prototype.assessFuture = function (dataSystem, timeInfo) {
-  let futureData = 9 // this.liveCALE.learn('tomorrow', dataSystem, timeInfo)
-  return futureData
+  /**
+  *  which future time period, which assumption about it?
+  * @method assessFuture
+  *
+  */
+  assessFuture(dataSystem, timeInfo) {
+    let futureData = 9 // this.liveCALE.learn('tomorrow', dataSystem, timeInfo)
+    return futureData
+  }
 }
 
 export default SimulatedDataSystem

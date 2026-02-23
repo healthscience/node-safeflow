@@ -10,68 +10,63 @@
 * @version    $Id$
 */
 import DTsystem from '../systems/data/dtSystem.js'
-import util from 'util'
-import events from 'events'
+import { EventEmitter } from 'events'
 
-var DatatypeComponent = function () {
-  events.EventEmitter.call(this)
-  this.liveDTsystem = new DTsystem()
-  this.datatypeInfoLive = []
-  this.datatypesLive = []
-  this.sourceDatatypes = []
-}
-
-/**
-* inherits core emitter class within this class
-* @method inherits
-*/
-util.inherits(DatatypeComponent, events.EventEmitter)
-
-/**
-*  the Type of data
-* @method dataType
-*
-*/
-DatatypeComponent.prototype.dataTypeMapping = function (api, contract, datatype) {
-  let dataTypeMapped = this.liveDTsystem.DTStartMatch(api, contract, datatype)
-  this.datatypeInfoLive = dataTypeMapped
-  return true
-}
-
-/**
-*  the current data types ask for by the peer
-* @method setDataTypeLive
-*
-*/
-DatatypeComponent.prototype.setDataTypeLive = function (liveDTs) {
-  this.datatypesLive = []
-  for (let dtl of liveDTs) {
-    // check if results datatype  inclue hypon
-    let hyponDTs = false // dtl.includes('-')
-    if (hyponDTs === false) {
-      this.datatypesLive.push(dtl)
-      // this.sourceDatatypes.push(dtl)
-    } else {
-      // split the dt into parts
-      let splitDT = dtl.split('-')
-      // for (let sdt of splitDT) {
-      this.sourceDatatypes.push(splitDT[0])
-      // }
-      this.datatypesLive.push(dtl)
-    }
+class DatatypeComponent extends EventEmitter {
+  constructor() {
+    super()
+    this.liveDTsystem = new DTsystem()
+    this.datatypeInfoLive = []
+    this.datatypesLive = []
+    this.sourceDatatypes = []
   }
-  return true
-}
 
-/**
-*  switch to source data types needing compute
-* @method switchSourceDatatypes
-*
-*/
-DatatypeComponent.prototype.switchSourceDatatypes = function () {
-  this.sourceDatatypes = [...new Set(this.sourceDatatypes)]
-  this.datatypesLive = this.sourceDatatypes
-  return true
+  /**
+  *  the Type of data
+  * @method dataTypeMapping
+  *
+  */
+  dataTypeMapping(api, contract, datatype) {
+    let dataTypeMapped = this.liveDTsystem.DTStartMatch(api, contract, datatype)
+    this.datatypeInfoLive = dataTypeMapped
+    return true
+  }
+
+  /**
+  *  the current data types ask for by the peer
+  * @method setDataTypeLive
+  *
+  */
+  setDataTypeLive(liveDTs) {
+    this.datatypesLive = []
+    for (let dtl of liveDTs) {
+      // check if results datatype  inclue hypon
+      let hyponDTs = false // dtl.includes('-')
+      if (hyponDTs === false) {
+        this.datatypesLive.push(dtl)
+        // this.sourceDatatypes.push(dtl)
+      } else {
+        // split the dt into parts
+        let splitDT = dtl.split('-')
+        // for (let sdt of splitDT) {
+        this.sourceDatatypes.push(splitDT[0])
+        // }
+        this.datatypesLive.push(dtl)
+      }
+    }
+    return true
+  }
+
+  /**
+  *  switch to source data types needing compute
+  * @method switchSourceDatatypes
+  *
+  */
+  switchSourceDatatypes() {
+    this.sourceDatatypes = [...new Set(this.sourceDatatypes)]
+    this.datatypesLive = this.sourceDatatypes
+    return true
+  }
 }
 
 export default DatatypeComponent

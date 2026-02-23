@@ -11,70 +11,65 @@
 */
 import ChartSystem from './charts/chartSystem.js'
 import TableSystem from './table/tableSystem.js'
-import util from 'util'
-import events from 'events'
-// import moment from 'moment'
+import { EventEmitter } from 'events'
 
-var VisSystem = function () {
-  events.EventEmitter.call(this)
-  this.liveChartSystem = new ChartSystem()
-  this.liveTableSystem = new TableSystem()
-  this.visSystemData = []
-}
-
-/**
-* inherits core emitter class within this class
-* @method inherits
-*/
-util.inherits(VisSystem, events.EventEmitter)
-
-/**
-*
-* @method chartSystem
-*
-*/
-VisSystem.prototype.visualControl = function (visModule, contract, dataPrint, dataIN, dtConvert) {
-  // temp fix two competin structure comimg in blind and nxp
-  let visContract = {}
-  if (contract?.value?.computational?.name !== undefined) {
-    visContract = contract.value.computational.name
-  } else {
-    visContract = contract[0].value.computational.name
+class VisSystem extends EventEmitter {
+  constructor() {
+    super()
+    this.liveChartSystem = new ChartSystem()
+    this.liveTableSystem = new TableSystem()
+    this.visSystemData = []
   }
-  let visBundlePrepared = {}
-  if (visContract === 'chartjs') {
-    visBundlePrepared = this.liveChartSystem.chartjsControl(visModule, contract, dataPrint, dataIN, dtConvert)
-  } else if (visContract === 'Table') {
-  }
-  return visBundlePrepared
-}
 
-/**
-*
-* @method singlemultiControl
-*
-*/
-VisSystem.prototype.singlemultiControl = function (type, chartOptions, dataPrint, inputHash, dataSet, sourceData, dataPrints) {
-  let restructureDone = {}
-  if (type.format === 'timeseries') {
-    restructureDone = this.liveChartSystem.structureMulitChartData(dataPrint, chartOptions, dataSet, sourceData, dataPrints)
-  } else if (type.format = 'overlay') {
-    restructureDone = this.liveChartSystem.structureOverlayChartData(dataPrint, chartOptions, dataSet, sourceData, dataPrints)
+  /**
+  *
+  * @method visualControl
+  *
+  */
+  visualControl(visModule, contract, dataPrint, dataIN, dtConvert) {
+    // temp fix two competin structure comimg in blind and nxp
+    let visContract = {}
+    if (contract?.value?.computational?.name !== undefined) {
+      visContract = contract.value.computational.name
+    } else {
+      visContract = contract[0].value.computational.name
+    }
+    let visBundlePrepared = {}
+    if (visContract === 'chartjs') {
+      visBundlePrepared = this.liveChartSystem.chartjsControl(visModule, contract, dataPrint, dataIN, dtConvert)
+    } else if (visContract === 'Table') {
+      // table implementation
+    }
+    return visBundlePrepared
   }
-  return restructureDone
-}
 
-/**
-*
-* @method tableSystem
-*
-*/
-VisSystem.prototype.tableSystem = function (bundle, visIN, vData, timeComponent) {
-  let tableData
-  if (bundle.cid === 'cnrl-2356388731') {
-    tableData = this.liveTableSystem.structureTableData(bundle, visIN, vData, timeComponent.timerange)
+  /**
+  *
+  * @method singlemultiControl
+  *
+  */
+  singlemultiControl(type, chartOptions, dataPrint, inputHash, dataSet, sourceData, dataPrints) {
+    let restructureDone = {}
+    if (type.format === 'timeseries') {
+      restructureDone = this.liveChartSystem.structureMulitChartData(dataPrint, chartOptions, dataSet, sourceData, dataPrints)
+    } else if (type.format === 'overlay') {
+      restructureDone = this.liveChartSystem.structureOverlayChartData(dataPrint, chartOptions, dataSet, sourceData, dataPrints)
+    }
+    return restructureDone
   }
-  return tableData
+
+  /**
+  *
+  * @method tableSystem
+  *
+  */
+  tableSystem(bundle, visIN, vData, timeComponent) {
+    let tableData
+    if (bundle.cid === 'cnrl-2356388731') {
+      tableData = this.liveTableSystem.structureTableData(bundle, visIN, vData, timeComponent.timerange)
+    }
+    return tableData
+  }
 }
 
 export default VisSystem

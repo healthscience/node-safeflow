@@ -16,38 +16,32 @@ import TimeComponent from './components/timeComponent.js'
 import ComputeComponent from './components/computeComponent.js'
 import VisualComponent from './components/visualComponent.js'
 import PlaceComponent from './components/placeComponent.js'
-// import SimComponent from './components/simComponent.js'
-import util from 'util'
-import events from 'events'
+import { EventEmitter } from 'events'
 
-var ScienceEntities = function (dAccess) {
-  events.EventEmitter.call(this)
-  this.liveDeviceC = new DeviceComponent(dAccess)
-  this.liveTimeC = new TimeComponent()
-  this.liveDatatypeC = new DatatypeComponent()
-  this.liveDataC = new DataComponent(dAccess)
-  this.liveComputeC = new ComputeComponent(dAccess)
-  this.liveVisualC = new VisualComponent()
-  this.livePlaceC = new PlaceComponent()
-  // this.liveSimC = new SimComponent()
-  this.datascience = {}
-  this.datauuid = {}
-  this.evidenceChain = []
+class ScienceEntities extends EventEmitter {
+  constructor(dAccess) {
+    super()
+    this.liveDeviceC = new DeviceComponent(dAccess)
+    this.liveTimeC = new TimeComponent()
+    this.liveDatatypeC = new DatatypeComponent()
+    this.liveDataC = new DataComponent(dAccess)
+    this.liveComputeC = new ComputeComponent(dAccess)
+    this.liveVisualC = new VisualComponent()
+    this.livePlaceC = new PlaceComponent()
+    this.datascience = {}
+    this.datauuid = {}
+    this.evidenceChain = []
+  }
+
+  /**
+  *
+  * @method setDataStore
+  */
+  async setDataStore(authDataStore) {
+    this.liveDeviceC.setAuthToken(authDataStore)
+    this.liveDataC.setAuthToken(authDataStore)
+    this.liveComputeC.setAuthToken(authDataStore)
+  }
 }
 
-/**
-* inherits core emitter class within this class
-* @method inherits
-*/
-util.inherits(ScienceEntities, events.EventEmitter)
-
-/**
-*
-* @method setDataStore
-*/
-DeviceComponent.prototype.setDataStore = async function (authDataStore) {
-  this.liveDeviceC.setAuthToken(authDataStore)
-  this.liveDataC.setAuthToken(authDataStore)
-  this.liveComputeC.setAuthToken(authDataStore)
-}
 export default ScienceEntities
