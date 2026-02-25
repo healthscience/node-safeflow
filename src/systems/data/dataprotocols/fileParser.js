@@ -14,15 +14,15 @@ import atob from 'atob'
 
 import fs from 'fs'
 import os from 'os'
-import axios from 'axios'
 import csv from 'csv-parser'
 import crypto from 'crypto'
 import { EventEmitter } from 'events'
 
 class FileParser extends EventEmitter {
-  constructor(path) {
+  constructor(path, dataAPI) {
     super()
     this.storepath = path
+    this.liveDataAPI = dataAPI
   }
 
   /**
@@ -75,14 +75,16 @@ class FileParser extends EventEmitter {
   }
 
   /**
-  * files from cloud
+  * files from cloud - Refactored to use Hyperdrive/Hypercore
   * @method webFileParse
   *
   */
   async webFileParse(o, ws) {
-    const localthis = this
-    let dataWeb = await axios.get(o.data.websource)
-    // implementation here
+    // Instead of axios.get, we assume the file is already in Hyperdrive or we fetch it via Holepunch
+    // For this refactor, we'll assume the data is retrieved from the liveDataAPI
+    const hyperPath = `/web_cache/${crypto.createHash('md5').update(o.data.websource).digest('hex')}`
+    const data = await this.liveDataAPI.DriveFiles.drive.get(hyperPath)
+    // implementation continues...
   }
 
   /**

@@ -1,82 +1,90 @@
 'use strict'
 /**
-*  Test CloudStorage
+*  Holepunch Storage API
 *
 *
-* @class testStorageAPI
-* @package    testStorage API
-* @copyright  Copyright (c) 2019 James Littlejohn
+* @class TestStorageAPI
+* @package    safeFlow
+* @copyright  Copyright (c) 2024 James Littlejohn
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
 */
 import { EventEmitter } from 'events'
-import axios from 'axios'
 
 class TestStorageAPI extends EventEmitter {
-  constructor(setUP) {
+  constructor(dataAPI) {
     super()
-    this.baseAPI = setUP // .namespace
-    this.tempPubkey = setUP // .publickey
-    this.tempToken = setUP // .token
+    this.liveDataAPI = dataAPI
   }
 
   /**
-  *  device REST builder  (TODO this will need to be come more sophisticed e.g. type of rest authoriseation, no. query parameters etc.)
+  *  device builder using Hyperbee/Hypercore
   * @method RESTbuilder
   *
   */
   async RESTbuilder(dapi, queryIN) {
-    let jsondata = await axios.get(dapi.namespace + dapi.path + this.tempPubkey + '/' + this.tempToken + '/' + queryIN)
-    return jsondata.data[0]
+    // Use Hyperbee to get data
+    const node = await this.liveDataAPI.BeeData.get(queryIN)
+    return node ? node.value : null
   }
 
   /**
-  *  COMPUTEbuilder  temp until smart URL builder is created
+  *  COMPUTEbuilder using Hyperbee
   * @method COMPUTEbuilder
   *
   */
   async COMPUTEbuilder(dapi, device, time) {
     let apitime = time / 1000
-    let jsondata = await axios.get(dapi.namespace + dapi.path + this.tempPubkey + '/' + this.tempToken + '/' + apitime + '/' + device)
-    return jsondata.data
+    const key = `${device}/${apitime}`
+    const node = await this.liveDataAPI.BeeData.get(key)
+    return node ? node.value : []
   }
 
   /**
-  *  COMPUTEbuilder  temp until smart URL builder is created
+  *  COMPUTEbuilderLuft using Hyperbee
   * @method COMPUTEbuilderLuft
   *
   */
   async COMPUTEbuilderLuft(dapi, device, time) {
-    dapi.path = '/luftdatenGet/'
     let apitime = time / 1000
     let apitime2 = apitime + 86400
-    let jsondata = await axios.get(dapi.namespace + dapi.path + this.tempPubkey + '/' + this.tempToken + '/' + device + '/' + apitime + '/' + apitime2)
-    return jsondata.data
+    // Range query in Hyperbee
+    const results = []
+    for await (const node of this.liveDataAPI.BeeData.createReadStream({
+      gte: `${device}/${apitime}`,
+      lte: `${device}/${apitime2}`
+    })) {
+      results.push(node.value)
+    }
+    return results
   }
 
   /**
-  *  device REST builder
+  *  device builder
   * @method deviceRESTbuilder
   *
   */
   async deviceRESTbuilder(dapi) {
-    let jsondata = []
-    if (dapi.apipath === '/computedata/') {
-      jsondata = await axios.get(dapi.apibase + '/contextdata/' + this.tempPubkey + '/' + this.tempToken)
-    } else if (dapi.device.query === '/luftdatendevice/') {
-      jsondata = await axios.get(dapi.apibase + '/luftdatendevice/' + this.tempPubkey + '/' + this.tempToken)
+    const results = []
+    const prefix = dapi.apipath === '/computedata/' ? 'contextdata/' : 'luftdatendevice/'
+    for await (const node of this.liveDataAPI.BeeData.createReadStream({
+      gte: prefix,
+      lte: prefix + '\xff'
+    })) {
+      results.push(node.value)
     }
-    return jsondata.data
+    return results
   }
 
   /**
-  *  datatype REST builder
+  *  datatype builder
   * @method datatypeRESTbuilder
   *
   */
   async datatypeRESTbuilder(dapi) {
-    let jsondata = await axios.get(dapi.namespace + dapi.datatype + this.tempPubkey + '/' + this.tempToken)
-    return jsondata.data
+    const key = `datatype/${dapi.datatype}`
+    const node = await this.liveDataAPI.BeeData.get(key)
+    return node ? node.value : []
   }
 
   /**
@@ -85,19 +93,20 @@ class TestStorageAPI extends EventEmitter {
   *
   */
   async getContextType() {
-    //  nosql query but headng towards a gRPC listener on stream socket
-    let jsondata = await axios.get(this.baseAPI + '/contexttype/' + this.tempPubkey + '/' + this.tempToken)
-    return jsondata.data
+    const key = 'contexttype'
+    const node = await this.liveDataAPI.BeeData.get(key)
+    return node ? node.value : []
   }
 
   /**
-  *  save results to datastore
+  *  save results to Hyperbee
   * @method saveResults
   *
   */
   async saveResults(api, data) {
-    let jsondata = await axios.post(api.namespace + api.path + this.tempPubkey + '/' + this.tempToken, data)
-    return jsondata.data
+    const key = `results/${Date.now()}`
+    await this.liveDataAPI.BeeData.put(key, data)
+    return { success: true, key }
   }
 }
 

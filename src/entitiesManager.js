@@ -230,6 +230,7 @@ class EntitiesManager extends EventEmitter {
 
   /**
   *  loop through the data required per datatype time and device
+  *  Refactored to act as an ECS Scheduler: generates individual entities for each dataPrint
   * @method flowMany
   *
   */
@@ -243,17 +244,48 @@ class EntitiesManager extends EventEmitter {
       timeList = this.liveSEntities[shellID].liveTimeC.timerange
     }
     if (ecsInput.flowstate.devicerange === true && ecsInput.flowstate.datatyperange === true && ecsInput.flowstate.timerange === true) {
-      for (let device of this.liveSEntities[shellID].liveDeviceC.devices) {
+      for (let i = 0; i < this.liveSEntities[shellID].liveDeviceC.devices.length; i++) {
+        const currentDevice = this.liveSEntities[shellID].liveDeviceC.devices[i]
         if (computeFlag === false) {
-          this.liveSEntities[shellID].liveVisualC.clearDeviceCount(device)
+          this.liveSEntities[shellID].liveVisualC.clearDeviceCount(currentDevice)
         }
-        for (let datatype of this.liveSEntities[shellID].liveDatatypeC.datatypesLive) {
-          for (let time of timeList) {
+        for (let j = 0; j < this.liveSEntities[shellID].liveDatatypeC.datatypesLive.length; j++) {
+          const currentDatatype = this.liveSEntities[shellID].liveDatatypeC.datatypesLive[j]
+          for (let k = 0; k < timeList.length; k++) {
+            const currentTime = timeList[k]
+            const d = currentDevice
+            const dt = currentDatatype
+            const t = currentTime
             this.throttle(() => {
               let tidy = ecsInput.flowstate.updateModContract.value.info.controls.tidy
               let category = ''
-              let dataPrintHash = this.resultsUUIDbuilder(device, datatype, time, tidy, category)
-              this.trackDataUUIDS(shellID, inputUUID, dataPrintHash, device, datatype, time, tidy, category, computeFlag, dataPrint)
+              let dataPrintHash = this.resultsUUIDbuilder(d, dt, t, tidy, category)
+              
+              // Create a new sub-entity for this specific dataPrint chunk
+              const subEntityId = `${shellID}-${dataPrintHash}`
+              this.liveSEntities[subEntityId] = new Entity(subEntityId)
+              
+              // Attach Pipeline Components to the sub-entity
+              this.liveSEntities[subEntityId].dataRequest = new DataRequestComponent({
+                device: d,
+                datatype: dt,
+                time: t,
+                tidy,
+                category,
+                inputUUID,
+                parentShellID: shellID
+              })
+              
+              this.liveSEntities[subEntityId].tidyRules = new TidyRulesComponent(
+                ecsInput.flowstate.updateModContract.value.modules.data.rules
+              )
+              
+              this.liveSEntities[subEntityId].computeContract = new ComputeContractComponent(
+                ecsInput.flowstate.updateModContract.value.modules.compute
+              )
+
+              // Legacy tracking for backward compatibility during transition
+              this.trackDataUUIDS(shellID, inputUUID, dataPrintHash, d, dt, t, tidy, category, computeFlag, dataPrint)
               this.entityResultsReady(shellID, ecsInput.input, dataPrintHash, computeFlag)
             })
           }

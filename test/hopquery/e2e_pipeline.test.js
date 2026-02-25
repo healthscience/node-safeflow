@@ -30,7 +30,20 @@ describe('End-to-End HOPquery Pipeline', () => {
   beforeEach(() => {
     const mockDataAPI = {
       DriveFiles: {
-        testDataExtact: vi.fn().mockReturnValue(1672574400000)
+        testDataExtact: vi.fn().mockReturnValue(1672574400000),
+        hyperdriveLocalfile: vi.fn().mockResolvedValue('/tmp/test.db'),
+        drive: {
+          get: vi.fn().mockResolvedValue(Buffer.from('{"data":[]}'))
+        }
+      },
+      BeeData: {
+        get: vi.fn().mockResolvedValue({ value: [{ Date: '2023-01-01 12:00', heart_rate: 70 }] }),
+        put: vi.fn().mockResolvedValue(true),
+        createReadStream: vi.fn().mockReturnValue({
+          [Symbol.asyncIterator]: async function* () {
+            yield { value: { Date: '2023-01-01 12:00', heart_rate: 70 } }
+          }
+        })
       }
     }
     entitiesManager = new EntitiesManager(mockDataAPI)
@@ -72,8 +85,7 @@ describe('End-to-End HOPquery Pipeline', () => {
     expect(entity.dataRequest).toBeDefined()
     expect(entity.computeContract).toBeDefined()
 
-    // 2. Manually trigger ticks to advance the pipeline (since we want to test deterministically)
-    // In a real scenario, the setInterval would handle this.
+    // 2. Manually trigger ticks to advance the pipeline
     
     // Tick 1: DataFetchSystem
     await entitiesManager.tick()

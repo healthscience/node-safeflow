@@ -1,10 +1,10 @@
 'use strict'
 /**
-*  SQLite local file interface
+*  SQLite local file interface via Hyperdrive
 *
 *
 * @class SQLiteAPI
-* @package    testStorage API
+* @package    safeFlow
 * @copyright  Copyright (c) 2022 James Littlejohn
 * @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
 * @version    $Id$
@@ -25,7 +25,7 @@ class SQLiteAPI extends EventEmitter {
   *
   */
   async SQLiteSetup(dapi) {
-    // const stream = this.liveDataAPI.DriveFiles.listFilesFolder('sqlite/')
+    // Use Hyperdrive to get the local file path
     let dbFile = await this.liveDataAPI.DriveFiles.hyperdriveLocalfile('sqlite/' + dapi)
     this.db = new sqlite3.Database(dbFile)
   }
@@ -38,7 +38,6 @@ class SQLiteAPI extends EventEmitter {
   async SQLitebuilderPromise(dapi, device, time) {
     let table = dapi.sqlitetablename
     let deviceCol = dapi.sourcedevicecol.name
-    // first setup the db MI_BAND_ACTIVITY_SAMPLE  SELECT * FROM MI_BAND_ACTIVITY_SAMPLE WHERE TIMESTAMP BETWEEN 1718279760 AND 1720382880
     let timeCol = 'TIMESTAMP'
     await this.SQLiteSetup(dapi.filename)
     let apiTime1 = Math.round(time / 1000)
@@ -62,8 +61,6 @@ class SQLiteAPI extends EventEmitter {
   *
   */
   async SQLiteDevicePromise(table, filename) {
-    // need to connect to the db requested
-    // first setup the db
     await this.SQLiteSetup(filename)
     const res = await new Promise((resolve, reject) => {
       let sql = `SELECT * FROM ` + table
@@ -94,7 +91,6 @@ class SQLiteAPI extends EventEmitter {
         data.push(row)
       })
     })
-    // this.db.close()
   }
 }
 

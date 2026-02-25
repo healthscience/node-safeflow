@@ -39,19 +39,17 @@ class DataSystem extends EventEmitter {
     console.log(datatype)
     console.log(time)
     let rawHolder = []
+    
+    // All types now use the refactored storage protocols which utilize the dataAPI (Hypercore/Hyperbee)
     if (type === 'SAFE') {
-      // no api plug in yet
+      // implementation for SAFE network if needed
     } else if (type === 'REST') {
-      // pass on to either safe API builder, REST API builder or IPSF builder etc.
       rawHolder = await this.liveRestStorage.RESTbuilder(sourceInfo, hash).catch(e => console.log('Error: ', e.message))
     } else if (type === 'SQLITE') {
-      // pass on to either safe API builder, REST API builder or IPSF builder etc.
       rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo, device.device_mac).catch(e => console.log('Error: ', e.message))
     } else if (type === 'JSON') {
-      // pass on to either safe API builder, REST API builder or IPSF builder etc.
       rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device).catch(e => console.log('Error: ', e.message))
     } else if (type === 'DATA-COMPUTE') {
-      // temp two different structures comign in blind and nxp need to correct
       let pathFile = sourceInfo.data
       let dataPath = ''
       if (sourceInfo.data.path !== undefined) {
@@ -59,17 +57,14 @@ class DataSystem extends EventEmitter {
       } else {
         dataPath = 'json'
       }
-      // temp before smart rest extractor is built
+      
       if (dataPath === '/rest/') {
         rawHolder = await this.liveRestStorage.COMPUTEbuilder(sourceInfo.data, device, time).catch(e => console.log('Error: ', e.message))
       } else if (dataPath === 'csv') {
-        // source csv e.g. large file query
         rawHolder = await this.liveCSVStorage.csvTimeFilter(sourceInfo.data, device, datatype, time).catch(e => console.log('Error: ', e.message))
-        // this.liveCSVStorage.CSVbuilderPromise(sourceInfo, device, time) // .catch(e => console.log('Error: ', e.message))
       } else if (dataPath === 'sqlite') {
         rawHolder = await this.liveSQLiteStorage.SQLitebuilderPromise(sourceInfo.data, device.device_mac, time)
       } else if (dataPath === 'json') {
-        // pass on to either safe API builder, REST API builder or IPSF builder etc.
         rawHolder = await this.liveJSONStorage.jsonFilebuilder(sourceInfo, device, time).catch(e => console.log('Error: ', e.message))
       }
     }
@@ -77,8 +72,8 @@ class DataSystem extends EventEmitter {
   }
 
   /**
-  *  return array of active devices
-  * @method getLiveDevices
+  *  save results to datastore
+  * @method saveSystem
   *
   */
   async saveSystem(api, data) {
@@ -92,7 +87,13 @@ class DataSystem extends EventEmitter {
   *
   */
   getLiveDevices(devicesIN) {
-    // implementation here
+    let deviceList = []
+    for (let device of devicesIN) {
+      if (device.active === true) {
+        deviceList.push(device.device_mac)
+      }
+    }
+    return deviceList
   }
 }
 
