@@ -1,6 +1,4 @@
 'use strict'
-import atob from 'atob'
-
 /**
 *  FileParser
 *
@@ -15,7 +13,6 @@ import atob from 'atob'
 import fs from 'fs'
 import os from 'os'
 import csv from 'csv-parser'
-import crypto from 'crypto'
 import { EventEmitter } from 'events'
 
 class FileParser extends EventEmitter {
@@ -82,7 +79,7 @@ class FileParser extends EventEmitter {
   async webFileParse(o, ws) {
     // Instead of axios.get, we assume the file is already in Hyperdrive or we fetch it via Holepunch
     // For this refactor, we'll assume the data is retrieved from the liveDataAPI
-    const hyperPath = `/web_cache/${crypto.createHash('md5').update(o.data.websource).digest('hex')}`
+    const hyperPath = '' // `/web_cache/${crypto.createHash('md5').update(o.data.websource).digest('hex')}`
     const data = await this.liveDataAPI.DriveFiles.drive.get(hyperPath)
     // implementation continues...
   }
