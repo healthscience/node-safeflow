@@ -11,6 +11,8 @@
 */
 import EventEmitter from 'events'
 import EntitiesManager from './entitiesManager.js'
+import { World } from './core/world.js'
+import { PulseBridge } from './ingest/pulseBridge.js'
 
 class SafeFlow extends EventEmitter {
 
@@ -18,10 +20,37 @@ class SafeFlow extends EventEmitter {
     super()
     console.log('udpat eo ECS')
     this.dataAPIlive = dataAPI
+    
+    // Core Infrastructure Upgrade
+    this.world = new World()
+    this.pulseBridge = new PulseBridge(this.world)
+
     // start error even listener
     this.eventErrorListen()
     this.liveEManager = new EntitiesManager(this.dataAPIlive)
     this.resultCount = 0
+  }
+
+  /**
+   * Set up WebSocket and attach ingest handler
+   * @method setWebsocket
+   */
+  setWebsocket(ws) {
+    this.dataAPIlive.setWebsocket(ws)
+    
+    ws.on('message', (msg) => {
+      let message
+      try {
+        message = JSON.parse(msg.utf8Data || msg)
+      } catch (err) {
+        return
+      }
+
+      if (message.agentId && message.data) {
+        this.pulseBridge.ingestLive(message.agentId, message.data)
+        this.world.tick(message.heliStamp)
+      }
+    })
   }
 
   /**
