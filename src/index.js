@@ -13,6 +13,7 @@ import EventEmitter from 'events'
 import EntitiesManager from './entitiesManager.js'
 import { World } from './core/world.js'
 import { PulseBridge } from './ingest/pulseBridge.js'
+import { Weaver } from 'consilience-weave'
 
 class SafeFlow extends EventEmitter {
 
@@ -24,6 +25,8 @@ class SafeFlow extends EventEmitter {
     // Core Infrastructure Upgrade
     this.world = new World()
     this.pulseBridge = new PulseBridge(this.world)
+    // consilience weave
+    this.weaver = this.world.weaver
 
     // start error even listener
     this.eventErrorListen()
