@@ -1,12 +1,12 @@
 import { Registry } from '../identity/registry.js';
-import { Weaver } from 'consilience-weave';
+// import { Weaver } from 'consilience-weave';
 
 export class World {
   constructor() {
     this.entities = new Map();
     this.systems = [];
     this.registry = new Registry(); // The Foreman
-    this.weaver = new Weaver(); // The Weaver
+    // this.weaver = new Weaver(); // The Weaver
   }
 
   addSystem(system) {
