@@ -13,7 +13,6 @@ import EventEmitter from 'events'
 import EntitiesManager from './entitiesManager.js'
 import { World } from './core/world.js'
 import { PulseBridge } from './ingest/pulseBridge.js'
-import { Weaver } from 'consilience-weave'
 
 class SafeFlow extends EventEmitter {
 
