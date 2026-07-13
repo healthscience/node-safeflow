@@ -1,6 +1,6 @@
 'use strict'
 /**
-*  SAFEflow  heart of the data
+*  SAFEflow  heart of the emulation coherence ledger
 *
 *
 * @class safeFlow
@@ -16,10 +16,13 @@ import { PulseBridge } from './ingest/pulseBridge.js'
 
 class SafeFlow extends EventEmitter {
 
-  constructor(dataAPI) {
+  constructor(wiring) {
     super()
-    console.log('udpat eo ECS')
-    this.dataAPIlive = dataAPI
+    console.log('up SafeFlow-ECS')
+    console.log(wiring)
+    this.wiring = wiring;
+    this.isPulsing = false;
+    this.dataAPIlive = wiring.network
     
     // Core Infrastructure Upgrade
     this.world = new World()
@@ -32,6 +35,83 @@ class SafeFlow extends EventEmitter {
     this.liveEManager = new EntitiesManager(this.dataAPIlive)
     this.resultCount = 0
   }
+
+  /**
+   * Main ignition point for the constant Interplay heartbeat.
+   * Call this as soon as the core infrastructure layer comes to be.
+   */
+  startTicker() {
+    console.log('SF start ticker')
+    if (this.isPulsing) return;
+    this.isPulsing = true;
+    
+    console.log('[Orrery] SafeFlow-ECS pulse loop ignited.');
+    this._pulseLoop();
+  }
+
+  _pulseLoop() {
+    if (!this.isPulsing) return;
+
+    // 1. Capture current cosmic/heli time coordinates
+    const heliStamp = this.wiring.heliClock?.getCurrentStamp() || Date.now();
+
+    // 2. Run the internal systems over the active entity Map
+    // If empty, this loop completes in micro-seconds with zero allocations
+    this.liveEManager.updateSystems();
+
+    // 3. Compile the current coherence ledger entry
+    const coherentStatePackage = {
+      heliStamp: heliStamp,
+      entityCount: this.liveEManager.entityMap.size,
+      payload: [] 
+    };
+
+    // 4. Stream active entity states down the wire if they exist
+    if (coherentStatePackage.entityCount > 0) {
+      this.liveEManager.entityMap.forEach((components, entityId) => {
+        // Extract structural and geometric properties if present
+        const orgo = components.get('orgo');
+        const gelle = components.get('gelle');
+        
+        if (orgo || gelle) {
+          coherentStatePackage.payload.push({
+            id: entityId,
+            orgo: orgo || null,
+            gelle: gelle || null
+          });
+        }
+      });
+    }
+
+    // 5. Direct egress path to SfRoute -> WebSocket -> BentoBoxDS
+    this.emit('sf-displayUpdateEntityRange', coherentStatePackage);
+
+    // 6. Bind to the native animation frame or loop interval
+    // This provides a continuous background cadence
+    setTimeout(() => this._pulseLoop(), 16); // ~60fps baseline cadence
+  }
+
+  stopTicker() {
+    this.isPulsing = false;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   /**
    * Set up WebSocket and attach ingest handler
