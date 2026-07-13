@@ -118,7 +118,6 @@ export class EntitiesManager {
     if (this.isLooping) return
     this.isLooping = true
     this.intervalId = setInterval(() => this.tick(), msPerTick)
-    console.log(`[SafeFlow] Orrery loop initialized at ${msPerTick}ms intervals.`)
   }
 
   /**

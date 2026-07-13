@@ -18,8 +18,6 @@ class SafeFlow extends EventEmitter {
 
   constructor(wiring) {
     super()
-    console.log('up SafeFlow-ECS')
-    console.log(wiring)
     this.wiring = wiring;
     this.isPulsing = false;
     this.dataAPIlive = wiring.network
@@ -41,77 +39,57 @@ class SafeFlow extends EventEmitter {
    * Call this as soon as the core infrastructure layer comes to be.
    */
   startTicker() {
-    console.log('SF start ticker')
     if (this.isPulsing) return;
     this.isPulsing = true;
     
-    console.log('[Orrery] SafeFlow-ECS pulse loop ignited.');
     this._pulseLoop();
   }
 
+  /**
+   * pulse heli in entities
+   * @method _pulseLoop
+   */
   _pulseLoop() {
     if (!this.isPulsing) return;
 
     // 1. Capture current cosmic/heli time coordinates
     const heliStamp = this.wiring.heliClock?.getCurrentStamp() || Date.now();
 
-    // 2. Run the internal systems over the active entity Map
-    // If empty, this loop completes in micro-seconds with zero allocations
-    this.liveEManager.updateSystems();
+    // 2. Execute the synchronous pulse through all active systems
+    // This calls the exact method in your EntitiesManager code
+    this.liveEManager.tick();
 
-    // 3. Compile the current coherence ledger entry
+    // 3. Compile the current coherence ledger entry using your native Map (.size)
     const coherentStatePackage = {
       heliStamp: heliStamp,
-      entityCount: this.liveEManager.entityMap.size,
-      payload: [] 
+      entityCount: this.liveEManager.entities.size,
+      morphogens: [] 
     };
 
-    // 4. Stream active entity states down the wire if they exist
+    // 4. Stream active states down the wire if entities exist
     if (coherentStatePackage.entityCount > 0) {
-      this.liveEManager.entityMap.forEach((components, entityId) => {
-        // Extract structural and geometric properties if present
-        const orgo = components.get('orgo');
-        const gelle = components.get('gelle');
-        
-        if (orgo || gelle) {
-          coherentStatePackage.payload.push({
+      // High-performance loop over your native entities Map
+      for (const [entityId, components] of this.liveEManager.entities) {
+        if (components.orgo || components.gelle) {
+          coherentStatePackage.morphogens.push({
             id: entityId,
-            orgo: orgo || null,
-            gelle: gelle || null
+            orgo: components.orgo || null,
+            gelle: components.gelle || null
           });
         }
-      });
+      }
     }
 
     // 5. Direct egress path to SfRoute -> WebSocket -> BentoBoxDS
     this.emit('sf-displayUpdateEntityRange', coherentStatePackage);
 
-    // 6. Bind to the native animation frame or loop interval
-    // This provides a continuous background cadence
-    setTimeout(() => this._pulseLoop(), 16); // ~60fps baseline cadence
+    // 6. Maintain the steady baseline cadence
+    setTimeout(() => this._pulseLoop(), 16); // ~60fps cadence
   }
 
   stopTicker() {
     this.isPulsing = false;
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   /**
    * Set up WebSocket and attach ingest handler
