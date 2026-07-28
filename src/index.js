@@ -1,19 +1,23 @@
 'use strict'
 /**
-*  SAFEflow  heart of the emulation coherence ledger
+* SAFEflow heart of the emulation coherence ledger
 *
-*  Integrated with the Exo-Assembly Grafting state tracking mechanics.
+* Integrated with the Exo-Assembly Grafting state tracking mechanics.
 *
 * @class safeFlow
-* @package    LKN health
-* @copyright  Copyright (c) 2023 James Littlejohn
-* @license    http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
-* @version    $Id$
+* @package LKN health
+* @copyright Copyright (c) 2023 James Littlejohn
+* @license http://www.gnu.org/licenses/old-licenses/gpl-3.0.html
+* @version $Id$
 */
 import EventEmitter from 'events'
 import EntitiesManager from './entitiesManager.js'
 import { World } from './core/world.js'
 import { PulseBridge } from './ingest/pulseBridge.js'
+
+import { JsonExtractionSystem } from './systems/data/JsonExtractorSystem.js'
+// ... import other systems
+
 
 class SafeFlow extends EventEmitter {
 
@@ -27,16 +31,34 @@ class SafeFlow extends EventEmitter {
     this.isPulseSuspended = false;
     this.pulseInterval = 16; // Default to standard high-frequency execution (~60fps)
     
+    // Temporal Mode Management ('LIVE' | 'PLAYBACK' | 'PROJECTION')
+    this.temporalMode = 'LIVE';
+
     // Core Infrastructure Upgrade
     this.world = new World()
     this.pulseBridge = new PulseBridge(this.world)
     // consilience weave
     this.weaver = this.world.weaver
 
-    // start error even listener
+    // start error event listener
     this.eventErrorListen()
-    this.liveEManager = new EntitiesManager(this.dataAPIlive)
+    this.liveEManager = {} // new EntitiesManager(this.dataAPIlive)
+    this.initializeSafeFlow()
     this.resultCount = 0
+  }
+
+
+  /**
+   * bring entity manager to be
+   * @method initializeSafeFlow 
+   */
+  initializeSafeFlow() {
+    this.liveEManager = new EntitiesManager()
+
+    // 2. Add systems to the Orrery prior to the first pulse
+    this.liveEManager.addSystem(new JsonExtractionSystem())
+    // liveEManager.addSystem(new SomeOtherSystem())
+
   }
 
   /**
@@ -51,13 +73,94 @@ class SafeFlow extends EventEmitter {
   }
 
   /**
+   * Switches execution between Live Heli time, History Playback, and Projections Forward.
+   * @method setTemporalMode
+   */
+  setTemporalMode(mode, options = {}) {
+    this.temporalMode = mode;
+
+    switch (mode) {
+      case 'LIVE':
+        this.resumePulse();
+        break;
+
+      case 'PLAYBACK':
+        // Dilation lock: pause live ticks to allow fast historical replay
+        this.suspendPulseForIngest(true);
+        if (options.frames) {
+          this.executePlaybackSequence(options.frames);
+        }
+        break;
+
+      case 'PROJECTION':
+        // Dilation lock: pause live ticks for forward speculative ticks
+        this.suspendPulseForIngest(true);
+        if (options.speculativeCues) {
+          this.executeProjectionSequence(options.speculativeCues, options.steps || 10);
+        }
+        break;
+    }
+
+    this.emit('sf-temporalModeChanged', { mode: this.temporalMode });
+  }
+
+  /**
+   * Replays historical frames synchronously without waiting for real-time intervals.
+   * @method executePlaybackSequence
+   */
+  executePlaybackSequence(frames) {
+    for (let i = 0; i < frames.length; i++) {
+      const frame = frames[i];
+
+      // Ingest historical entity components directly into EntitiesManager
+      if (frame.entityId && frame.componentName) {
+        this.liveEManager.updateComponent(frame.entityId, frame.componentName, frame.data);
+      }
+
+      // Synchronously step system state forward
+      this.liveEManager.tick();
+
+      // Emit proof milestone if this historical timestamp sealed an evidence block
+      if (frame.isProofMilestone) {
+        this.emit('sf-proofMilestoneReplayed', {
+          heliStamp: frame.heliStamp,
+          entityCount: this.liveEManager.entities.size
+        });
+      }
+    }
+
+    // Automatically return to LIVE mode unless explicitly kept in PLAYBACK
+    this.setTemporalMode('LIVE');
+  }
+
+  /**
+   * Runs forward speculative projections using hypothetical exoCues.
+   * @method executeProjectionSequence
+   */
+  executeProjectionSequence(speculativeCues, steps) {
+    for (let step = 0; step < steps; step++) {
+      const cue = speculativeCues[step] || {};
+      
+      // Inject projection cues into PulseBridge
+      if (cue.agentId && cue.data) {
+        this.pulseBridge.ingestLive(cue.agentId, cue.data);
+      }
+
+      // Step state forward in deep-time
+      this.liveEManager.tick();
+    }
+
+    this.emit('sf-projectionCompleted', { stepsExecuted: steps });
+    this.setTemporalMode('LIVE');
+  }
+
+  /**
    * Slows down or pauses the emulation pulse loop to allow safe registration
    * of new Orgo and Gelle pairs without state collisions.
    * @method suspendPulseForIngest
    */
   suspendPulseForIngest(slowOnly = false) {
     this.isPulseSuspended = true;
-    // Either keep ticking at 16ms but skip ECS updates, or slow the actual interval
     this.pulseInterval = slowOnly ? 500 : 16; 
     this.emit('sf-pulseDilation', { suspended: true, interval: this.pulseInterval });
   }
@@ -70,6 +173,53 @@ class SafeFlow extends EventEmitter {
     this.isPulseSuspended = false;
     this.pulseInterval = 16;
     this.emit('sf-pulseDilation', { suspended: false, interval: this.pulseInterval });
+  }
+
+  /**
+   * Ingests a complete HOPstory bundle from the Sculpting Lab process
+   * and maps it directly into the SafeFlow-ECS Orrery.
+   * @method ingestHOPstoryBundle
+   */
+  ingestHOPstoryBundle(bundle) {
+    if (!bundle || !bundle.components) {
+      console.error("Invalid HOPstory bundle provided.");
+      return null;
+    }
+
+    // 1. Pause live ticker briefly during state grafting to prevent collisions
+    this.suspendPulseForIngest(true);
+
+    try {
+      // 2. Spawn a clean entity slot in the Orrery
+      const entityId = this.liveEManager.createEntity();
+      const comps = bundle.components;
+
+      // 3. Bind components individually (late binding via ECS)
+      if (comps.lifestrapStory) {
+        this.liveEManager.addComponent(entityId, 'lifestrapStory', comps.lifestrapStory);
+      }
+      if (comps.lensGlue) {
+        this.liveEManager.addComponent(entityId, 'lensGlue', comps.lensGlue);
+      }
+      if (comps.exoCues) {
+        // Use your existing Orgo/Gelle registration mechanics
+        const torso = comps.exoCues.torso || {};
+        this.saveAndRegisterExoCue(entityId, torso.orgoSpecs, torso.gelleSpecs);
+      }
+      if (comps.data) {
+        this.liveEManager.addComponent(entityId, 'Data', comps.data);
+      }
+
+      this.emit('sf-hopStoryIngested', { entityId, storyId: bundle.storyId });
+      return entityId;
+
+    } catch (err) {
+      console.error("Failed to ingest HOPstory bundle into SafeFlow-ECS:", err);
+      return null;
+    } finally {
+      // 4. Resume normal pulsing cadence
+      this.resumePulse();
+    }
   }
 
   /**
@@ -113,14 +263,15 @@ class SafeFlow extends EventEmitter {
     const heliStamp = this.wiring.heliClock?.getCurrentStamp() || Date.now();
 
     // 2. Execute the synchronous pulse through all active systems
-    // Only execute state ticks if we are not locked in suspended writing state
-    if (!this.isPulseSuspended) {
+    // Only execute state ticks if we are not locked in suspended writing state and in LIVE mode
+    if (!this.isPulseSuspended && this.temporalMode === 'LIVE') {
       this.liveEManager.tick();
     }
 
     // 3. Compile the current coherence ledger entry using your native Map (.size)
     const coherentStatePackage = {
       heliStamp: heliStamp,
+      temporalMode: this.temporalMode,
       entityCount: this.liveEManager.entities.size,
       morphogens: [],
       // Simplified tracking metrics optimized for Orgo-Gelle Coherence
@@ -187,10 +338,15 @@ class SafeFlow extends EventEmitter {
         return
       }
 
-      // Enhanced ingest processing to handle graft/snap updates from peer nodes
+      // Live Ingest Processing
       if (message.agentId && message.data) {
         this.pulseBridge.ingestLive(message.agentId, message.data)
         this.world.tick(message.heliStamp)
+      }
+
+      // Temporal Mode Switching Command
+      if (message.type === 'sf-modeSwitch') {
+        this.setTemporalMode(message.mode, message.payload || {});
       }
     })
   }
@@ -198,7 +354,6 @@ class SafeFlow extends EventEmitter {
   /**
   * ask Library for system active
   * @method askSystemStart
-  *
   */
   askSystemStart() {
     let startMessage = {
@@ -211,7 +366,6 @@ class SafeFlow extends EventEmitter {
   /**
   * load in system active in library
   * @method setSystemsStart
-  *
   */
   setSystemsStart(systemsLive) {
     // implementation of systems live mapping can go here
@@ -220,7 +374,6 @@ class SafeFlow extends EventEmitter {
   /**
   * listen for error on event triggered
   * @method eventErrorListen
-  *
   */
   eventErrorListen(refCont) {
     this.on('error', (err) => {
@@ -231,7 +384,6 @@ class SafeFlow extends EventEmitter {
   /**
   * Network Authorisation
   * @method networkAuthorisation
-  *
   */
   networkAuthorisation(auth) {
     let peerAuth = {
@@ -254,7 +406,6 @@ class SafeFlow extends EventEmitter {
   /**
   * verify release
   * @method verifyRelease
-  *
   */
   verifyRelease() {
     return true
@@ -263,7 +414,6 @@ class SafeFlow extends EventEmitter {
   /**
   * entity getter
   * @method entityGetter
-  *
   */
   entityGetter() {
     // Entity ingestion and component caching implementation

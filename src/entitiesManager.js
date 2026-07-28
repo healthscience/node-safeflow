@@ -51,8 +51,13 @@ export class EntitiesManager {
     if (entity) {
       entity[componentName] = dataObject
       return true
+    } else {
+      // If entity doesn't exist yet, spawn it and set component
+      const newEntity = {}
+      newEntity[componentName] = dataObject
+      this.entities.set(entityId, newEntity)
+      return true
     }
-    return false
   }
 
   /**
@@ -104,6 +109,28 @@ export class EntitiesManager {
   }
 
   /**
+   * Fast Map clone to support state branching for Projections and History Rollbacks
+   */
+  snapshotState() {
+    const snapshot = new Map()
+    for (const [id, components] of this.entities) {
+      snapshot.set(id, { ...components })
+    }
+    return snapshot
+  }
+
+  /**
+   * Instantly restores the entity fabric from a state snapshot Map
+   */
+  restoreState(snapshotMap) {
+    if (snapshotMap instanceof Map) {
+      this.entities = snapshotMap
+      return true
+    }
+    return false
+  }
+
+  /**
    * Appends a dynamic processing system to the metabolic sequence
    */
   addSystem(systemInstance) {
@@ -140,6 +167,7 @@ export class EntitiesManager {
       this.systems[i].update(this)
     }
   }
+  
 }
 
 export default EntitiesManager

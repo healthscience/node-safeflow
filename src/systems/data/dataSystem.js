@@ -31,13 +31,6 @@ class DataSystem extends EventEmitter {
   *
   */
   async datatypeQueryMapping(type, hash, sourceInfo, device, datatype, time, contract) {
-    console.log('SF -datasysem -- mappping')
-    console.log(type)
-    console.log(hash)
-    console.log(sourceInfo)
-    console.log(device)
-    console.log(datatype)
-    console.log(time)
     let rawHolder = []
     
     // All types now use the refactored storage protocols which utilize the dataAPI (Hypercore/Hyperbee)
