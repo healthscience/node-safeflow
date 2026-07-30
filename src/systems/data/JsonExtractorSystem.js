@@ -1,9 +1,10 @@
-// src/systems/data/JsonExtractorSystem.js
+import b4a from 'b4a'
 import { JsonExtractor } from './dataprotocols/json/jsonExtractor.js'
 
 export class JsonExtractionSystem {
-  constructor() {
+  constructor(holepunch) {
     this.signature = ['SchemaProbeRequest', 'SchemaProbeResult']
+    this.drive = holepunch.DriveFiles
   }
 
   update(ecs) {
@@ -41,7 +42,7 @@ export class JsonExtractionSystem {
     
     // Use the native inspectPath pattern from the working HyperdriveIntrospectionSystem
     const rawData = await this.inspectPath(hyperdrivePath)
-    
+   
     const extractor = new JsonExtractor(rawData)
     const targetPath = request.targetPath || 'cues.cueMap'
     const schema = extractor.extractSchema(targetPath)
@@ -58,6 +59,10 @@ export class JsonExtractionSystem {
   async inspectPath(hyperdrivePath) {
     // Pure JS Hyperdrive API integration
     // Replace with your actual local-first buffer or drive read implementation
-    return await drive.get(hyperdrivePath)
+    let sourceFile = await this.drive.getFile(hyperdrivePath)
+    const jsonString = b4a.toString(sourceFile, 'utf-8')
+
+    return jsonString
+
   }
 }

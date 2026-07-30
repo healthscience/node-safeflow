@@ -11,6 +11,9 @@
 * @version $Id$
 */
 import EventEmitter from 'events'
+import { ResonanceConduction } from './conduction/resonanceConduction.js'
+import StoryReceiver from './orchestration/storyReceiver.js'
+import SafeFlowIngestAdapter from './orchestration/ingestAdaptor.js'
 import EntitiesManager from './entitiesManager.js'
 import { World } from './core/world.js'
 import { PulseBridge } from './ingest/pulseBridge.js'
@@ -24,6 +27,10 @@ class SafeFlow extends EventEmitter {
   constructor(wiring) {
     super()
     this.wiring = wiring;
+    this.resonance = new ResonanceConduction(this.wiring)
+    this.storyExpand = {} // new StoryReceiver(this.wiring.library.libManager, this.resonance, this)
+    this.adapter = new SafeFlowIngestAdapter(this);
+
     this.isPulsing = false;
     this.dataAPIlive = wiring.network
     
@@ -47,6 +54,12 @@ class SafeFlow extends EventEmitter {
     this.resultCount = 0
   }
 
+  setWiring (wiring) {
+    this.wiring = wiring
+    // also update
+    this.resonance = new ResonanceConduction(this.wiring)
+    this.storyExpand = new StoryReceiver(this.wiring.library.libManager, this.resonance, this)
+  }
 
   /**
    * bring entity manager to be
@@ -56,9 +69,32 @@ class SafeFlow extends EventEmitter {
     this.liveEManager = new EntitiesManager()
 
     // 2. Add systems to the Orrery prior to the first pulse
-    this.liveEManager.addSystem(new JsonExtractionSystem())
+    this.liveEManager.addSystem(new JsonExtractionSystem(this.wiring.network))
     // liveEManager.addSystem(new SomeOtherSystem())
 
+  }
+
+  /**
+   * 
+   * take HOPstory and expands contract refs etc.
+   * @ingestStart
+  */
+  ingestStart (HOPstory) {
+    console.log('SF ingest start')
+    console.log(HOPstory)
+    // expand this
+    let fullyExpandedStory = this.storyExpand.handleIncomingStory(HOPstory)
+    console.log('fully expanded')
+    console.log(fullyExpandedStory)
+    // set emulation context
+    let activeEmulationContext = ''
+    // When HOP finalizes the expanded bundle:
+    const entityId = this.adapter.processAndIngest(fullyExpandedStory, activeEmulationContext);
+
+    // Confirm state registration via event listener
+    this.on('sf-hopStoryIngested', (data) => {
+      console.log(`Entity ${data.entityId} successfully woven into SafeFlow orrery.`);
+    });
   }
 
   /**
