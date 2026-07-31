@@ -12,7 +12,7 @@ export class ResonanceConduction {
    * Maps references to the twinned Library and establishes the tempo.
    */
   establishTrack(contract) {
-    const registry = this.wiring.safeflow;
+    const registry = this.wiring.safeflow.liveEManager;
     const entityId = registry.createEntity();
 
     // 1. Core Reference to the twinned Library contract logic

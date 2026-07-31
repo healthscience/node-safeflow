@@ -115,6 +115,7 @@ export class StoryReceiver {
         scaleValue: 1.0
       }
     }
+    return emulationWorld
   }
 
 }
