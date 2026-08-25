@@ -59,7 +59,7 @@ export class JsonExtractionSystem {
   async inspectPath(hyperdrivePath) {
     // Pure JS Hyperdrive API integration
     // Replace with your actual local-first buffer or drive read implementation
-    let sourceFile = await this.drive.getFile(hyperdrivePath)
+    let sourceFile = await this.drive.peerDrive.getFile(hyperdrivePath)
     const jsonString = b4a.toString(sourceFile, 'utf-8')
 
     return jsonString

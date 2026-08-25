@@ -360,6 +360,52 @@ class SafeFlow extends EventEmitter {
   }
 
   /**
+   * Ingests a solar-aligned cue batch from hop-osmosis into EntitiesManager
+   * @method ingestSolarBatch
+   * @param {Array} batch - Filtered cues from hop-osmosis
+   * @param {number} solarAngle - Current orbital angle from Heli Clock
+   */
+  ingestSolarBatch(batch, solarAngle) {
+    if (!batch || !Array.isArray(batch) || batch.length === 0) return null;
+
+    // 1. Pause pulse briefly to avoid state collision during entity creation
+    this.suspendPulseForIngest(true);
+
+    try {
+      const createdIds = [];
+
+      for (const cue of batch) {
+        // 2. Spawn entity in EntitiesManager
+        const entityId = this.liveEManager.createEntity();
+
+        // 3. Attach solar alignment metadata and cue data
+        this.liveEManager.addComponent(entityId, 'SolarAlignment', {
+          ingestAngle: solarAngle,
+          timestamp: Date.now()
+        });
+
+        if (cue.orgo || cue.gelle) {
+          this.saveAndRegisterExoCue(entityId, cue.orgo, cue.gelle);
+        } else {
+          this.liveEManager.addComponent(entityId, 'Data', cue);
+        }
+
+        createdIds.push(entityId);
+      }
+
+      this.emit('sf-solarBatchIngested', { count: createdIds.length, solarAngle });
+      return createdIds;
+
+    } catch (err) {
+      console.error("Failed to ingest solar batch into SafeFlow-ECS:", err);
+      return null;
+    } finally {
+      // 4. Resume clockwork execution
+      this.resumePulse();
+    }
+  }
+
+  /**
    * Set up WebSocket and attach ingest handler
    * @method setWebsocket
    */
